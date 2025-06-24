@@ -53,7 +53,8 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-sm btn-primary">Ver</a>
+                            <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-sm btn-primary">Continuar <br> Visita</a>
+                             <a style="background-color: green" href="{{ route('visitas.detalle', $visita->id) }}" class="btn btn-sm btn-primary">Ver  <br> Detalle</a>
                         </td>
                     </tr>
                 @endforeach

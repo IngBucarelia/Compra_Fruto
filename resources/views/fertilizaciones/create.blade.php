@@ -2,7 +2,68 @@
 
 @section('content')
 <div class="container">
-    <h3>Fertilización para: {{ $visita->proveedor->proveedor_nombre }}</h3>
+<h3>🌴🌴 Información de plantación - Fertilización 🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+    <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
+</h3>
+    <form id="formRedireccion" class="mt-4">
+    <p> <strong>Seleccione la Zona a Dirigirse</strong></p>
+                <div class="input-group">
+                    <select id="seccion" class="form-select" required>
+                        <option value="">Seleccione una sección</option>
+
+                        @if ($visita->estado === 'pendiente' || $visita->estado === 'en_ejecucion')
+                            <option value="{{ route('areas.create', ['visita_id' => $visita->id]) }}">📍 Área</option>
+                            <option value="{{ route('fertilizaciones.create', ['visita_id' => $visita->id]) }}">💧 Fertilización</option>
+                            <option value="{{ route('polinizaciones.create', ['visita_id' => $visita->id]) }}">🌸 Polinización</option>
+                            <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
+                            <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
+                            <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                        @endif
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Ir</button>
+                </div>
+                </form>
+
+                <script>
+                document.getElementById('formRedireccion').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const url = document.getElementById('seccion').value;
+                    if (url) window.location.href = url;
+                });
+            </script>
+                    <br><br>
+    <div class="accordion mb-4" id="accordionArea">
+        <div class="accordion-item">
+            
+            <h2 class="accordion-header" id="headingArea">
+                  
+
+            <button style="background-color: darkseagreen !important; color:aliceblue" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArea"  aria-controls="collapseArea">
+                📍 información del Área
+            </button>
+            </h2>
+            <div id="collapseArea" class="accordion-collapse collapse show" aria-labelledby="headingArea" data-bs-parent="#accordionArea">
+            <div class="accordion-body" style="background-color: rgb(209, 241, 209) !important; color:rgb(31, 32, 34)">
+                @if ($visita->area)
+                <ul>
+                    <li><strong>Material:</strong> {{ $visita->area->material }}</li>
+                    <li><strong>Estado:</strong> {{ $visita->area->estado }}</li>
+                    <li><strong>Año siembra:</strong> {{ $visita->area->anio_siembra }}</li>
+                    <li><strong>Área (m²):</strong> {{ $visita->area->area }}</li>
+                    <li><strong>Orden Plantis N°:</strong> {{ $visita->area->orden_plantis_numero }}</li>
+                    <li><strong>Estado orden Plantis:</strong> {{ $visita->area->estado_orden_plantis }}</li>
+                </ul>
+                
+                @else
+                <p class="text-muted">No se ha registrado área para esta visita.</p>
+                @endif
+            </div>
+            </div>
+        </div>
+        </div>
+
+    <h3>Formulario de Fertilización para: {{ $visita->proveedor->proveedor_nombre }}</h3>
 
     <form method="POST" action="{{ route('fertilizaciones.store') }}">
         @csrf
@@ -51,6 +112,10 @@
                     @endforeach
                 </ul>
             </div>
+            <a href="{{ route('polinizaciones.create', ['visita_id' => $visita->id]) }}" class="btn btn-outline-success mt-3">
+                ➡️ Continuar con Polinización
+            </a>
+
         </div>
     @endforeach
 @else

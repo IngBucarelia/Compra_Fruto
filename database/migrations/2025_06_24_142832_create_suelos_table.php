@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up()
         {
-            Schema::create('polinizacions', function (Blueprint $table) {
+            Schema::create('suelos', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('visita_id')->constrained()->onDelete('cascade');
-                $table->integer('n_pases');
-                $table->integer('ciclos_ronda');
-                $table->decimal('ana', 8, 2);
-                $table->enum('tipo_ana', ['solido', 'liquido']);
-                $table->decimal('talco', 8, 2);
+                $table->enum('analisis_foliar', ['si', 'no']);
+                $table->enum('alanisis_suelo', ['si', 'no']);
+                $table->string('tipo_suelo');
                 $table->timestamps();
             });
         }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('polinizacions');
+        Schema::dropIfExists('suelos');
     }
 };

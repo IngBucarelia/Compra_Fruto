@@ -66,18 +66,29 @@ class AreaController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Area $area)
     {
-        //
+        $visita = $area->visita()->with('proveedor')->first();
+        return view('areas.edit', compact('area', 'visita'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Area $area)
     {
-        //
+        $data = $request->validate([
+            'material' => 'required|in:guinense,hibrido',
+            'estado' => 'required|in:desarrollo,produccion',
+            'anio_siembra' => 'required|date',
+            'area' => 'required|integer',
+            'orden_plantis_numero' => 'required|integer',
+            'estado_oren_plantis' => 'required|in:desarrollo,produccion',
+        ]);
+
+        $area->update($data);
+
+        return redirect()->route('areas.create', ['visita_id' => $area->visita_id])
+            ->with('success', 'Área actualizada correctamente.');
     }
+
 
     /**
      * Remove the specified resource from storage.

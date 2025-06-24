@@ -44,6 +44,37 @@ class Visita extends Model
     {
         return $this->hasMany(Fertilizacion::class);
     }
+    // app/Models/Visita.php
+
+    public function polinizaciones()
+    {
+        return $this->hasMany(\App\Models\Polinizacion::class);
+    }
+
+    public function sanidad()
+    {
+        return $this->hasOne(Sanidad::class);
+    }
+
+    public function suelo()
+    {
+        return $this->hasOne(Suelo::class);
+    }
+
+    public function sanidades()
+    {
+        return $this->hasMany(Sanidad::class);
+    }
+
+    public function laboresCultivo()
+    {
+        return $this->hasOne(LaboresCultivo::class);
+    }
+
+
+
+
+
 
 
 

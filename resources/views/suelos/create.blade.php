@@ -2,10 +2,40 @@
 
 @section('content')
 <div class="container">
-<h3>🌴🌴 Información de plantación - Detalle Completo de Visita Realizado el {{ $visita->fecha }}  🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+    <div class="container">
+    <h3>🌴🌴 Información de plantación - Analisis de Suelo 🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
     <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
-    <div class="accordion mt-4" id="acordeonDetalleVisita">
+    <form id="formRedireccion" class="mt-4">
+    <p> <strong>Seleccione la Zona a Dirigirse</strong></p>
+                <div class="input-group">
+                    <select id="seccion" class="form-select" required>
+                        <option value="">Seleccione una sección</option>
+
+                        @if ($visita->estado === 'pendiente' || $visita->estado === 'en_ejecucion')
+                            <option value="{{ route('areas.create', ['visita_id' => $visita->id]) }}">📍 Área</option>
+                            <option value="{{ route('fertilizaciones.create', ['visita_id' => $visita->id]) }}">💧 Fertilización</option>
+                            <option value="{{ route('polinizaciones.create', ['visita_id' => $visita->id]) }}">🌸 Polinización</option>
+                            <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
+                            <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
+                            <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                        @endif
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Ir</button>
+                </div>
+                </form>
+
+                <script>
+                document.getElementById('formRedireccion').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const url = document.getElementById('seccion').value;
+                    if (url) window.location.href = url;
+                });
+            </script><br><br>
+
+    {{-- Acordeones con formularios anteriores --}}
+    <div class="accordion mb-4" id="acordeonSuelo">
 
         {{-- Área --}}
         <div class="accordion-item">
@@ -14,7 +44,7 @@
                     📍 Área registrada
                 </button>
             </h2>
-            <div id="collapseArea" class="accordion-collapse collapse show" data-bs-parent="#acordeonDetalleVisita">
+            <div id="collapseArea" class="accordion-collapse collapse show" data-bs-parent="#acordeonSuelo">
                 <div class="accordion-body">
                     @if ($visita->area)
                         <ul>
@@ -23,10 +53,10 @@
                             <li><strong>Año siembra:</strong> {{ $visita->area->anio_siembra }}</li>
                             <li><strong>Área (m²):</strong> {{ $visita->area->area }}</li>
                             <li><strong>Orden Plantis:</strong> {{ $visita->area->orden_plantis_numero }}</li>
-                            <li><strong>Estado orden Plantis:</strong> {{ $visita->area->estado_orden_plantis }}</li>
+                            <li><strong>Estado Orden Plantis:</strong> {{ $visita->area->estado_oren_plantis }}</li>
                         </ul>
                     @else
-                        <p>No se ha registrado información de área.</p>
+                        <p class="text-muted">No se ha registrado información de área.</p>
                     @endif
                 </div>
             </div>
@@ -39,7 +69,7 @@
                     💧 Fertilizaciones
                 </button>
             </h2>
-            <div id="collapseFert" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+            <div id="collapseFert" class="accordion-collapse collapse" data-bs-parent="#acordeonSuelo">
                 <div class="accordion-body">
                     @if ($visita->fertilizaciones->count())
                         @foreach ($visita->fertilizaciones as $fertilizacion)
@@ -67,7 +97,7 @@
                     🌸 Polinizaciones
                 </button>
             </h2>
-            <div id="collapsePol" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+            <div id="collapsePol" class="accordion-collapse collapse" data-bs-parent="#acordeonSuelo">
                 <div class="accordion-body">
                     @if ($visita->polinizaciones->count())
                         <ul class="list-group">
@@ -92,10 +122,10 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingSanidad">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSanidad">
-                    🧪 Sanidad
+                    🧪 Sanidad registrada
                 </button>
             </h2>
-            <div id="collapseSanidad" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+            <div id="collapseSanidad" class="accordion-collapse collapse" data-bs-parent="#acordeonSuelo">
                 <div class="accordion-body">
                     @if ($visita->sanidad)
                         <ul>
@@ -112,70 +142,67 @@
                             <li><strong>Observaciones:</strong> {{ $visita->sanidad->observaciones }}</li>
                         </ul>
                     @else
-                        <p>No se ha registrado información de sanidad.</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Suelo --}}
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingSuelo">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSuelo">
-                    🧬 Análisis de Suelo
-                </button>
-            </h2>
-            <div id="collapseSuelo" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
-                <div class="accordion-body">
-                    @if ($visita->suelo)
-                        <ul>
-                            <li><strong>Análisis foliar:</strong> {{ ucfirst($visita->suelo->analisis_foliar) }}</li>
-                            <li><strong>Análisis suelo:</strong> {{ ucfirst($visita->suelo->alanisis_suelo) }}</li>
-                            <li><strong>Tipo de suelo:</strong> {{ ucfirst($visita->suelo->tipo_suelo) }}</li>
-                        </ul>
-                    @else
-                        <p>No se ha registrado análisis de suelo.</p>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Labores de Cultivo --}}
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingLabores">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLabores">
-                    🌾 Labores de Cultivo
-                </button>
-            </h2>
-            <div id="collapseLabores" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
-                <div class="accordion-body">
-                    @if ($visita->laboresCultivo)
-                        <ul>
-                            <li><strong>Polinización:</strong> {{ $visita->laboresCultivo->polinizacion }}%</li>
-                            <li><strong>Limpieza calle:</strong> {{ $visita->laboresCultivo->limpieza_calle }}%</li>
-                            <li><strong>Limpieza plato:</strong> {{ $visita->laboresCultivo->limpieza_plato }}%</li>
-                            <li><strong>Poda:</strong> {{ $visita->laboresCultivo->poda }}%</li>
-                            <li><strong>Fertilización:</strong> {{ $visita->laboresCultivo->fertilizacion }}%</li>
-                            <li><strong>Enmiendas:</strong> {{ $visita->laboresCultivo->enmiendas }}%</li>
-                            <li><strong>Ubicación tusa/fibra:</strong> {{ $visita->laboresCultivo->ubicacion_tusa_fibra }}%</li>
-                            <li><strong>Ubicación hoja:</strong> {{ $visita->laboresCultivo->ubicacion_hoja }}%</li>
-                            <li><strong>Lugar hoja:</strong> {{ $visita->laboresCultivo->lugar_ubicacion_hoja }}%</li>
-                            <li><strong>Plantas nectaríferas:</strong> {{ $visita->laboresCultivo->plantas_nectariferas }}%</li>
-                            <li><strong>Cobertura:</strong> {{ $visita->laboresCultivo->cobertura }}%</li>
-                            <li><strong>Labor cosecha:</strong> {{ $visita->laboresCultivo->labor_cosecha }}%</li>
-                            <li><strong>Calidad fruta:</strong> {{ $visita->laboresCultivo->calidad_fruta }}%</li>
-                            <li><strong>Recolección fruta:</strong> {{ $visita->laboresCultivo->recoleccion_fruta }}%</li>
-                            <li><strong>Drenajes:</strong> {{ $visita->laboresCultivo->drenajes }}%</li>
-                        </ul>
-                    @else
-                        <p class="text-muted">No se han registrado labores de cultivo.</p>
+                        <p class="text-muted">No hay datos de sanidad registrados.</p>
                     @endif
                 </div>
             </div>
         </div>
 
     </div>
+    <h3>🧬Formulario de Análisis de Suelo </h3>
 
-    <a href="{{ route('visitas.index') }}" class="btn btn-secondary mt-4">⬅️ Volver</a>
+            @if ($suelo)
+            {{-- Mostrar detalles del suelo con botón para editar --}}
+            <div class="card mb-4">
+                <div class="card-header">🧾 Análisis de Suelo Registrado</div>
+                <div class="card-body">
+                    <p><strong>Análisis foliar:</strong> {{ ucfirst($suelo->analisis_foliar) }}</p>
+                    <p><strong>Análisis suelo:</strong> {{ ucfirst($suelo->alanisis_suelo) }}</p>
+                    <p><strong>Tipo de suelo:</strong> {{ ucfirst($suelo->tipo_suelo) }}</p>
+                    <a href="{{ route('suelos.edit', $suelo->id) }}" class="btn btn-warning">✏️ Editar análisis</a>
+                </div>
+            </div>
+        @else
+            {{-- Mostrar formulario si no hay registro --}}
+            <form method="POST" action="{{ route('suelos.store') }}">
+                @csrf
+                <input type="hidden" name="visita_id" value="{{ $visita->id }}">
+
+                <div class="mb-3">
+                    <label>¿Análisis foliar?</label>
+                    <select name="analisis_foliar" class="form-control" required>
+                        <option value="">Seleccione</option>
+                        <option value="si">Sí</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>¿Análisis de suelo?</label>
+                    <select name="alanisis_suelo" class="form-control" required>
+                        <option value="">Seleccione</option>
+                        <option value="si">Sí</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Tipo de suelo</label>
+                    <select name="tipo_suelo" class="form-control" required>
+                        <option value="">Seleccione</option>
+                        <option value="arenoso">Arenoso</option>
+                        <option value="arcilloso">Arcilloso</option>
+                        <option value="franco">Franco</option>
+                        <option value="limoso">Limoso</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">💾 Guardar análisis de suelo</button>
+            </form>
+        @endif
+            <a href="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}" class="btn btn-outline-success mt-4">
+                ➡️ Continuar con Labores de Cultivo
+            </a>                   
 </div>
 @endsection

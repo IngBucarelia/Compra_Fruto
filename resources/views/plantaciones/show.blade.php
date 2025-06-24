@@ -18,12 +18,52 @@
             </div>
         </div>
     </div>
+    <hr>
+<h4 class="mt-4">📋 Visitas asociadas a esta plantación</h4>
+
+    @if ($plantacion->visitas->count())
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha de creación</th>
+                    <th>Estado</th>
+                    <th>Técnico</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($plantacion->visitas as $visita)
+                    <tr>
+                        <td>{{ $visita->id }}</td>
+                        <td>{{ $visita->created_at->format('Y-m-d') }}</td>
+                        <td>
+                            <span class="badge bg-{{ $visita->estado === 'finalizada' ? 'success' : ($visita->estado === 'en_ejecucion' ? 'warning' : 'secondary') }}">
+                                {{ ucfirst($visita->estado) }}
+                            </span>
+                        </td>
+                        <td>{{ $visita->tecnico->name ?? 'No asignado' }}</td>
+                        <td>
+                            <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-sm btn-outline-primary">
+                                Ver detalle
+                            </a>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @else
+        <p class="text-muted">No hay visitas registradas para esta plantación.</p>
+    @endif
+
 
     <div id="map" style="height: 400px; margin-top: 20px;" class="rounded shadow-sm"></div>
 
     <div class="text-center mt-3">
         <a href="{{ route('plantaciones.index') }}" class="btn btn-secondary btn-block">Volver</a>
     </div>
+
+    
 </div>
 
 <!-- Leaflet CSS & JS -->

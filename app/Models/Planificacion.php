@@ -26,10 +26,18 @@ class Planificacion extends Model
     {
         return $this->belongsTo(User::class, 'tecnico_campo');
     }
-    public function visita()
+   public function visitas()
     {
-        return $this->hasOne(Visita::class);
+        return $this->hasMany(\App\Models\Visita::class, 'id_plantacion');
     }
+
+    public function visita()
+{
+    return $this->hasOne(\App\Models\Visita::class, 'planificacion_id');
+}
+
+
+    
 
 
 }

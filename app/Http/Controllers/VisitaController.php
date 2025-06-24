@@ -84,7 +84,7 @@ class VisitaController extends Controller
      */
     public function show($id)
         {
-            $visita = \App\Models\Visita::with(['proveedor', 'tecnico', 'plantacion'])->findOrFail($id);
+            $visita = \App\Models\Visita::with(['proveedor', 'tecnico', 'plantacion','polinizaciones', 'sanidad'])->findOrFail($id);
             return view('visitas.show', compact('visita'));
         }
 

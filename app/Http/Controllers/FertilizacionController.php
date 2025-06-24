@@ -11,11 +11,10 @@ class FertilizacionController extends Controller
    public function create(Request $request)
         {
             $visita_id = $request->query('visita_id');
-            $visita = \App\Models\Visita::with('fertilizaciones.fertilizantes')->findOrFail($visita_id);
+            $visita = \App\Models\Visita::with(['proveedor', 'fertilizaciones.fertilizantes', 'area'])->findOrFail($visita_id);
 
             return view('fertilizaciones.create', compact('visita'));
         }
-
 
 
 public function store(Request $request)
@@ -39,7 +38,8 @@ public function store(Request $request)
                 ]);
             }
 
-            return redirect()->route('dashboard')->with('success', 'Fertilización registrada con éxito.');
+            return redirect()->route('polinizaciones.create', ['visita_id' => $data['visita_id']]);
+
         }
 
 }

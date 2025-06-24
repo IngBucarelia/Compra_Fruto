@@ -10,8 +10,9 @@ use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\PlanificacionController;
 use App\Http\Controllers\AreaOfflineController;
 use App\Http\Controllers\FertilizacionController;
-
-
+use App\Http\Controllers\LaboresCultivoController;
+use App\Http\Controllers\SanidadController;
+use App\Http\Controllers\SueloController;
 
 // Redirección por defecto al login
 Route::redirect('/', '/login');
@@ -65,6 +66,9 @@ Route::middleware('auth')->group(function () {
     // rutas de area
 
     Route::resource('areas', AreaController::class)->middleware('auth');
+    Route::get('/areas/{area}/edit', [AreaController::class, 'edit'])->name('areas.edit');
+    Route::put('/areas/{area}', [AreaController::class, 'update'])->name('areas.update');
+
 
     //formulario offline 
 
@@ -81,6 +85,31 @@ Route::middleware('auth')->group(function () {
     //rutas fertilizacion 
     Route::get('/fertilizaciones/create', [FertilizacionController::class, 'create'])->name('fertilizaciones.create');
     Route::post('/fertilizaciones', [FertilizacionController::class, 'store'])->name('fertilizaciones.store');
+
+    //rutas polinizacion
+    Route::resource('polinizaciones', \App\Http\Controllers\PolinizacionController::class);
+    Route::delete('/polinizaciones/{id}', [\App\Http\Controllers\PolinizacionController::class, 'destroy'])->name('polinizaciones.destroy');
+
+    // rutas sanidad
+    Route::resource('sanidades', \App\Http\Controllers\SanidadController::class)->only(['create', 'store']);
+    Route::delete('/sanidades/{id}', [SanidadController::class, 'destroy'])->name('sanidades.destroy');
+
+
+    // rutas analisis de suelo 
+
+    Route::get('/suelos/create', [App\Http\Controllers\SueloController::class, 'create'])->name('suelos.create');
+    Route::post('/suelos', [App\Http\Controllers\SueloController::class, 'store'])->name('suelos.store');
+    Route::get('/suelos/{suelo}/edit', [SueloController::class, 'edit'])->name('suelos.edit');
+    Route::put('/suelos/{suelo}', [SueloController::class, 'update'])->name('suelos.update');
+
+    // labores de cultivo rutas 
+
+    Route::get('/labores-cultivo/create', [LaboresCultivoController::class, 'create'])->name('labores_cultivo.create');
+    Route::post('/labores-cultivo', [LaboresCultivoController::class, 'store'])->name('labores_cultivo.store');
+
+
+
+
 
 
 

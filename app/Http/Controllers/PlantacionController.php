@@ -47,11 +47,16 @@ class PlantacionController extends Controller
         return redirect()->route('plantaciones.index')->with('success', 'Plantación creada correctamente.');
     }
 
-    public function show($id)
-    {
-        $plantacion = Plantacion::with('proveedor')->findOrFail($id);
-        return view('plantaciones.show', compact('plantacion'));
-    }
+   public function show($id)
+        {
+            $plantacion = Plantacion::with([
+                'proveedor',
+                'visitas.tecnico' // <-- Aquí se carga el nombre del técnico
+            ])->findOrFail($id);
+
+            return view('plantaciones.show', compact('plantacion'));
+        }
+
 
     public function edit($id)
     {
