@@ -2,7 +2,8 @@
 
 @section('content')
 <div class="container">
-    <h3>Editar Área - {{ $visita->proveedor->proveedor_nombre }}</h3>
+    <h3>Editar Área para: <br> <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+        <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span></h3><br>
 
     <form method="POST" action="{{ route('areas.update', $area->id) }}">
         @csrf

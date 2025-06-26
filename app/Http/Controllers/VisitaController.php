@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Planificacion;
 use App\Models\Visita;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\VisitaExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+
 
 class VisitaController extends Controller
 {
@@ -84,7 +89,7 @@ class VisitaController extends Controller
      */
     public function show($id)
         {
-            $visita = \App\Models\Visita::with(['proveedor', 'tecnico', 'plantacion','polinizaciones', 'sanidad'])->findOrFail($id);
+            $visita = \App\Models\Visita::with(['proveedor', 'tecnico', 'plantacion','polinizaciones', 'sanidad','evaluacionCosechaCampo'])->findOrFail($id);
             return view('visitas.show', compact('visita'));
         }
 
@@ -136,11 +141,40 @@ class VisitaController extends Controller
         {
             $visita = \App\Models\Visita::with([
                 'area',
-                'fertilizaciones.detalles' // detalles = FertilizanteFertilizacion
+                'fertilizaciones.detalles',
+                'polinizaciones',
+                'sanidad',
+                'suelo',
+                'laboresCultivo',          
+                'evaluacionCosechaCampo',
+                 'cierreVisita' 
             ])->findOrFail($id);
 
             return view('visitas.detalle', compact('visita'));
         }
+
+
+        
+        public function exportarPDF($id)
+        {
+            $visita = Visita::with([
+                'proveedor', 'plantacion', 'area',
+                'fertilizaciones.fertilizantes',
+                'polinizaciones', 'sanidad',
+                'suelo', 'laboresCultivo',
+                'evaluacionCosechaCampo', 'cierreVisita'
+            ])->findOrFail($id);
+
+            $pdf = Pdf::loadView('visitas.exportar_pdf', compact('visita'));
+            return $pdf->download("detalle_visita_{$id}.pdf");
+        }
+
+
+        public function exportarExcel($id)
+        {
+            return Excel::download(new VisitaExport($id), "detalle_visita_{$id}.xlsx");
+        }
+
 
 
 }

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h3>🌴🌴 Información de plantación - Sanidad 🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+    <h3>🌴🌴 Información de plantación - Sanidad 🌴🌴<br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span> <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
     <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
     <form id="formRedireccion" class="mt-4">
@@ -18,6 +18,7 @@
                             <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
                             <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
                             <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                            <option value="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}">🌴 Evaluación de Cosecha</option>
                         @endif
                     </select>
 
@@ -201,11 +202,12 @@
                     <strong>Otros:</strong> {{ $sanidad->otros ?? '-' }}<br>
                     <strong>Observaciones:</strong> {{ $sanidad->observaciones ?? 'Sin observaciones' }}
                 </div>
+                    <a href="{{ route('sanidades.edit', $sanidad->id) }}" class="btn btn-sm btn-warning">✏️ Editar Registro</a>
 
                 <form method="POST" action="{{ route('sanidades.destroy', $sanidad->id) }}" onsubmit="return confirm('¿Deseas eliminar esta sanidad?')">
                     @csrf
                     @method('DELETE')
-                    <button class="btn btn-sm btn-danger ms-3">🗑️</button>
+                    <button class="btn btn-sm btn-danger ms-3">🗑️ Eliminar</button>
                 </form>
             </li>
         @endforeach

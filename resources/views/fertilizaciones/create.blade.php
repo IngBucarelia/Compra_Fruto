@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-<h3>🌴🌴 Información de plantación - Fertilización 🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+<h3>🌴🌴 Información de plantación - Fertilización 🌴🌴<br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span> <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
     <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
     <form id="formRedireccion" class="mt-4">
@@ -18,6 +18,7 @@
                             <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
                             <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
                             <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                            <option value="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}">🌴 Evaluación de Cosecha</option>
                         @endif
                     </select>
 
@@ -91,7 +92,7 @@
         <button type="button" class="btn btn-sm btn-secondary mb-3" onclick="agregarFertilizante()">+ Añadir otro fertilizante</button>
 
         <button type="submit" class="btn btn-primary">Guardar fertilización</button>
-    </form>
+    </form><button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
 </div>
 <hr>
 <h4 class="mt-4">📋 Fertilizaciones registradas</h4>
@@ -99,8 +100,18 @@
 @if ($visita->fertilizaciones->count())
     @foreach ($visita->fertilizaciones as $fertilizacion)
         <div class="card mb-3">
-            <div class="card-header">
-                <strong>🗓 Fecha:</strong> {{ $fertilizacion->fecha_fertilizacion }}
+            <div class="card-header d-flex justify-content-between">
+                <div>
+                    <strong>🗓 Fecha:</strong> {{ $fertilizacion->fecha_fertilizacion }}
+                </div>
+                <div>
+                    <a href="{{ route('fertilizaciones.edit', $fertilizacion->id) }}" class="btn btn-sm btn-outline-warning">✏️ Editar</a>
+                    <form action="{{ route('fertilizaciones.destroy', $fertilizacion->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar esta fertilización?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-outline-danger">🗑️ Eliminar</button>
+                    </form>
+                </div>
             </div>
             <div class="card-body">
                 <ul class="list-group">
@@ -112,15 +123,12 @@
                     @endforeach
                 </ul>
             </div>
-            <a href="{{ route('polinizaciones.create', ['visita_id' => $visita->id]) }}" class="btn btn-outline-success mt-3">
-                ➡️ Continuar con Polinización
-            </a>
-
         </div>
     @endforeach
 @else
     <p class="text-muted">No hay fertilizaciones registradas aún.</p>
 @endif
+
 
 
 <script>

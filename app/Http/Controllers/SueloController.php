@@ -65,6 +65,17 @@ class SueloController extends Controller
             ->with('success', '✅ Análisis de suelo actualizado correctamente.');
     }
 
+    public function destroy($id)
+    {
+        $suelo = Suelo::findOrFail($id);
+        $visitaId = $suelo->visita_id;
+        $suelo->delete();
+
+        return redirect()->route('suelos.create', ['visita_id' => $visitaId])
+            ->with('success', '🗑️ Análisis de suelo eliminado correctamente.');
+    }
+
+
 
 }
 

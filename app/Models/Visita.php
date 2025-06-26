@@ -14,7 +14,8 @@ class Visita extends Model
         'tecnico_campo',
         'tipo_visita',
         'recibio_visita',
-        'planificacion_id'
+        'planificacion_id',
+        'estado'
     ];
 
     public function proveedor()
@@ -70,6 +71,20 @@ class Visita extends Model
     {
         return $this->hasOne(LaboresCultivo::class);
     }
+
+    // app/Models/Visita.php
+
+    public function evaluacionCosechaCampo()
+    {
+        return $this->hasOne(EvaluacionCosechaCampo::class);
+    }
+
+    public function cierreVisita()
+    {
+        return $this->hasOne(CierreVisita::class);
+    }
+
+
 
 
 

@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="container">
-    <h3>🌴🌴 Información de plantación - Analisis de Suelo 🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+    <h3>🌴🌴 Información de plantación - Analisis de Suelo 🌴🌴 <br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span><br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
     <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
     <form id="formRedireccion" class="mt-4">
@@ -19,6 +19,7 @@
                             <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
                             <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
                             <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                            <option value="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}">🌴 Evaluación de Cosecha</option>
                         @endif
                     </select>
 
@@ -160,6 +161,11 @@
                     <p><strong>Análisis suelo:</strong> {{ ucfirst($suelo->alanisis_suelo) }}</p>
                     <p><strong>Tipo de suelo:</strong> {{ ucfirst($suelo->tipo_suelo) }}</p>
                     <a href="{{ route('suelos.edit', $suelo->id) }}" class="btn btn-warning">✏️ Editar análisis</a>
+                    <form method="POST" action="{{ route('suelos.destroy', $suelo->id) }}" class="d-inline" onsubmit="return confirm('¿Deseas eliminar este análisis de suelo?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger">🗑️ Eliminar análisis</button>
+                    </form>
                 </div>
             </div>
         @else

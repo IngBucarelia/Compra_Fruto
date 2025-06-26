@@ -27,7 +27,7 @@
                 🟢 Comenzar visita
             </a>
         @elseif ($estadoVisita === 'en_ejecucion')
-            <a href="{{ route('fertilizaciones.create', ['visita_id' => $planificacion->visita->id]) }}" class="btn btn-warning mt-3">
+            <a href="{{ route('visitas.show', ['visita' => $planificacion->visita]) }}" class="btn btn-warning mt-3">
                 🟡 Continuar visita
             </a>
         @elseif ($estadoVisita === 'finalizada')

@@ -174,7 +174,150 @@
             </div>
         </div>
 
+        {{-- Evaluación de Cosecha en Campo --}}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEvaluacionCosecha">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEvaluacionCosecha">
+                    🍌 Evaluación de Cosecha en Campo
+                </button>
+            </h2>
+            <div id="collapseEvaluacionCosecha" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+                <div class="accordion-body">
+                    @if ($visita->evaluacionCosechaCampo)
+                        <ul>
+                            <li><strong>Variedad de Fruto:</strong> {{ ucfirst($visita->evaluacionCosechaCampo->variedad_fruto) }}</li>
+                            <li><strong>Cantidad de Racimos:</strong> {{ $visita->evaluacionCosechaCampo->cantidad_racimos }}</li>
+                            <li><strong>Verde:</strong> {{ $visita->evaluacionCosechaCampo->verde }}%</li>
+                            <li><strong>Maduro:</strong> {{ $visita->evaluacionCosechaCampo->maduro }}%</li>
+                            <li><strong>Sobre Maduro:</strong> {{ $visita->evaluacionCosechaCampo->sobremaduro }}%</li>
+                            <li><strong>Pedúnculo:</strong> {{ $visita->evaluacionCosechaCampo->pedunculo }}%</li>
+                            <li><strong>Observaciones:</strong> {{ $visita->evaluacionCosechaCampo->observaciones }}</li>
+                        </ul>
+                    @else
+                        <p class="text-muted">No se ha registrado evaluación de cosecha.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Cierre de Visita --}}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCierre">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCierre">
+                🔏 Cierre de Visita
+            </button>
+        </h2>
+        <div id="collapseCierre" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+            <div class="accordion-body">
+                @if ($visita->cierreVisita)
+                    <ul>
+                        <li><strong>Responsable cierre:</strong> {{ $visita->tecnico->name }}</li>
+                        <li><strong>Recomendaciones:</strong> {{ $visita->cierreVisita->recomendaciones ?? 'No se especificaron' }}</li>
+                        <li><strong>Observaciones:</strong> {{ $visita->cierreVisita->observaciones_finales ?? 'No registradas' }}</li>
+                        <li><strong>Fecha:</strong> {{ $visita->cierreVisita->created_at->format('d/m/Y') }}</li>
+                    </ul>
+
+                    {{-- Firma --}}
+                    @if ($visita->cierreVisita->firma_responsable)
+                        <div class="mt-3">
+                            <strong>📄 Firma Responsable de Visita:</strong><br>
+                            <img src="{{ asset('storage/' . $visita->cierreVisita->firma_responsable) }}" alt="Firma" style="max-height: 120px;">
+                        </div>
+                    @endif
+
+                    {{-- Imágenes finales --}}
+                    @if ($visita->cierreVisita->imagenes)
+                        @php
+                            $imagenes = json_decode($visita->cierreVisita->imagenes, true);
+                        @endphp
+
+                        @if (is_array($imagenes) && count($imagenes))
+                            <div class="mt-4">
+                                <strong>🖼️ Imágenes finales:</strong><br>
+                                <div class="row">
+                                    @foreach ($imagenes as $img)
+                                        <div class="col-md-4 mb-3">
+                                            <img src="{{ asset('storage/' . $img) }}" class="img-fluid rounded shadow">
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+                @else
+                    <p class="text-muted">No se ha registrado el cierre de visita.</p>
+                @endif
+            </div>
+        </div>
     </div>
+
+
+
+
+    </div>
+    <!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Botón de exportación -->
+<button onclick="descargarPDFConSweet()" class="btn btn-danger">
+    📥 Exportar PDF
+</button>
+
+<!-- Iframe oculto para la descarga -->
+<iframe id="descargaPDFiframe" style="display:none;"></iframe>
+
+<script>
+    function descargarPDFConSweet() {
+        Swal.fire({
+            title: 'Generando PDF...',
+            text: 'Esto puede tardar unos segundos',
+            imageUrl: '{{ asset('images/loader.gif') }}',
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+
+        // Cargar el PDF en el iframe oculto (no recarga la página)
+        const iframe = document.getElementById('descargaPDFiframe');
+        iframe.src = "{{ route('visitas.exportar.pdf', $visita->id) }}";
+
+        // Cerrar el SweetAlert luego de 4-6 segundos
+        setTimeout(() => {
+            Swal.close();
+        }, 16000); // Ajusta el tiempo según la velocidad de generación
+    }
+</script>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Botón de exportación a Excel -->
+<button onclick="descargarExcelConSweet()" class="btn btn-success">
+    📊 Exportar a Excel
+</button>
+
+<!-- Iframe oculto -->
+<iframe id="descargaExcelIframe" style="display: none;"></iframe>
+
+<script>
+    function descargarExcelConSweet() {
+        Swal.fire({
+            title: 'Generando Excel...',
+            text: 'Esto puede tardar unos segundos',
+            imageUrl: '{{ asset('images/loader.gif') }}', // Usa tu gif de carga
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+
+        document.getElementById('descargaExcelIframe').src = "{{ route('visitas.exportar.excel', $visita->id) }}";
+
+        setTimeout(() => {
+            Swal.close();
+        }, 4000); // Ajusta si se demora más
+    }
+</script>
+
 
     <a href="{{ route('visitas.index') }}" class="btn btn-secondary mt-4">⬅️ Volver</a>
 </div>

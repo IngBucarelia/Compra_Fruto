@@ -43,9 +43,9 @@ public function store(Request $request)
 
         Sanidad::create($data);
 
-        return redirect()->route('suelos.create', $data['visita_id'])
-            ->with('success', 'Registro de sanidad guardado correctamente.');
-    }
+      return redirect()->route('suelos.create', ['visita_id' => $data['visita_id']])
+    ->with('success', 'Registro de sanidad guardado correctamente.');
+ }
 
     public function destroy($id)
     {
@@ -56,6 +56,39 @@ public function store(Request $request)
         return redirect()->route('sanidades.create', ['visita_id' => $visita_id])
             ->with('success', 'Sanidad eliminada correctamente.');
     }
+
+    public function edit($id)
+        {
+            $sanidad = Sanidad::findOrFail($id);
+            $visita = $sanidad->visita;
+
+            return view('sanidades.edit', compact('sanidad', 'visita'));
+        }
+
+    public function update(Request $request, $id)
+        {
+            $data = $request->validate([
+                'opsophanes' => 'nullable|integer|min:0|max:100',
+                'pudricion_cogollo' => 'nullable|integer|min:0|max:100',
+                'raspador' => 'nullable|integer|min:0|max:100',
+                'palmarum' => 'nullable|integer|min:0|max:100',
+                'strategus' => 'nullable|integer|min:0|max:100',
+                'leptoparsha' => 'nullable|integer|min:0|max:100',
+                'pestalotiopsis' => 'nullable|integer|min:0|max:100',
+                'pudricion_basal' => 'nullable|integer|min:0|max:100',
+                'pudricion_estipe' => 'nullable|integer|min:0|max:100',
+                'otros' => 'nullable|string|max:255',
+                'observaciones' => 'nullable|string|max:1000',
+            ]);
+
+            $sanidad = Sanidad::findOrFail($id);
+            $sanidad->update($data);
+
+            return redirect()->route('suelos.create', ['visita_id' => $sanidad->visita_id])
+                ->with('success', '✅ Sanidad actualizada correctamente.');
+        }
+
+
 
 
 }

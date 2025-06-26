@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-<h3>🌴🌴 Información de plantación - Área 🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+<h3>🌴🌴 Información de plantación - Área 🌴🌴<br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span> <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
     <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>     <form id="formRedireccion" class="mt-4">
     <p> <strong>Seleccione la Zona a Dirigirse</strong></p>
@@ -17,6 +17,7 @@
                             <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
                             <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
                             <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                            <option value="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}">🌴 Evaluación de Cosecha</option>
                         @endif
                     </select>
 
@@ -53,6 +54,7 @@
         <a href="{{ route('fertilizaciones.create', ['visita_id' => $visita->id]) }}" class="btn btn-primary mt-3">
             ➡️ Continuar con fertilización
         </a>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
     @else
         {{-- Formulario si NO hay área registrada --}}
         <form method="POST" action="{{ route('areas.store') }}">

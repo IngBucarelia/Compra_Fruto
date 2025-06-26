@@ -3,9 +3,9 @@
 @section('content')
 <div class="container">
 
-    <h3>🌴🌴 Información de plantación - Labores de Cultivo🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
-    <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
-</h3>
+    <h3>🌴🌴 Información de plantación - Labores de Cultivo🌴🌴<br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span> <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+        <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
+    </h3>
     <form id="formRedireccion" class="mt-4">
     <p> <strong>Seleccione la Zona a Dirigirse</strong></p>
                 <div class="input-group">
@@ -19,6 +19,7 @@
                             <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
                             <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
                             <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                            <option value="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}">🌴 Evaluación de Cosecha</option>
                         @endif
                     </select>
 
@@ -208,5 +209,57 @@
 
         <button type="submit" class="btn btn-primary">💾 Guardar labores</button>
     </form>
+    <a href="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}" class="btn btn-outline-success mt-3">
+        ➕ Registrar evaluación de cosecha
+    </a>
+    
+
+    {{-- Mostrar registros si existen --}}
+   @if ($visita->laboresCultivo)
+            <hr>
+            <h4 class="mt-4">📋 Labores registradas</h4>
+
+            @php
+                $laboresLabels = [
+                    'polinizacion' => 'Polinización',
+                    'limpieza_calle' => 'Limpieza de calle',
+                    'limpieza_plato' => 'Limpieza de plato',
+                    'poda' => 'Poda',
+                    'fertilizacion' => 'Fertilización',
+                    'enmiendas' => 'Enmiendas',
+                    'ubicacion_tusa_fibra' => 'Ubicación tusa/fibra',
+                    'ubicacion_hoja' => 'Ubicación hoja',
+                    'lugar_ubicacion_hoja' => 'Lugar ubicación hoja',
+                    'plantas_nectariferas' => 'Plantas nectaríferas',
+                    'cobertura' => 'Cobertura',
+                    'labor_cosecha' => 'Labor cosecha',
+                    'calidad_fruta' => 'Calidad fruta',
+                    'recoleccion_fruta' => 'Recolección fruta',
+                    'drenajes' => 'Drenajes',
+                ];
+            @endphp
+
+            <ul class="list-group mb-4">
+                @foreach ($laboresLabels as $campo => $label)
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>{{ $label }}</span>
+                        <strong>{{ $visita->laboresCultivo->$campo ?? '0' }}%</strong>
+                    </li>
+                @endforeach
+            </ul>
+            <a href="{{ route('labores-cultivo.edit', ['visita_id' => $visita->id]) }}" class="btn btn-warning">
+                ✏️ Editar labores de cultivo
+            </a>
+            <form method="POST" action="{{ route('labores-cultivo.destroy', $visita->laboresCultivo->id) }}" class="d-inline" onsubmit="return confirm('¿Deseas eliminar este registro de Labor de Cultivo?')">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-danger">🗑️ Eliminar </button>
+            </form>
+
+            <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-outline-secondary">
+                ⬅️ Volver al detalle de la visita
+            </a>
+        @endif
+
 </div>
 @endsection

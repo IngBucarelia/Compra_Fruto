@@ -15,6 +15,11 @@
                 <p><strong>Estado de visita:</strong> {{ $visita->estado }}</p>
             </div>
         </div>
+        @if(session('info'))
+        <div class="alert alert-warning">
+            {{ session('info') }}
+        </div>
+    @endif
     <!-- Botón dinámico según el estado de la visita -->
        @if ($visita->estado !== 'finalizada')
             <form id="formRedireccion" class="mt-4">
@@ -30,9 +35,9 @@
                             <option value="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}">🦠 Sanidad</option>
                             <option value="{{ route('suelos.create', ['visita_id' => $visita->id]) }}">🧪 Análisis de Suelo</option>
                             <option value="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}">🚜 Labores de Cultivo</option>
+                            <option value="{{ route('evaluacion.create', ['visita_id' => $visita->id]) }}">🌴 Evaluación de Cosecha en Campo</option>
                         @endif
                     </select>
-
                     <button type="submit" class="btn btn-primary">Ir</button>
                 </div>
             </form>
