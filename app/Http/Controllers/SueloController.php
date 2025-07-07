@@ -75,6 +75,17 @@ class SueloController extends Controller
             ->with('success', '🗑️ Análisis de suelo eliminado correctamente.');
     }
 
+    public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            Suelo::updateOrCreate(
+                ['visita_id' => $data['visita_id']],
+                $data
+            );
+        }
+        return response()->json(['message' => 'Suelos sincronizados']);
+    }
+
 
 
 }

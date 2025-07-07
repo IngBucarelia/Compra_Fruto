@@ -64,4 +64,27 @@ class CierreVisitaController extends Controller
                 ->with('success', '✅ Visita finalizada con éxito.');
         }
 
+        // zona de sincronizar con offline 
+
+         public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            CierreVisita::updateOrCreate(
+                ['visita_id' => $data['visita_id']],
+                [
+                    'firma_responsable' => $data['firma_realiza'],
+                    'firma_recibe' => $data['firma_recibe'],
+                    'firma_testigo' => $data['firma_testigo'] ?? null,
+                    'imagenes' => json_encode($data['imagenes'] ?? []),
+                    'estado_visita' => 'finalizada',
+                    'finalizada_en' => now(),
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Cierre de visitas sincronizado correctamente']);
+    }
+
+    // fin de sincronizador 
+
 }

@@ -47,7 +47,7 @@
               </div>
 
               <div class="mb-3">
-                <label>Estado orden plantis</label>
+                <label>d</label>
                 <select v-model="form.estado_orden_plantis" class="form-control">
                   <option value="">Seleccione</option>
                   <option value="desarrollo">Desarrollo</option>

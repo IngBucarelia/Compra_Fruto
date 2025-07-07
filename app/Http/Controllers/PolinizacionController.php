@@ -95,5 +95,16 @@ class PolinizacionController extends Controller
             return redirect()->route('polinizaciones.create', ['visita_id' => $visita_id])
                 ->with('success', '❌ Polinización eliminada correctamente.');
         }
+        // controllador offline
+         
+
+
+        public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            Polinizacion::create($data);
+        }
+        return response()->json(['message' => 'Polinizaciones sincronizadas']);
+    }
 
 }

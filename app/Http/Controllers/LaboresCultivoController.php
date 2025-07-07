@@ -93,6 +93,20 @@ class LaboresCultivoController extends Controller
                 ->with('success', '🗑️ labores-cultivo eliminado correctamente.');
         }
 
+                // controllador offline
+
+                
+            public function syncOffline(Request $request)
+            {
+                foreach ($request->all() as $data) {
+                    LaboresCultivo::updateOrCreate(
+                        ['visita_id' => $data['visita_id']],
+                        $data
+                    );
+                }
+                return response()->json(['message' => 'Labores sincronizadas']);
+            }
+
 
 
 

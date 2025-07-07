@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" class="h-100">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'App Frutas')</title>
@@ -115,10 +116,17 @@
     </script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('Service Worker registrado'))
-                .catch(err => console.error('Error al registrar SW:', err));
-        }
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(function (reg) {
+                    console.log('SW registrado con éxito:', reg);
+                })
+                .catch(function (err) {
+                    console.log('SW error:', err);
+                });
+            });
+            }
+
     </script>
 
 </body>

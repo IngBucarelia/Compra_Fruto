@@ -79,16 +79,27 @@ public function store(Request $request)
         }
 
         public function destroy($id)
-{
-    $fertilizacion = Fertilizacion::findOrFail($id);
-    $visitaId = $fertilizacion->visita_id;
+    {
+        $fertilizacion = Fertilizacion::findOrFail($id);
+        $visitaId = $fertilizacion->visita_id;
 
-    $fertilizacion->fertilizantes()->delete();
-    $fertilizacion->delete();
+        $fertilizacion->fertilizantes()->delete();
+        $fertilizacion->delete();
 
-    return redirect()->route('fertilizaciones.create', ['visita_id' => $visitaId])
-        ->with('success', 'Fertilización eliminada.');
-}
+        return redirect()->route('fertilizaciones.create', ['visita_id' => $visitaId])
+            ->with('success', 'Fertilización eliminada.');
+    }
+
+        // controllador offline 
+
+
+     public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            Fertilizacion::create($data);
+        }
+        return response()->json(['message' => 'Fertilizaciones sincronizadas']);
+    }
 
 
 

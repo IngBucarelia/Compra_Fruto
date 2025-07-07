@@ -1,18 +1,22 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import laravel from 'laravel-vite-plugin'
 
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
-            refresh: true,
-        }),
-        vue(),
-    ],
-    server: {
-        host: 'localhost', // ⚠️ CAMBIA esto de '0.0.0.0' a 'localhost'
-        port: 5173,
-        strictPort: true,
+  plugins: [
+    vue(),
+    laravel({
+      input: ['resources/js/offline-app.js', 'resources/css/app.css'],
+      refresh: true,
+    })
+  ],
+  build: {
+    rollupOptions: {
+      input: {
+        offline: 'resources/js/offline-app.js'
+      },
+      
     },
-});
+    outDir: 'public/build'
+  }
+})

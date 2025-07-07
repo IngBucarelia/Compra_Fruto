@@ -1,4 +1,7 @@
 import { createApp } from 'vue'
-import VisitaApp from './VisitaApp.vue'
+import AreaForm from './offline/AreaForm.vue'
 
-createApp(VisitaApp).mount('#app')
+const el = document.getElementById('offline-app')
+if (el) {
+  createApp(AreaForm).mount(el)
+}

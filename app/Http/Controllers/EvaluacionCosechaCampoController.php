@@ -83,6 +83,15 @@ class EvaluacionCosechaCampoController extends Controller
             return redirect()->route('evaluacion.create', ['visita_id' => $visitaId])
                 ->with('success', '🗑️ Evaluacion Cosecha Campo eliminado correctamente.');
         }
-
+         public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            EvaluacionCosechaCampo::updateOrCreate(
+                ['visita_id' => $data['visita_id']],
+                $data
+            );
+        }
+        return response()->json(['message' => 'Evaluación sincronizada']);
+    }
 }
 

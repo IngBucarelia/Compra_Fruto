@@ -7,6 +7,7 @@ use App\Models\Visita;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\VisitaExport;
+use App\Models\Area;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -174,6 +175,69 @@ class VisitaController extends Controller
         {
             return Excel::download(new VisitaExport($id), "detalle_visita_{$id}.xlsx");
         }
+
+        // para los formularios offline 
+
+        public function syncOfflineData(Request $request)
+{
+    $submissions = $request->input('submissions');
+    $results = [];
+    
+    foreach ($submissions as $submission) {
+        try {
+            switch ($submission['formName']) {
+                case 'area':
+                    $result = $this->syncArea($submission['formData']);
+                    break;
+                case 'fertilizacion':
+                    $result = $this->syncFertilizacion($submission['formData']);
+                    break;
+                // Agregar más casos según sea necesario
+                default:
+                    throw new \Exception("Tipo de formulario no soportado");
+            }
+            
+            $results[] = [
+                'id' => $submission['id'],
+                'success' => true,
+                'message' => 'Sincronizado correctamente'
+            ];
+        } catch (\Exception $e) {
+            $results[] = [
+                'id' => $submission['id'],
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+    
+    return response()->json(['results' => $results]);
+    }
+
+    private function syncArea($data)
+    {
+        $validated = validator($data, [
+            'visita_id' => 'required|exists:visitas,id',
+            'material' => 'required|in:guinense,hibrido',
+            // Agregar todas las validaciones
+        ])->validate();
+        
+        $area = Area::create($validated);
+        
+        // Actualizar estado de la visita
+        $visita = Visita::find($validated['visita_id']);
+        if ($visita->estado === 'pendiente') {
+            $visita->estado = 'en_ejecucion';
+            $visita->save();
+        }
+        
+        return $area;
+    }
+
+    private function syncFertilizacion($data)
+    {
+        // Implementar lógica similar para fertilización
+    }
 
 
 

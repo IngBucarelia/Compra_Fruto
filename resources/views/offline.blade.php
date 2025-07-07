@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>App Compra de Fruto - Modo Offline</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Estilos compilados (Vite) -->
+  <link href="/build/assets/offline-BP5HB3ti.css" rel="stylesheet">
+
+  <!-- Bootstrap y FontAwesome CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    .sidebar { width: 250px; height: 100vh; position: fixed; top: 56px; left: 0; background-color: #343a40; overflow-y: auto; z-index: 1000; }
+    .sidebar-menu { list-style: none; padding: 0; }
+    .sidebar-item { padding: 0.75rem 1rem; }
+    .sidebar-link { color: white; text-decoration: none; display: flex; align-items: center; }
+    .sidebar-link:hover { background-color: rgba(255,255,255,0.1); }
+    main { margin-left: 250px; padding: 1rem; padding-top: 80px; }
+  </style>
+</head>
+<body>
+
+  <!-- AppBar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm fixed-top">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button"><span class="navbar-toggler-icon"></span></button>
+      <a class="navbar-brand" href="#">
+        <span style="font-size: 2em;">🌴</span>
+        <span style="font-size: 2em;">🛢️</span>
+        App Compra de Fruto <span style="font-size: 2em;">🚜</span>
+      </a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#"><i class="fas fa-user-circle me-1"></i> Usuario Offline</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><span class="dropdown-item"><i class="fas fa-cog me-1"></i> Configuración</span></li>
+              <li><span class="dropdown-item"><i class="fas fa-sign-out-alt me-1"></i> Salir</span></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  
+
+  <!-- Contenido Vue -->
+  <main>
+    <div id="offline-app" data-visita-id="{{ request()->query('visita_id') }}"></div>
+  </main>
+
+  <!-- JS App Offline -->
+  <script type="module" src="/build/assets/offline-C2TtRujc.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+          .catch(err => console.error('Error al registrar SW:', err));
+      });
+    }
+  </script>
+</body>
+</html>

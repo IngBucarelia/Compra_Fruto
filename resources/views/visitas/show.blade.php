@@ -2,10 +2,23 @@
 
 @section('content')
     <div class="container">
+        <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h5>Modo Offline</h5>
+                            <p>Trabaja sin conexión a internet</p>
+                           <a href="{{ url('/offline/area?visita_id=' . $visita->id) }}" class="btn btn-dark">
+                            📴 Continuar sin conexión
+                            </a>
+
+
+
+                        </div>
+                    </div>
         <h2 class="mb-4">Detalle de Visita</h2>
 
         <div class="card">
-            <div class="card-body">
+            <div class="card-body"> 
                 <p><strong>Fecha:</strong> {{ $visita->fecha }}</p>
                 <p><strong>Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre }}</p>
                 <p><strong>Técnico de campo:</strong> {{ $visita->tecnico->name }}</p>

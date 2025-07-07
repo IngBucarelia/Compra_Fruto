@@ -14,7 +14,9 @@ use App\Http\Controllers\LaboresCultivoController;
 use App\Http\Controllers\SanidadController;
 use App\Http\Controllers\SueloController;
 use App\Http\Controllers\EvaluacionCosechaCampoController;
+use App\Http\Controllers\PolinizacionController;
 use App\Http\Controllers\VisitaController;
+
 
 // Redirección por defecto al login
 Route::redirect('/', '/login');
@@ -137,6 +139,44 @@ Route::middleware('auth')->group(function () {
 
 
 
+    //rutas formulario offline 
+    // Ruta para redireccionar al modo offline
+   
+
+
+
+    // Ruta para sincronización
+
+    Route::post('/offline-sync/areas', [AreaController::class, 'syncOffline'])
+    ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/fertilizaciones', [FertilizacionController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/polinizaciones', [PolinizacionController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/sanidades', [SanidadController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/suelos', [SueloController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/labores', [LaboresCultivoController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/evaluacion', [EvaluacionCosechaCampoController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+    Route::post('/offline-sync/cierre-visitas', [\App\Http\Controllers\CierreVisitaController::class, 'syncOffline'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+
+    
+
+    Route::post('/api/offline/sync', [VisitaController::class, 'syncOfflineData']);
+    // Página offline (SPA en Vue que maneja rutas internamente)
+    Route::get('/offline/{any?}', function () {return response()->view('offline');})->where('any', '.*');
 
 
 

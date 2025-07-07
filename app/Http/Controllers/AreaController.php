@@ -97,4 +97,52 @@ class AreaController extends Controller
     {
         //
     }
+
+    public function syncOfflineData(Request $request)
+    {
+        $submissions = $request->input('submissions');
+        $results = [];
+
+        foreach ($submissions as $submission) {
+            try {
+                if ($submission['formName'] === 'area') {
+                    $validated = validator($submission['formData'], [
+                        'visita_id' => 'required|exists:visitas,id',
+                        'material' => 'required|in:guinense,hibrido',
+                        'estado' => 'required',
+                        'anio_siembra' => 'required|date',
+                        'area' => 'required|numeric',
+                        'orden_plantis_numero' => 'required|numeric',
+                        'estado_oren_plantis' => 'required'
+                    ])->validate();
+
+                    \App\Models\Area::updateOrCreate(
+                        ['visita_id' => $validated['visita_id']],
+                        $validated
+                    );
+
+                    $results[] = ['id' => $submission['formName'], 'success' => true];
+                }
+            } catch (\Exception $e) {
+                $results[] = ['id' => $submission['formName'], 'success' => false, 'message' => $e->getMessage()];
+            }
+        }
+
+        return response()->json(['results' => $results]);
+    }
+
+    // controllador offline
+     
+
+     public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            Area::updateOrCreate(
+                ['visita_id' => $data['visita_id']],
+                $data
+            );
+        }
+        return response()->json(['message' => 'Áreas sincronizadas correctamente']);
+    }
+
 }

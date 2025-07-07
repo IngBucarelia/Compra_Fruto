@@ -88,6 +88,19 @@ public function store(Request $request)
                 ->with('success', '✅ Sanidad actualizada correctamente.');
         }
 
+                // controllador offline
+
+
+         public function syncOffline(Request $request)
+    {
+        foreach ($request->all() as $data) {
+            Sanidad::updateOrCreate(
+                ['visita_id' => $data['visita_id']],
+                $data
+            );
+        }
+        return response()->json(['message' => 'Sanidades sincronizadas']);
+    }
 
 
 

@@ -12,11 +12,13 @@ class CierreVisita extends Model
     protected $fillable = [
         'visita_id',
         'firma_responsable',
+        'firma_recibe',
+        'firma_testigo',
+        'imagenes',
         'observaciones_finales',
         'recomendaciones',
-        'imagenes',
-        'finalizada_en',
         'estado_visita',
+        'finalizada_en',
     ];
 
     protected $casts = [
