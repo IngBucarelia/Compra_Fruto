@@ -17,6 +17,6 @@ class VerifyCsrfToken extends Middleware
         '/suelos',
         '/labores-cultivo',
         '/evaluacion-cosecha',
-        '/api/offline/sync',
+       
     ];
 }

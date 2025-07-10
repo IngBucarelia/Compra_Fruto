@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use App\Models\Sanidad;
 use App\Models\Visita;
+use Illuminate\Support\Facades\Log;
+
 
 use Illuminate\Http\Request;
 
@@ -91,15 +93,45 @@ public function store(Request $request)
                 // controllador offline
 
 
-         public function syncOffline(Request $request)
+        public function syncOffline(Request $request)
     {
-        foreach ($request->all() as $data) {
+        $data = $request->json()->all();
+        Log::info('Datos recibidos para sincronizar Sanidad:', $data);
+
+        try {
+            $request->validate([
+                'visita_id' => 'required|integer',
+                'opsophanes' => 'nullable|integer|min:0|max:100',
+                'pudricion_cogollo' => 'nullable|integer|min:0|max:100',
+                'raspador' => 'nullable|integer|min:0|max:100',
+                'palmarum' => 'nullable|integer|min:0|max:100',
+                'strategus' => 'nullable|integer|min:0|max:100',
+                'leptopharsa' => 'nullable|integer|min:0|max:100',
+                'pestalotiopsis' => 'nullable|integer|min:0|max:100',
+                'pudricion_basal' => 'nullable|integer|min:0|max:100',
+                'pudricion_estipe' => 'nullable|integer|min:0|max:100',
+                'otros' => 'nullable|string|max:255', // Asumiendo VARCHAR para 'otros'
+                'observaciones' => 'nullable|string', // Asumiendo TEXTAREA para 'observaciones'
+                // 'indexeddb_id' => 'nullable|string',
+            ]);
+
+            // Asumiendo que solo hay un registro de Sanidad por Visita.
+            // Si puede haber múltiples, necesitarías una clave única adicional.
             Sanidad::updateOrCreate(
                 ['visita_id' => $data['visita_id']],
                 $data
             );
+
+            Log::info('Registro de Sanidad sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
+            return response()->json(['message' => 'Sanidad sincronizada con éxito.']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error("Error de validación al sincronizar Sanidad: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
+            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error("Error inesperado al sincronizar Sanidad: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error interno del servidor al sincronizar Sanidad.', 'error' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Sanidades sincronizadas']);
     }
 
 

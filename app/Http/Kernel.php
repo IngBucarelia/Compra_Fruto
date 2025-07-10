@@ -28,8 +28,11 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            'throttle:api',
+            // 'throttle:api', // Puedes descomentar esto si necesitas throttling de API
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // ASEGÚRATE DE QUE NO HAYA NINGÚN MIDDLEWARE DE SESIÓN O CSRF AQUÍ
+            // Específicamente, NO debe estar \Illuminate\Session\Middleware\StartSession::class
+            // ni \App\Http\Middleware\VerifyCsrfToken::class
         ],
     ];
 

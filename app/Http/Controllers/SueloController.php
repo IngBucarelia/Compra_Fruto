@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Visita;
 use App\Models\Suelo;
+use Illuminate\Support\Facades\Log;
+
 
 class SueloController extends Controller
 {
@@ -77,15 +79,38 @@ class SueloController extends Controller
 
     public function syncOffline(Request $request)
     {
-        foreach ($request->all() as $data) {
+        $data = $request->json()->all();
+        Log::info('Datos recibidos para sincronizar Suelo:', $data);
+
+        try {
+            $request->validate([
+                'visita_id' => 'required|integer',
+                // ✅ CAMBIO: Usar 'in:si,no' para aceptar las cadenas "si" o "no"
+                'analisis_foliar' => 'required|string|in:si,no',
+                // ✅ CAMBIO: Corregir el nombre del campo a 'alanalisis_suelo' para que coincida con los datos
+                'alanalisis_suelo' => 'required|string|in:si,no',
+                'tipo_suelo' => 'required|string', // Si es un select de varias opciones, podría ser JSON o string
+                // 'indexeddb_id' => 'nullable|string',
+            ]);
+
+            // Asumiendo que solo hay un registro de Suelo por Visita.
+            // Si puede haber múltiples, necesitarías una clave única adicional.
             Suelo::updateOrCreate(
                 ['visita_id' => $data['visita_id']],
                 $data
             );
-        }
-        return response()->json(['message' => 'Suelos sincronizados']);
-    }
 
+            Log::info('Registro de Suelo sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
+            return response()->json(['message' => 'Suelo sincronizado con éxito.']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error("Error de validación al sincronizar Suelo: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
+            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error("Error inesperado al sincronizar Suelo: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error interno del servidor al sincronizar Suelo.', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 
 }

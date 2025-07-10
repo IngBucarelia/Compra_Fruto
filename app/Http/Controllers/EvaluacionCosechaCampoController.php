@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\EvaluacionCosechaCampo;
 use App\Models\Visita;
@@ -83,15 +84,42 @@ class EvaluacionCosechaCampoController extends Controller
             return redirect()->route('evaluacion.create', ['visita_id' => $visitaId])
                 ->with('success', '🗑️ Evaluacion Cosecha Campo eliminado correctamente.');
         }
-         public function syncOffline(Request $request)
+       
+        public function syncOffline(Request $request)
     {
-        foreach ($request->all() as $data) {
+        $data = $request->json()->all();
+        Log::info('Datos recibidos para sincronizar Evaluación de Cosecha de Campo:', $data);
+
+        try {
+            $request->validate([
+                'visita_id' => 'required|integer',
+                'variedad_fruto' => 'required|string',
+                'cantidad_racimos' => 'required|integer',
+                'verde' => 'nullable|integer|min:0|max:100',
+                'maduro' => 'nullable|integer|min:0|max:100',
+                'sobremaduro' => 'nullable|integer|min:0|max:100',
+                'pedunculo' => 'nullable|integer|min:0|max:100',
+                'observaciones' => 'nullable|string',
+                // 'indexeddb_id' => 'nullable|string',
+            ]);
+
+            // Asumiendo que solo hay un registro de Evaluación de Cosecha por Visita.
+            // Si puede haber múltiples, necesitarías una clave única adicional.
             EvaluacionCosechaCampo::updateOrCreate(
                 ['visita_id' => $data['visita_id']],
                 $data
             );
+
+            Log::info('Registro de Evaluación de Cosecha de Campo sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
+            return response()->json(['message' => 'Evaluación de Cosecha de Campo sincronizada con éxito.']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error("Error de validación al sincronizar Evaluación de Cosecha de Campo: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
+            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error("Error inesperado al sincronizar Evaluación de Cosecha de Campo: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error interno del servidor al sincronizar Evaluación de Cosecha de Campo.', 'error' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Evaluación sincronizada']);
     }
 }
 

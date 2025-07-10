@@ -83,26 +83,7 @@ export default {
       alert('✅ Fertilización guardada localmente')
     },
     async sincronizar() {
-      const db = await getFormDataByVisita('fertilizacion', this.visitaId)
-      if (!db) return alert('⚠️ No hay fertilización local')
-
-      const res = await fetch('/api/offline/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-          submissions: [{ formName: 'fertilizacion', formData: db }]
-        })
-      })
-
-      const result = await res.json()
-      if (result.results?.[0]?.success) {
-        alert('✅ Sincronización exitosa')
-      } else {
-        alert('❌ Error al sincronizar')
-      }
+      
     },
     volver() {
       this.$router.push('/area')

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log; // Para registrar errores
 
 use App\Models\Area;
 use Illuminate\Http\Request;
@@ -134,15 +135,58 @@ class AreaController extends Controller
     // controllador offline
      
 
-     public function syncOffline(Request $request)
+    public function syncOffline(Request $request)
     {
-        foreach ($request->all() as $data) {
+        // Obtiene todos los datos JSON de la petición.
+        // Se espera un único objeto JSON por cada llamada de sincronización.
+        $data = $request->json()->all();
+
+        // Registra los datos recibidos para depuración (opcional, puedes eliminarlo en producción)
+        Log::info('Datos recibidos para sincronizar Área:', $data);
+
+        try {
+            // Validar los datos si es necesario (ejemplo básico, puedes expandir las reglas)
+            // Esto es importante para asegurar que los datos son válidos antes de guardarlos.
+            // Si la validación falla, se lanzará una excepción.
+            $request->validate([
+                'visita_id' => 'required|integer',
+                'material' => 'required|string',
+                'estado' => 'required|string',
+                'anio_siembra' => 'required|date',
+                'area' => 'required|numeric', // 'area' como campo numérico para la superficie
+                'orden_plantis_numero' => 'required|integer',
+                'estado_oren_plantis' => 'required|string',
+                // Si usas un ID de IndexedDB para la unicidad, añádelo aquí
+                // 'indexeddb_id' => 'nullable|string',
+            ]);
+
+            // Utiliza updateOrCreate para insertar o actualizar el registro.
+            // La clave para buscar el registro existente es crucial.
+            // Aquí se asume que la combinación de 'visita_id' y 'orden_plantis_numero'
+            // es única para identificar un registro de Área.
+            // Si 'orden_plantis_numero' no es único para una visita, considera añadir
+            // un campo 'id_offline' generado en el frontend (IndexedDB ID) a tu modelo
+            // y usarlo como clave de búsqueda: ['id_offline' => $data['id_offline']]
             Area::updateOrCreate(
-                ['visita_id' => $data['visita_id']],
+                [
+                    'visita_id' => $data['visita_id'],
+                    'orden_plantis_numero' => $data['orden_plantis_numero']
+                ],
                 $data
             );
+
+            Log::info('Registro de Área sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
+            return response()->json(['message' => 'Área sincronizada con éxito.']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Captura errores de validación y devuelve una respuesta 422
+            Log::error("Error de validación al sincronizar Área: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
+            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            // Captura cualquier otro error inesperado y devuelve una respuesta 500
+            Log::error("Error inesperado al sincronizar Área: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error interno del servidor al sincronizar Área.', 'error' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Áreas sincronizadas correctamente']);
     }
 
 }

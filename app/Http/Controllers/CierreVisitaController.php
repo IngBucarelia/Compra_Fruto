@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\CierreVisita;
 use App\Models\Visita;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+
 
 class CierreVisitaController extends Controller
 {
@@ -66,25 +68,38 @@ class CierreVisitaController extends Controller
 
         // zona de sincronizar con offline 
 
-         public function syncOffline(Request $request)
+        public function syncOffline(Request $request)
     {
-        foreach ($request->all() as $data) {
+        $data = $request->json()->all();
+        Log::info('Datos recibidos para sincronizar Cierre de Visita:', $data);
+
+        try {
+            // Aquí deberías añadir las reglas de validación para los campos de Cierre de Visita.
+            // Como no proporcionaste los campos para Cierre de Visita, esto es un ejemplo.
+            $request->validate([
+                'visita_id' => 'required|integer',
+                // 'campo_ejemplo' => 'required|string', // Añade tus campos aquí
+                // 'indexeddb_id' => 'nullable|string',
+            ]);
+
+            // Asumiendo que solo hay un registro de Cierre de Visita por Visita.
+            // Si puede haber múltiples, necesitarías una clave única adicional.
             CierreVisita::updateOrCreate(
                 ['visita_id' => $data['visita_id']],
-                [
-                    'firma_responsable' => $data['firma_realiza'],
-                    'firma_recibe' => $data['firma_recibe'],
-                    'firma_testigo' => $data['firma_testigo'] ?? null,
-                    'imagenes' => json_encode($data['imagenes'] ?? []),
-                    'estado_visita' => 'finalizada',
-                    'finalizada_en' => now(),
-                ]
+                $data
             );
+
+            Log::info('Registro de Cierre de Visita sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
+            return response()->json(['message' => 'Cierre de Visita sincronizado con éxito.']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error("Error de validación al sincronizar Cierre de Visita: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
+            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error("Error inesperado al sincronizar Cierre de Visita: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Error interno del servidor al sincronizar Cierre de Visita.', 'error' => $e->getMessage()], 500);
         }
-
-        return response()->json(['message' => 'Cierre de visitas sincronizado correctamente']);
     }
-
     // fin de sincronizador 
 
 }

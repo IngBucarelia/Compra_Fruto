@@ -103,27 +103,7 @@ export default {
     },
 
     async sincronizar() {
-      const data = JSON.parse(localStorage.getItem(`area_${this.visitaId}`));
-      if (!data) return alert('⚠️ No hay datos locales');
-
-      const res = await fetch('/api/offline/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-          submissions: [{ formName: 'area', formData: data }]
-        })
-      });
-
-      const result = await res.json();
-      if (result.results?.[0]?.success) {
-        localStorage.removeItem(`area_${this.visitaId}`);
-        alert('✅ Datos sincronizados');
-      } else {
-        alert('❌ Error al sincronizar');
-      }
+     
     }
   },
   

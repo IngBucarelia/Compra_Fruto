@@ -1,15 +1,15 @@
-
-import { getAllDataFromStore, clearStore } from '../store/indexeddb'
+// src/scripts/sincronizador.js (o donde tengas este script)
+import { getAllDataFromStore, clearStore } from '../store/indexeddb' // Asegúrate de que la ruta sea correcta
 
 const endpoints = {
-  area: '/offline-sync/areas',
-  fertilizacion: '/offline-sync/fertilizaciones',
-  polinizacion: '/offline-sync/polinizaciones',
-  sanidad: '/offline-sync/sanidades',
-  suelo: '/offline-sync/suelos',
-  labores_cultivo: '/offline-sync/labores',
-  evaluacion_cosecha: '/offline-sync/evaluacion',
-  cierre_visitas: '/offline-sync/cierre-visitas' // ← FIRMAS + imágenes + cierre
+  area: '/api/offline-sync/areas', // ✅ CAMBIO AQUÍ
+  fertilizacion: '/api/offline-sync/fertilizaciones', // ✅ CAMBIO AQUÍ
+  polinizacion: '/api/offline-sync/polinizaciones', // ✅ CAMBIO AQUÍ
+  sanidad: '/api/offline-sync/sanidades', // ✅ CAMBIO AQUÍ
+  suelo: '/api/offline-sync/suelos', // ✅ CAMBIO AQUÍ
+  labores_cultivo: '/api/offline-sync/labores', // ✅ CAMBIO AQUÍ
+  evaluacion_cosecha: '/api/offline-sync/evaluacion', // ✅ CAMBIO AQUÍ
+  cierre_visitas: '/api/offline-sync/cierre-visitas' // ✅ CAMBIO AQUÍ
 }
 
 export async function sincronizarDatosOffline() {
@@ -25,24 +25,29 @@ export async function sincronizarDatosOffline() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            // Si necesitas enviar tokens de autenticación para APIs, irían aquí:
+            // 'Authorization': `Bearer ${tuTokenDeAuth}`
           },
+          credentials: 'same-origin',
           body: JSON.stringify(registro)
         })
 
         if (!response.ok) {
-          throw new Error(`Error al sincronizar ${storeName}: ${response.statusText}`)
+          // Intenta parsear la respuesta de error si Laravel devuelve un JSON con detalles
+          let errorData = await response.json().catch(() => ({ message: response.statusText }));
+          throw new Error(`Error al sincronizar ${storeName} (HTTP ${response.status}): ${errorData.message || response.statusText}`);
         }
 
         console.log(`✅ ${storeName}: registro sincronizado`)
         totalSincronizados++
       } catch (error) {
         console.error(`❌ Error en ${storeName}`, error)
-        errores.push({ storeName, error })
+        errores.push({ storeName, error: error.message }) // Guardar solo el mensaje para legibilidad
       }
     }
 
-    // Limpiar solo si no hubo errores en ese store
+    // Solo limpia el store si no hubo errores para ese tipo de registro
     if (errores.filter(e => e.storeName === storeName).length === 0) {
       await clearStore(storeName)
     }
@@ -51,6 +56,6 @@ export async function sincronizarDatosOffline() {
   if (errores.length === 0) {
     alert(`✅ Todos los registros sincronizados con éxito: ${totalSincronizados}`)
   } else {
-    alert(`⚠️ Algunos errores al sincronizar. Ver consola.\nSincronizados: ${totalSincronizados}`)
+    alert(`⚠️ Algunos errores al sincronizar. Ver consola para detalles.\nSincronizados: ${totalSincronizados}`)
   }
 }
