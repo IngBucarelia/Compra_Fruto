@@ -11,24 +11,25 @@ class CierreVisita extends Model
 
     protected $fillable = [
         'visita_id',
-        'firma_responsable',
+        'fecha_cierre',
+        'estado_visita',
+        'observaciones_finales', 
+        'recomendaciones',       
+        'firma_responsable',     
         'firma_recibe',
         'firma_testigo',
         'imagenes',
-        'observaciones_finales',
-        'recomendaciones',
-        'estado_visita',
-        'finalizada_en',
+        'finalizada_en',         
     ];
 
     protected $casts = [
+        'fecha_cierre' => 'date',
+        'finalizada_en' => 'date', 
         'imagenes' => 'array',
-        'finalizada_en' => 'datetime',
     ];
 
-    public function visita()
+      public function visita()
     {
-        return $this->belongsTo(Visita::class);
+        return $this->belongsTo(Visita::class, 'visita_id');
     }
 }
-

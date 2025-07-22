@@ -116,7 +116,7 @@ Route::middleware('auth')->group(function () {
 
 
     // labores de cultivo rutas 
-    Route::get('/labores-cultivo/create', [LaboresCultivoController::class, 'create'])->name('labores_cultivo.create');
+    Route::get('/labores-cultivo/{visita_id}/create', [LaboresCultivoController::class, 'create'])->name('labores_cultivo.create');
     Route::post('/labores-cultivo', [LaboresCultivoController::class, 'store'])->name('labores_cultivo.store');
     Route::get('/labores-cultivo/{visita_id}/edit', [LaboresCultivoController::class, 'edit'])->name('labores-cultivo.edit');
     Route::put('/labores-cultivo/{id}', [LaboresCultivoController::class, 'update'])->name('labores-cultivo.update');

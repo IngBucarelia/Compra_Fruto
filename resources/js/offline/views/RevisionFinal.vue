@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <h2>📋 Revisión Final de Formulario (Modo Offline)</h2>
+  <div class="container" style="background-color: whitesmoke !important; padding: 20px;margin-top: 25px;">
+    <h2 class="offline-title" >📋 Revisión Final de Formulario (Modo Offline)</h2>
 
     <!-- Módulo: Área -->
     <InfoCard v-if="area" title="📍 Área" :items="[
@@ -72,28 +72,36 @@
       { label: 'Pedúnculo', value: evaluacion.pedunculo + '%' },
       { label: 'Observaciones', value: evaluacion.observaciones }
     ]" />
-    <!-- 🖋️ Firmas -->
+
+    <!-- ✅ Módulo: Cierre de Visita (NUEVO) -->
+    <InfoCard v-if="cierreVisita" title="✅ Cierre de Visita" :items="[
+      { label: 'Fecha de Cierre', value: cierreVisita.fecha_cierre },
+      { label: 'Estado de la Visita', value: cierreVisita.estado_visita },
+      { label: 'Observaciones Finales', value: cierreVisita.observaciones_finales }, // ✅ CAMBIO AQUÍ
+      { label: 'Recomendaciones', value: cierreVisita.recomendaciones } // ✅ NUEVO CAMPO
+    ]" />
+
+    <!-- 🖋️ Firmas (AHORA REFERENCIAN A cierreVisita) -->
     <div class="row mt-4">
-      <div class="col-md-4" v-if="firmas.firma_realiza">
+      <div class="col-md-4" v-if="cierreVisita.firma_responsable">
         <h5>Firma de quien realizó la visita</h5>
-        <img :src="firmas.firma_realiza" class="img-fluid border" />
+        <img :src="cierreVisita.firma_responsable" class="img-fluid border" />
       </div>
-      <div class="col-md-4" v-if="firmas.firma_recibe">
+      <div class="col-md-4" v-if="cierreVisita.firma_recibe">
         <h5>Firma de quien recibió la visita</h5>
-        <img :src="firmas.firma_recibe" class="img-fluid border" />
+        <img :src="cierreVisita.firma_recibe" class="img-fluid border" />
       </div>
-      <div class="col-md-4" v-if="firmas.firma_testigo">
+      <div class="col-md-4" v-if="cierreVisita.firma_testigo">
         <h5>Firma del testigo (opcional)</h5>
-        <img :src="firmas.firma_testigo" class="img-fluid border" />
+        <img :src="cierreVisita.firma_testigo" class="img-fluid border" />
       </div>
     </div>
 
-
-    <!-- 🖼️ Imágenes -->
-    <div v-if="imagenes.length" class="mt-4">
+    <!-- 🖼️ Imágenes (AHORA REFERENCIAN A cierreVisita) -->
+    <div v-if="cierreVisita.imagenes && cierreVisita.imagenes.length" class="mt-4">
       <h5>📸 Imágenes de la visita</h5>
       <div class="row">
-        <div class="col-md-3 mb-3" v-for="(img, idx) in imagenes" :key="idx">
+        <div class="col-md-3 mb-3" v-for="(img, idx) in cierreVisita.imagenes" :key="idx">
           <img :src="img" class="img-fluid border" />
         </div>
       </div>
@@ -106,14 +114,12 @@
     </button>
     <button class="btn btn-success" @click="sincronizarTodo">🔄 Sincronizar Datos</button>
 
-
   </div>
-    <div class="mt-4">
-      <button class="btn btn-success" @click="irAFirmas">
-        ✍️ Continuar a Firma del Responsable
-      </button>
-    </div>
-  
+  <div class="mt-4">
+    <button class="btn btn-success" @click="irAFirmas">
+      ✍️ Continuar a Firma del Responsable
+    </button>
+  </div>
 </template>
 
 <script>
@@ -122,8 +128,6 @@ import { getFormDataByVisita } from '../store/indexeddb'
 import { generarResumenPDF } from '../utils/pdfGenerator'
 import { exportarResumenExcel } from '../utils/excelExporter'
 import { sincronizarDatosOffline } from '../utils/sincronizador'
-
-
 
 export default {
   components: { InfoCard },
@@ -137,8 +141,7 @@ export default {
       suelo: null,
       labores: null,
       evaluacion: null,
-      firmas: {},           // ✅ AÑADIDO
-      imagenes: [], 
+      cierreVisita: null, // Para los datos de cierre de visita
       camposLabores: {
         polinizacion: '🌸 Polinización',
         limpieza_calle: '🧹 Limpieza Calle',
@@ -172,17 +175,12 @@ export default {
     this.labores = await getFormDataByVisita('labores_cultivo', this.visitaId)
     this.evaluacion = await getFormDataByVisita('evaluacion_cosecha', this.visitaId)
 
-    const f = await getFormDataByVisita('firmas', this.visitaId)
-    this.firmas = f || {}
-
-
-    const imgs = await getFormDataByVisita('firmas', this.visitaId)
-    this.imagenes = Array.isArray(imgs?.imagenes) ? imgs.imagenes : []
-
+    // Cargar los datos de cierre de visita desde el store 'cierre_visitas'
+    this.cierreVisita = await getFormDataByVisita('cierre_visitas', this.visitaId) || {};
   },
   methods: {
     irAFirmas() {
-     // this.$router.push(`/firmas?visita_id=${this.visitaId}`)
+      // this.$router.push(`/firmas?visita_id=${this.visitaId}`)
     },
     async generarPDF() {
       await generarResumenPDF({
@@ -193,8 +191,7 @@ export default {
         suelo: this.suelo,
         labores: this.labores,
         evaluacion: this.evaluacion,
-        firmas: this.firmas,
-        imagenes: this.imagenes
+        cierreVisita: this.cierreVisita,
       });
     },
     descargarExcel() {
@@ -206,15 +203,26 @@ export default {
         suelo: this.suelo,
         labores: this.labores,
         evaluacion: this.evaluacion,
-        firmas: this.firmas
+        cierreVisita: this.cierreVisita,
       })
     },
-     async sincronizarTodo() {
+    async sincronizarTodo() {
       await sincronizarDatosOffline()
     }
-      
-
-
   }
 }
 </script>
+
+<style scoped>
+
+@import '../styles/offline.css';
+
+.firma-canvas {
+  background-color: #fff;
+  width: 100%;
+  max-width: 300px;
+  height: 150px;
+}
+</style>
+
+

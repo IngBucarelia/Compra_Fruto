@@ -20,7 +20,7 @@ export async function sincronizarDatosOffline() {
     const registros = await getAllDataFromStore(storeName)
 
     for (const registro of registros) {
-      try {
+      try { 
         const response = await fetch(url, {
           method: 'POST',
           headers: {

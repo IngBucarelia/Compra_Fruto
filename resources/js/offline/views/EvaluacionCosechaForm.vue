@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <h2>🌱 Evaluacion Cosecha - Registros Previos </h2>
+  <div class="offline-container" >
+    <h2  class="offline-title">🌱 Evaluacion Cosecha - Registros Previos </h2>
 
     <!-- 🧻 Módulos previos -->
     <div class="row mb-4">
@@ -103,7 +103,7 @@
       ➡️ Continuar con Firmas e Imagenes
     </button>
     <button v-if="canSync" @click="sincronizar" class="btn btn-success mt-3">🔄 Sincronizar</button>
-    <button class="btn btn-dark mt-3 ms-2" @click="volver">⬅️ Volver</button>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
   </div>
 </template>
 
@@ -179,3 +179,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+@import '../styles/offline.css';
+
+/* Estilos adicionales específicos para este componente si los necesitas */
+</style>

@@ -9,19 +9,20 @@ use Illuminate\Http\Request;
 
 class LaboresCultivoController extends Controller
 {
-   public function create(Request $request)
-        {
-            $visita = Visita::with([
-                'area',
-                'fertilizaciones.fertilizantes',
-                'polinizaciones',
-                'sanidad',
-                'suelo',
-                'laboresCultivo' 
-            ])->findOrFail($request->query('visita_id'));
+    public function create(int $visita_id) // ✅ CAMBIO: Recibir visita_id directamente como parámetro de ruta
+    {
+        // ✅ CAMBIO: Usar el $visita_id directamente
+        $visita = Visita::with([
+            'area',
+            'fertilizaciones.detalles', // Asegúrate de cargar la relación 'detalles' aquí
+            'polinizaciones',
+            'sanidad',
+            'suelo',
+            'laboresCultivo'
+        ])->findOrFail($visita_id); // ✅ Usar $visita_id directamente
 
-            return view('labores_cultivo.create', compact('visita'));
-        }
+        return view('labores_cultivo.create', compact('visita'));
+    }
 
         public function store(Request $request)
         {

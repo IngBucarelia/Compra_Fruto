@@ -1,7 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<style>
+    .container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+    
+</style>
+<div class="container" >
     <h2>Registrar Visita</h2>
 
     @if($errors->any())
@@ -68,7 +75,8 @@
 
 
         <button type="submit" class="btn btn-primary">Guardar visita</button>
-    </form>
+    </form><br>
+     <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
 </div>
 
 <!-- Select2 -->
@@ -119,6 +127,29 @@
         });
     });
 </script>
+
+<style>
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px 10px;
+            margin-left: -40px;
+            width:110%
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+        
+        .search-box input {
+            min-width: 100%;
+        }
+        
+        .action-buttons .btn {
+            min-width: 80px;
+            font-size: 0.75rem;
+        }
+    }
+</style>
 
 
 

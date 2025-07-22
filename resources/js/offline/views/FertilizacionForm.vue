@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="offline-container" >
     <h2>🌱 Fertilizacion - Registros Previos </h2>
 
     <div v-if="areaInfo" class="mb-4">
@@ -13,13 +13,13 @@
     </div>
  <h2>🌱 Registro de Fertilización (Modo Offline)</h2>
     <form @submit.prevent="guardar">
-      <div class="mb-3">
+      <div class="form-group">
         <label>Fecha de fertilización</label>
         <input type="date" v-model="fertilizacion.fecha_fertilizacion" class="form-control" required>
       </div>
 
       <h5>Fertilizantes</h5>
-      <div v-for="(item, index) in fertilizacion.fertilizantes" :key="index" class="mb-3 border p-3">
+      <div v-for="(item, index) in fertilizacion.fertilizantes" :key="index" class="form-group border p-3">
         <select v-model="item.nombre" class="form-select mb-2" required>
           <option value="">Seleccione fertilizante</option>
           <option value="urea">Urea</option>
@@ -30,7 +30,7 @@
         <input type="number" v-model="item.cantidad" class="form-control" placeholder="Cantidad (kg)" required>
       </div>
 
-      <button type="button" @click="agregarFertilizante" class="btn btn-secondary mb-3">➕ Añadir otro</button>
+      <button type="button" @click="agregarFertilizante" class="btn btn-secondary form-group">➕ Añadir otro</button>
       <br>
       <button type="submit" class="btn btn-primary">💾 Guardar Local</button>
     </form>
@@ -91,3 +91,7 @@ export default {
   }
 }
 </script>
+<style>
+@import '../styles/offline.css';
+
+</style>

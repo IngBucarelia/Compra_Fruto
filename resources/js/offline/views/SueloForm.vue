@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <h2>🌱 Suelo - Registros Previos </h2>
+  <div class="offline-container" >
+    <h2 class="offline-title" >🌱 Suelo - Registros Previos </h2>
 
     <div class="row mb-4">
       <!-- Área -->
@@ -127,7 +127,7 @@
       ➡️ Ir a Labores de Cultivo
     </button>
     <button v-if="canSync" @click="sincronizar" class="btn btn-success mt-3">🔄 Sincronizar</button>
-    <button class="btn btn-dark mt-3 ms-2" @click="volver">⬅️ Volver</button>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
   </div>
 </template>
 
@@ -172,3 +172,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+@import '../styles/offline.css';
+
+/* Estilos adicionales específicos para este componente si los necesitas */
+</style>

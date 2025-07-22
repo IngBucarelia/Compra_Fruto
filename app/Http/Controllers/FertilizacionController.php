@@ -97,35 +97,48 @@ public function store(Request $request)
      public function syncOffline(Request $request)
     {
         $data = $request->json()->all();
-        Log::info('Datos recibidos para sincronizar Fertilización:', $data);
+        Log::info('Datos recibidos para sincronizar Fertilización (offline):', $data);
 
         try {
+            // Validar los datos. Esperamos que 'fertilizantes' sea un array de objetos.
             $request->validate([
                 'visita_id' => 'required|integer',
                 'fecha_fertilizacion' => 'required|date',
-                // Validamos que 'fertilizantes' sea un array y que cada elemento dentro de él
-                // tenga 'nombre' (string) y 'cantidad' (numérico).
-                'fertilizantes' => 'required|array',
+                'fertilizantes' => 'required|array', // Espera un array de detalles de fertilizantes
                 'fertilizantes.*.nombre' => 'required|string',
-                'fertilizantes.*.cantidad' => 'required|numeric|min:0',
-                // Eliminamos la validación de 'cantidad' a nivel raíz, ya que está anidada.
+                'fertilizantes.*.cantidad' => 'required|numeric|min:1',
             ]);
 
-            // Utiliza updateOrCreate para insertar o actualizar el registro.
-            // La clave para updateOrCreate. Si una visita puede tener varias fertilizaciones
-            // en la misma fecha, 'visita_id' y 'fecha_fertilizacion' no son suficientes.
-            // En ese caso, es fuertemente recomendado usar un ID único generado en el frontend (IndexedDB ID)
-            // y guardarlo como 'id_offline' en tu modelo de Laravel.
-            Fertilizacion::updateOrCreate(
+            // Separar los detalles de fertilizantes del registro principal de Fertilización
+            $fertilizantesDetalles = $data['fertilizantes'];
+            unset($data['fertilizantes']); // Eliminar 'fertilizantes' del array principal para el create
+
+            // Crear o actualizar el registro principal de Fertilización
+            // Usamos 'visita_id' y 'fecha_fertilizacion' como clave para updateOrCreate.
+            // Si una visita puede tener varias fertilizaciones en la misma fecha,
+            // considera usar un 'id_offline' generado en el frontend para la unicidad.
+            $fertilizacion = Fertilizacion::updateOrCreate(
                 [
                     'visita_id' => $data['visita_id'],
                     'fecha_fertilizacion' => $data['fecha_fertilizacion']
-                ], // O ['id_offline' => $data['id_offline']]
-                $data
+                ],
+                $data // Solo los campos de la tabla fertilizaciones
             );
 
-            Log::info('Registro de Fertilización sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
-            return response()->json(['message' => 'Fertilización sincronizada con éxito.']);
+            // Eliminar los detalles de fertilización existentes para esta fertilización
+            // antes de volver a crearlos, para evitar duplicados en cada sincronización.
+            $fertilizacion->detalles()->delete();
+
+            // Crear los registros de detalles de fertilizantes en la tabla relacionada
+            foreach ($fertilizantesDetalles as $detalle) {
+                $fertilizacion->detalles()->create([
+                    'fertilizante' => $detalle['nombre'], // Asumo que la columna se llama 'fertilizante'
+                    'cantidad' => $detalle['cantidad'],
+                ]);
+            }
+
+            Log::info('Registro de Fertilización y sus detalles sincronizados con éxito.', ['visita_id' => $data['visita_id']]);
+            return response()->json(['message' => 'Fertilización y detalles sincronizados con éxito.']);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error("Error de validación al sincronizar Fertilización: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
@@ -135,7 +148,6 @@ public function store(Request $request)
             return response()->json(['message' => 'Error interno del servidor al sincronizar Fertilización.', 'error' => $e->getMessage()], 500);
         }
     }
-
 
 
 }

@@ -1,25 +1,22 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm fixed-top" >
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm fixed-top" style="background-color:  rgba(29, 89, 7, 0.9)  !important">
     <div class="container-fluid" style="margin-bottom: -15px">
-        <button 
-            class="navbar-toggler" 
-            type="button" 
-            @click="sidebarOpen = !sidebarOpen"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
         
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
-            <span style="font-size: 2em;">🌴</span>
-    <span style="font-size: 2em;">🛢️</span>
-
-	 App Compra de Fruto<span style="font-size: 2em;">🚜</span>
-
+       <span style="font-size: 2em;">🌴</span>
+        <a href="{{ route('dashboard') }}">
+            <img class="logo" src="{{ asset('images/logo.png') }}" alt="Logo">
         </a>
+        <span style="font-size: 2em;">🚜</span>
+        <style>
+            .logo{
+                width: 200px;
+                margin-top: -10px;
+            }
+        </style>
         
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="color: black">
                         <i class="fas fa-user-circle me-1"></i> {{ auth()->user()->name }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">

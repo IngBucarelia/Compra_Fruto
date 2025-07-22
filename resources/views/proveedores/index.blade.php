@@ -1,7 +1,42 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+
+<style>
+
+    .container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+
+    .title{
+    text-align: center; 
+    font-family: Arial Black; 
+    font-weight: bold; 
+    font-size: 30px; 
+    color: #fdffe5; 
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    }
+
+
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+<div class="container" >
     <a href="{{ route('proveedores.create') }}" class="btn btn-success mb-3">Crear nuevo proveedor</a>
 
     <h2 class="mb-4">Listado de Proveedores</h2>
@@ -14,7 +49,8 @@
     </form>
 
     {{-- Tabla de resultados --}}
-    <table class="table table-bordered table-hover">
+    <div class="table-responsive">
+    <table class="table table-bordered table-hover" style="background-color: #fdffe5; border-color:#000">
         <thead class="table-light">
             <tr>
                 <th>ID</th>
@@ -45,7 +81,9 @@
             </tr>
             @endforelse
         </tbody>
-    </table>
+    </table><br>
+    <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
+    </div>
 
     {{-- Paginación --}}
     <div class="d-flex justify-content-center">

@@ -1,8 +1,45 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h3>✏️ Editar Análisis de Suelo - {{ $visita->proveedor->proveedor_nombre }}</h3>
+
+<style>
+
+    
+
+.container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+
+    .title{
+    text-align: center; 
+    font-family: Arial Black; 
+    font-weight: bold; 
+    font-size: 30px; 
+    color: #fdffe5; 
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    }
+
+
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+<div class="container" >
+    <h3 class="title">✏️ Editar Análisis de Suelo </h3><h3> {{ $visita->proveedor->proveedor_nombre }}</h3>
 
     <form method="POST" action="{{ route('suelos.update', $suelo->id) }}">
         @csrf
@@ -38,6 +75,6 @@
         <button type="submit" class="btn btn-primary">💾 Actualizar análisis</button>
     </form>
 
-    <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-secondary mt-3">⬅️ Volver</a>
+    <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
 </div>
 @endsection

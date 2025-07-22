@@ -1,10 +1,10 @@
 <template>
-  <div class="container">
-    <h2>🌱 Sanidad - Registros Previos </h2>
+  <div class="offline-container" >
+    <h2 class="offline-title" >🌱 Sanidad - Registros Previos </h2>
 
     <div class="row mb-4">
       <!-- Tarjeta: Área -->
-      <div class="col-md-4">
+      <div class="form-group">
         <div class="card border-success">
           <div class="card-header bg-success text-white">
             📍 Información del Área
@@ -22,7 +22,7 @@
       </div>
 
       <!-- Tarjeta: Fertilizaciones -->
-      <div class="col-md-4">
+      <div class="form-group">
         <div class="card border-primary">
           <div class="card-header bg-primary text-white">
             💧 Fertilizaciones
@@ -42,7 +42,7 @@
       </div>
 
       <!-- Tarjeta: Polinizaciones -->
-      <div class="col-md-4">
+      <div class="form-group">
         <div class="card border-warning">
           <div class="card-header bg-warning text-dark">
             🌸 Polinizaciones
@@ -67,7 +67,7 @@
     <!-- Formulario Sanidad -->
     <form @submit.prevent="guardar">
       <div class="row">
-        <div class="col-md-4" v-for="campo in campos" :key="campo.key">
+        <div class="form-group" v-for="campo in campos" :key="campo.key">
           <label>{{ campo.label }}</label>
           <input :type="campo.type" v-model="form[campo.key]" class="form-control mb-3" :required="campo.required">
         </div>
@@ -84,7 +84,7 @@
       ➡️ Ir a Estudio de Suelo
     </button>
     <button v-if="canSync" @click="sincronizar" class="btn btn-success mt-3">🔄 Sincronizar</button>
-    <button class="btn btn-dark mt-3 ms-2" @click="volver">⬅️ Volver</button>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
   </div>
 </template>
 
@@ -146,3 +146,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+@import '../styles/offline.css';
+
+/* Estilos adicionales específicos para este componente si los necesitas */
+</style>

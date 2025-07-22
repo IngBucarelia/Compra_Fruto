@@ -1,13 +1,47 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<style>
+
+    .container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+
+    .title{
+    text-align: center; 
+    font-family: Arial Black; 
+    font-weight: bold; 
+    font-size: 30px; 
+    color: #fdffe5; 
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    }
+
+
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+<div class="container" >
     <h2 class="mb-3">Plantaciones de: {{ $proveedor->proveedor_nombre }}</h2>
 
     <a href="{{ route('plantaciones.create') }}" class="btn btn-success mb-3">Agregar nueva plantación</a>
     <a href="{{ route('proveedores.index') }}" class="btn btn-secondary mb-3">Volver a Proveedores</a>
-
-    <table class="table table-bordered">
+<div class="table-responsive">
+    <table class="table table-bordered" style="background-color: #fdffe5; border-color:#000">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -38,7 +72,7 @@
             @endforeach
         </tbody>
     </table>
-
+</div>
     {{ $plantaciones->links() }}
 </div>
 @endsection

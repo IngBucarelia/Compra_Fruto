@@ -37,7 +37,8 @@ class SueloController extends Controller
 
         Suelo::create($data);
 
-        return redirect()->route('labores_cultivo.create', $data['visita_id'])
+        // ✅ CAMBIO: Pasar el visita_id como un array asociativo para la ruta con parámetro
+        return redirect()->route('labores_cultivo.create', ['visita_id' => $data['visita_id']])
             ->with('success', '✅ Análisis de suelo registrado correctamente.');
     }
 

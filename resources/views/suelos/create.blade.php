@@ -1,10 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="container">
-    <h3>🌴🌴 Información de plantación - Analisis de Suelo 🌴🌴 <br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span><br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
-    <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
+
+<style>
+
+    
+
+.container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+
+    .title{
+    text-align: center; 
+    font-family: Arial Black; 
+    font-weight: bold; 
+    font-size: 30px; 
+    color: #fdffe5; 
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    }
+
+
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+    <div class="container" >
+    <h3 class="title">🧪Información previa de plantación - Analisis de Suelo 🧬</h3><h3> <br><br>Fecha Visita: <span style="color: wheat">{{ $visita->fecha}}</span><br> Proveedor:<span style="color: wheat"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+    <span style="color: wheat">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
     <form id="formRedireccion" class="mt-4">
     <p> <strong>Seleccione la Zona a Dirigirse</strong></p>
@@ -150,7 +186,7 @@
         </div>
 
     </div>
-    <h3>🧬Formulario de Análisis de Suelo </h3>
+    <h3 class="title">🧬Formulario de Análisis de Suelo </h3>
 
             @if ($suelo)
             {{-- Mostrar detalles del suelo con botón para editar --}}
@@ -207,8 +243,8 @@
                 <button type="submit" class="btn btn-primary">💾 Guardar análisis de suelo</button>
             </form>
         @endif
-            <a href="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}" class="btn btn-outline-success mt-4">
+           <button> <a href="{{ route('labores_cultivo.create', ['visita_id' => $visita->id]) }}" >
                 ➡️ Continuar con Labores de Cultivo
-            </a>                   
+            </a>  </button>                 
 </div>
 @endsection

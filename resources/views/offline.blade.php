@@ -13,13 +13,14 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    body { margin: 0; font-family: sans-serif; }
+    body { margin: 0; font-family: sans-serif;  background-image: url('/images/fondo.jpg'); }
     .sidebar { width: 250px; height: 100vh; position: fixed; top: 56px; left: 0; background-color: #343a40; overflow-y: auto; z-index: 1000; }
     .sidebar-menu { list-style: none; padding: 0; }
     .sidebar-item { padding: 0.75rem 1rem; }
     .sidebar-link { color: white; text-decoration: none; display: flex; align-items: center; }
     .sidebar-link:hover { background-color: rgba(255,255,255,0.1); }
     main { margin-left: 250px; padding: 1rem; padding-top: 80px; }
+    .container{style="background-color: whitesmoke; padding: 20px;"}
   </style>
 </head>
 <body>

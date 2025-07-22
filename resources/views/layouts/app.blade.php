@@ -27,6 +27,10 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-image: url('{{ asset('images/fondo.jpg') }}'); 
+            background-size: contain;
+            background-position: center;
+            height: 100vh;
         }
         
         .sidebar {
@@ -80,6 +84,7 @@
         .collapsed-main {
             margin-left: var(--collapsed-sidebar-width) !important;
         }
+        
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
@@ -100,7 +105,7 @@
         class="main-content py-4"
         :class="{ 'collapsed-main': !sidebarOpen }"
     >
-        <div class="container-fluid">
+        <div style="margin-top: 80px !important;" class="container-fluid">
             @yield('content')
         </div>
     </main>

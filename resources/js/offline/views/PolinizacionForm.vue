@@ -1,11 +1,11 @@
 <template>
-  <div class="container">
-    <h2>🌱Polinización - Registros Previos </h2>
+  <div class="offline-container" >
+    <h2 class="offline-title">🌱Polinización - Registros Previos </h2>
 
     <div class="row mb-4">
   <!-- Tarjeta: Área -->
   <div class="col-md-6">
-    <div class="card border-success mb-3">
+    <div class="card border-success form-group">
       <div class="card-header bg-success text-white">
         📍 Información del Área
       </div>
@@ -25,12 +25,12 @@
 
   <!-- Tarjeta: Fertilización -->
   <div class="col-md-6">
-    <div class="card border-primary mb-3">
+    <div class="card border-primary form-group">
       <div class="card-header bg-primary text-white">
         💧 Fertilizaciones guardadas
       </div>
       <div class="card-body" v-if="fertilizacion.length">
-        <div v-for="(fert, index) in fertilizacion" :key="index" class="mb-3">
+        <div v-for="(fert, index) in fertilizacion" :key="index" class="form-group">
           <h6>📅 {{ fert.fecha_fertilizacion }}</h6>
           <ul class="list-group">
             <li v-for="(item, i) in fert.fertilizantes" :key="i" class="list-group-item">
@@ -48,23 +48,23 @@
 
     <!-- Formulario polinización -->
     <form @submit.prevent="guardar">
-      <div class="mb-3">
+      <div class="form-group">
         <label>🗓️ Fecha de polinización:</label>
         <input type="date" v-model="form.fecha" class="form-control" required>
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label>🔀 Nº de pases:</label>
         <input type="number" v-model="form.n_pases" class="form-control" required>
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label>🔁 Ciclos por ronda:</label>
         <input type="number" v-model="form.ciclos_ronda" class="form-control" required>
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label>💊 Cantidad de ANA aplicada:</label>
         <input type="number" step="0.01" v-model="form.ana" class="form-control" required>
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label>💧 Tipo de ANA:</label>
         <select v-model="form.tipo_ana" class="form-control" required>
           <option value="">Seleccione</option>
@@ -72,7 +72,7 @@
           <option value="liquido">Líquido</option>
         </select>
       </div>
-      <div class="mb-3">
+      <div class="form-group">
         <label>🌬️ Talco aplicado (kg):</label>
         <input type="number" step="0.01" v-model="form.talco" class="form-control" required>
       </div>
@@ -82,7 +82,7 @@
       ➡️ Ir a Sanidad
     </button>
     <button v-if="canSync" @click="sincronizar" class="btn btn-success mt-3">🔄 Sincronizar</button>
-    <button class="btn btn-dark mt-3 ms-2" @click="volver">⬅️ Volver</button>
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
   </div>
 </template>
 
@@ -125,3 +125,9 @@ export default {
   }
 };
 </script>
+<style scoped>
+@import '../styles/offline.css';
+
+/* Estilos adicionales específicos para este componente si los necesitas */
+</style>
+

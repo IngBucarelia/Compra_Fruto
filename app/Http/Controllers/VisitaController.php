@@ -146,7 +146,7 @@ class VisitaController extends Controller
                 'polinizaciones',
                 'sanidad',
                 'suelo',
-                'laboresCultivo',          
+                'laboresCultivo',           
                 'evaluacionCosechaCampo',
                  'cierreVisita' 
             ])->findOrFail($id);
@@ -157,18 +157,27 @@ class VisitaController extends Controller
 
         
         public function exportarPDF($id)
-        {
-            $visita = Visita::with([
-                'proveedor', 'plantacion', 'area',
-                'fertilizaciones.fertilizantes',
-                'polinizaciones', 'sanidad',
-                'suelo', 'laboresCultivo',
-                'evaluacionCosechaCampo', 'cierreVisita'
-            ])->findOrFail($id);
+    {
+        $visita = Visita::with([
+            'proveedor',
+            'plantacion',
+            'area',
+            // ✅ CAMBIO CLAVE: Cargar la relación 'detalles' en lugar de 'fertilizantes'
+            'fertilizaciones.detalles',
+            'polinizaciones',
+            'sanidad',
+            'suelo',
+            'laboresCultivo',
+            'evaluacionCosechaCampo',
+            'cierreVisita'
+        ])->findOrFail($id);
 
-            $pdf = Pdf::loadView('visitas.exportar_pdf', compact('visita'));
-            return $pdf->download("detalle_visita_{$id}.pdf");
-        }
+        // Si necesitas depurar los datos que llegan al PDF:
+        // dd($visita->toArray());
+
+        $pdf = Pdf::loadView('visitas.exportar_pdf', compact('visita'));
+        return $pdf->download("detalle_visita_{$id}.pdf");
+    }
 
 
         public function exportarExcel($id)

@@ -1,9 +1,45 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h3>🌴🌴 Información de plantación - Sanidad 🌴🌴<br><br>Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span> <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
-    <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
+<style>
+
+    
+
+.container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+
+    .title{
+    text-align: center; 
+    font-family: Arial Black; 
+    font-weight: bold; 
+    font-size: 30px; 
+    color: #fdffe5; 
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    }
+
+
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+<div class="container" >
+    <h3 class="title">🧪 Información previa de plantación - Sanidad 🦠</h3><h3><br><br>Fecha Visita: <span style="color: wheat">{{ $visita->fecha}}</span> <br> Proveedor:<span style="color: wheat"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+    <span style="color: wheat">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
     <form id="formRedireccion" class="mt-4">
     <p> <strong>Seleccione la Zona a Dirigirse</strong></p>
@@ -176,29 +212,31 @@
 
         <button type="submit" class="btn btn-primary">💾 Guardar sanidad</button>
     </form>
-    <a href="{{ route('suelos.create', ['visita_id' => $visita->id]) }}" class="btn btn-outline-success mt-3">
+    <br><button><a href="{{ route('suelos.create', ['visita_id' => $visita->id]) }}" >
         ➡️ Continuar con Análisis de Suelo
-    </a>
+    </a></button>
 
 </div>
 
 <hr>
-<h4 class="mt-4">🦠 Sanidades registradas</h4>
+
 
 @if ($visita->sanidades->count())
-    <ul class="list-group">
+    <div class="container">
+        <h4 class="title">🦠 Sanidades registradas</h4>
+        <ul class="list-group">
         @foreach ($visita->sanidades as $sanidad)
             <li class="list-group-item d-flex justify-content-between align-items-start">
                 <div>
-                    <strong>Opsophanes:</strong> {{ $sanidad->opsophanes }}% |
-                    <strong>P. Cogollo:</strong> {{ $sanidad->pudricion_cogollo }}% |
-                    <strong>Raspador:</strong> {{ $sanidad->raspador }}% |
-                    <strong>Palmarum:</strong> {{ $sanidad->palmarum }}% |
-                    <strong>Strategus:</strong> {{ $sanidad->strategus }}% |
-                    <strong>Leptoparsha:</strong> {{ $sanidad->leptoparsha }}% |
-                    <strong>Pestalotiopsis:</strong> {{ $sanidad->pestalotiopsis }}% |
-                    <strong>P. Basal:</strong> {{ $sanidad->pudricion_basal }}% |
-                    <strong>P. Estipe:</strong> {{ $sanidad->pudricion_estipe }}% |
+                    <strong>Opsophanes:</strong> {{ $sanidad->opsophanes }}% 
+                    <strong>P. Cogollo:</strong> {{ $sanidad->pudricion_cogollo }}% 
+                    <strong>Raspador:</strong> {{ $sanidad->raspador }}% 
+                    <strong>Palmarum:</strong> {{ $sanidad->palmarum }}% 
+                    <strong>Strategus:</strong> {{ $sanidad->strategus }}% 
+                    <strong>Leptoparsha:</strong> {{ $sanidad->leptoparsha }}% 
+                    <strong>Pestalotiopsis:</strong> {{ $sanidad->pestalotiopsis }}% 
+                    <strong>P. Basal:</strong> {{ $sanidad->pudricion_basal }}% 
+                    <strong>P. Estipe:</strong> {{ $sanidad->pudricion_estipe }}% 
                     <strong>Otros:</strong> {{ $sanidad->otros ?? '-' }}<br>
                     <strong>Observaciones:</strong> {{ $sanidad->observaciones ?? 'Sin observaciones' }}
                 </div>
@@ -211,7 +249,7 @@
                 </form>
             </li>
         @endforeach
-    </ul>
+    </ul></div>
 @else
     <p class="text-muted">No se han registrado sanidades aún.</p>
 @endif

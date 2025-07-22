@@ -1,7 +1,44 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+
+<style>
+
+    .container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+        width: 60%;
+        align: center !important;
+        align-items: center !
+    }
+
+    .card{
+        width: 200%;
+    }
+
+    
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+
+        .card{
+        width: 100%;
+    }
+    }
+</style>
+    <div class="container" >
         <div class="col-md-6 mb-3">
                     <div class="card h-100">
                         <div class="card-body text-center">
@@ -73,7 +110,7 @@
         <h4 class="mt-4">📘 Otras visitas a esta plantación</h4>
 
         @if ($visita->plantacion && $visita->plantacion->visitas->count() > 1)
-            <ul class="list-group">
+            <div class="card"><ul class="list-group">
                 @foreach ($visita->plantacion->visitas->where('id', '!=', $visita->id) as $otraVisita)
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span>
@@ -85,6 +122,7 @@
                     </li>
                 @endforeach
             </ul>
+            </div>
         @else
             <p class="text-muted">No hay otras visitas registradas para esta plantación.</p>
         @endif

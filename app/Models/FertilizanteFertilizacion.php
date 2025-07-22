@@ -14,6 +14,6 @@ class FertilizanteFertilizacion extends Model
 
     public function fertilizacion()
     {
-        return $this->belongsTo(Fertilizacion::class);
+        return $this->belongsTo(Fertilizacion::class, 'fertilizacion_id', 'id');
     }
 }

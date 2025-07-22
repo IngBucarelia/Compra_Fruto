@@ -1,10 +1,36 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-<h3>🌴🌴 Información de plantación - Detalle Completo de Visita Realizado el {{ $visita->fecha }}  🌴🌴 <br> Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
-    <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
-</h3>
+
+<style>
+    .container{
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    }
+    
+    @media (max-width: 768px) {
+
+        .container {
+        margin-left: -35px;
+        width: 110%;
+         background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+<div class="container" ">
+    <h3>🌴🌴 Información de plantación - Detalle Completo de Visita Realizado el {{ $visita->fecha }} <br> Proveedor:<span style="color: wheat"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+        <span style="color: wheat">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
+    </h3>
     <div class="accordion mt-4" id="acordeonDetalleVisita">
 
         {{-- Área --}}
@@ -23,7 +49,7 @@
                             <li><strong>Año siembra:</strong> {{ $visita->area->anio_siembra }}</li>
                             <li><strong>Área (m²):</strong> {{ $visita->area->area }}</li>
                             <li><strong>Orden Plantis:</strong> {{ $visita->area->orden_plantis_numero }}</li>
-                            <li><strong>Estado orden Plantis:</strong> {{ $visita->area->estado_orden_plantis }}</li>
+                            <li><strong>Estado orden Plantis:</strong> {{ $visita->area->estado_oren_plantis }}</li>
                         </ul>
                     @else
                         <p>No se ha registrado información de área.</p>
@@ -47,7 +73,7 @@
                                 <strong>Fecha:</strong> {{ $fertilizacion->fecha_fertilizacion }}
                                 <ul>
                                     @foreach ($fertilizacion->fertilizantes as $f)
-                                        <li>{{ ucfirst($f->nombre) }} - {{ $f->cantidad }} kg</li>
+                                        <li>{{ ucfirst($f->fertilizante) }} - {{ $f->cantidad }} kg</li>
                                     @endforeach
                                 </ul>
                                 <hr>
@@ -130,7 +156,7 @@
                     @if ($visita->suelo)
                         <ul>
                             <li><strong>Análisis foliar:</strong> {{ ucfirst($visita->suelo->analisis_foliar) }}</li>
-                            <li><strong>Análisis suelo:</strong> {{ ucfirst($visita->suelo->alanisis_suelo) }}</li>
+                            <li><strong>Análisis suelo:</strong> {{ ucfirst($visita->suelo->alanalisis_suelo) }}</li>
                             <li><strong>Tipo de suelo:</strong> {{ ucfirst($visita->suelo->tipo_suelo) }}</li>
                         </ul>
                     @else
@@ -201,64 +227,87 @@
         </div>
 
         {{-- Cierre de Visita --}}
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingCierre">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCierre">
-                🔏 Cierre de Visita
-            </button>
-        </h2>
-        <div id="collapseCierre" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
-            <div class="accordion-body">
-                @if ($visita->cierreVisita)
-                    <ul>
-                        <li><strong>Responsable cierre:</strong> {{ $visita->tecnico->name }}</li>
-                        <li><strong>Recomendaciones:</strong> {{ $visita->cierreVisita->recomendaciones ?? 'No se especificaron' }}</li>
-                        <li><strong>Observaciones:</strong> {{ $visita->cierreVisita->observaciones_finales ?? 'No registradas' }}</li>
-                        <li><strong>Fecha:</strong> {{ $visita->cierreVisita->created_at->format('d/m/Y') }}</li>
-                    </ul>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCierre">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCierre">
+                    🔏 Cierre de Visita
+                </button>
+            </h2>
+            <div id="collapseCierre" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+                <div class="accordion-body">
+                    @if ($visita->cierreVisita)
+                        <ul>
+                            {{-- ✅ Nuevos campos de Cierre de Visita --}}
+                            <li><strong>Fecha de Cierre:</strong> {{ $visita->cierreVisita->fecha_cierre ? $visita->cierreVisita->fecha_cierre->format('d/m/Y') : 'N/A' }}</li>
+                            <li><strong>Estado de la Visita:</strong> {{ $visita->cierreVisita->estado_visita ?? 'N/A' }}</li>
+                            <li><strong>Observaciones Finales:</strong> {{ $visita->cierreVisita->observaciones_finales ?? 'No registradas' }}</li>
+                            <li><strong>Recomendaciones:</strong> {{ $visita->cierreVisita->recomendaciones ?? 'No se especificaron' }}</li>
+                            <li><strong>Finalizada En:</strong> {{ $visita->cierreVisita->finalizada_en ? $visita->cierreVisita->finalizada_en->format('d/m/Y H:i') : 'N/A' }}</li>
 
-                    {{-- Firma --}}
-                    @if ($visita->cierreVisita->firma_responsable)
-                        <div class="mt-3">
-                            <strong>📄 Firma Responsable de Visita:</strong><br>
-                            <img src="{{ asset('storage/' . $visita->cierreVisita->firma_responsable) }}" alt="Firma" style="max-height: 120px;">
-                        </div>
-                    @endif
+                            {{-- ✅ Responsable cierre: Asumiendo que 'tecnico' es una relación en el modelo Visita --}}
+                            {{-- y que el ID del técnico está en $visita->cierreVisita->visita_id o similar --}}
+                            {{-- Si el nombre del técnico está en el modelo Visita a través de una relación 'tecnico', puedes usarlo. --}}
+                            {{-- Si no, necesitarías cargar el técnico a través del cierreVisita o pasar su nombre directamente. --}}
+                            <li><strong>Responsable cierre:</strong> {{ $visita->tecnico->name ?? 'N/A' }}</li>
+                        </ul>
 
-                    {{-- Imágenes finales --}}
-                    @if ($visita->cierreVisita->imagenes)
-                        @php
-                            $imagenes = json_decode($visita->cierreVisita->imagenes, true);
-                        @endphp
+                        {{-- Firma Responsable --}}
+                        @if ($visita->cierreVisita->firma_responsable)
+                            <div class="mt-3">
+                                <strong>📄 Firma Responsable de Visita:</strong><br>
+                                {{-- ✅ Usar la cadena Base64 directamente --}}
+                                <img src="{{ $visita->cierreVisita->firma_responsable }}" alt="Firma Responsable" style="max-height: 120px;">
+                            </div>
+                        @endif
 
-                        @if (is_array($imagenes) && count($imagenes))
+                        {{-- Firma Recibe --}}
+                        @if ($visita->cierreVisita->firma_recibe)
+                            <div class="mt-3">
+                                <strong>📄 Firma de quien recibió la visita:</strong><br>
+                                {{-- ✅ Usar la cadena Base64 directamente --}}
+                                <img src="{{ $visita->cierreVisita->firma_recibe }}" alt="Firma Recibe" style="max-height: 120px;">
+                            </div>
+                        @endif
+
+                        {{-- Firma Testigo --}}
+                        @if ($visita->cierreVisita->firma_testigo)
+                            <div class="mt-3">
+                                <strong>📄 Firma del testigo:</strong><br>
+                                {{-- ✅ Usar la cadena Base64 directamente --}}
+                                <img src="{{ $visita->cierreVisita->firma_testigo }}" alt="Firma Testigo" style="max-height: 120px;">
+                            </div>
+                        @endif
+
+                        {{-- Imágenes finales --}}
+                        {{-- ✅ Eliminar json_decode, ya es un array por el cast en el modelo --}}
+                        @if (is_array($visita->cierreVisita->imagenes) && count($visita->cierreVisita->imagenes))
                             <div class="mt-4">
                                 <strong>🖼️ Imágenes finales:</strong><br>
                                 <div class="row">
-                                    @foreach ($imagenes as $img)
+                                    @foreach ($visita->cierreVisita->imagenes as $img) {{-- ✅ Iterar directamente sobre el array --}}
                                         <div class="col-md-4 mb-3">
-                                            <img src="{{ asset('storage/' . $img) }}" class="img-fluid rounded shadow">
+                                            {{-- ✅ Usar la cadena Base64 directamente --}}
+                                            <img src="{{ $img }}" class="img-fluid rounded shadow">
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
                         @endif
+                    @else
+                        <p class="text-muted">No se ha registrado el cierre de visita.</p>
                     @endif
-                @else
-                    <p class="text-muted">No se ha registrado el cierre de visita.</p>
-                @endif
+                </div>
             </div>
         </div>
     </div>
 
 
-
-
-    </div>
+    
     <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Botón de exportación -->
+<br><br>
 <button onclick="descargarPDFConSweet()" class="btn btn-danger">
     📥 Exportar PDF
 </button>
@@ -292,7 +341,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Botón de exportación a Excel -->
-<button onclick="descargarExcelConSweet()" class="btn btn-success">
+<br><br><button onclick="descargarExcelConSweet()" class="btn btn-success">
     📊 Exportar a Excel
 </button>
 
@@ -320,5 +369,6 @@
 
 
     <a href="{{ route('visitas.index') }}" class="btn btn-secondary mt-4">⬅️ Volver</a>
+</div>
 </div>
 @endsection
