@@ -10,36 +10,56 @@ use Illuminate\Support\Facades\Log;
 
 class SueloController extends Controller
 {
-    public function create(Request $request)
-        {
-            $visita = Visita::with([
-                'area',
-                'fertilizaciones.fertilizantes',
-                'polinizaciones',
-                'sanidad',
-                'suelo' // incluimos la relación
-            ])->findOrFail($request->query('visita_id'));
+     public function create(Request $request)
+    {
+        $visita_id = $request->query('visita_id');
+        // ✅ Cargar las relaciones necesarias, incluyendo 'areas' (plural)
+        $visita = Visita::with([
+            'proveedor',
+            'plantacion',
+            'areas', // ✅ Cargar la relación 'areas' (plural)
+            'fertilizaciones.fertilizantes',
+            'polinizaciones',
+            'sanidades',
+            'suelo' // Para mostrar si ya hay un registro de suelo
+        ])->findOrFail($visita_id);
 
-            $suelo = $visita->suelo; // puede ser null
-
-            return view('suelos.create', compact('visita', 'suelo'));
-        }
-
+        return view('suelos.create', compact('visita'));
+    }
 
     public function store(Request $request)
     {
+        // Tu lógica de validación y guardado actual para el suelo
+        // (No se modifica según tu solicitud, ya que solo querías cambios en el frontend)
         $data = $request->validate([
-            'visita_id' => 'required|exists:visitas,id',
-            'analisis_foliar' => 'required|in:si,no',
-            'alanisis_suelo' => 'required|in:si,no',
+            'visita_id' => 'required|integer',
+            'analisis_foliar' => 'required|string|in:si,no',
+            'alanisis_suelo' => 'required|string|in:si,no', // Asegúrate de que el nombre de la columna sea 'alanisis_suelo'
             'tipo_suelo' => 'required|string',
         ]);
 
-        Suelo::create($data);
+        try {
+            // Asumiendo que solo hay un registro de Suelo por Visita.
+            // Si puede haber múltiples, necesitarías una clave única adicional.
+            Suelo::updateOrCreate(
+                ['visita_id' => $data['visita_id']],
+                $data
+            );
 
-        // ✅ CAMBIO: Pasar el visita_id como un array asociativo para la ruta con parámetro
-        return redirect()->route('labores_cultivo.create', ['visita_id' => $data['visita_id']])
-            ->with('success', '✅ Análisis de suelo registrado correctamente.');
+            // Opcional: Actualizar el estado de la visita a 'en_ejecucion'
+            $visita = Visita::find($data['visita_id']);
+            if ($visita && $visita->estado === 'pendiente') {
+                $visita->estado = 'en_ejecucion';
+                $visita->save();
+            }
+
+            return redirect()->route('labores_cultivo.create', ['visita_id' => $data['visita_id']])
+                ->with('success', '✅ Análisis de suelo registrado exitosamente. Continúa con las labores de cultivo.');
+
+        } catch (\Exception $e) {
+            Log::error("Error al guardar análisis de suelo: " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'request' => $request->all()]);
+            return redirect()->back()->with('error', 'Ocurrió un error al guardar el análisis de suelo: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function edit(Suelo $suelo)

@@ -118,9 +118,9 @@ Route::middleware('auth')->group(function () {
     // labores de cultivo rutas 
     Route::get('/labores-cultivo/{visita_id}/create', [LaboresCultivoController::class, 'create'])->name('labores_cultivo.create');
     Route::post('/labores-cultivo', [LaboresCultivoController::class, 'store'])->name('labores_cultivo.store');
-    Route::get('/labores-cultivo/{visita_id}/edit', [LaboresCultivoController::class, 'edit'])->name('labores-cultivo.edit');
+    Route::get('/labores-cultivo/{visita_id}/edit', [LaboresCultivoController::class, 'edit'])->name('labores_cultivo.edit');
     Route::put('/labores-cultivo/{id}', [LaboresCultivoController::class, 'update'])->name('labores-cultivo.update');
-    Route::delete('/labores-cultivo/{id}', [LaboresCultivoController::class, 'destroy'])->name('labores-cultivo.destroy');
+    Route::delete('/labores-cultivo/{id}', [LaboresCultivoController::class, 'destroy'])->name('labores_cultivo.destroy');
 
 
     // rutas evaluacion cosecha campo 
@@ -131,9 +131,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/evaluacion-cosecha/{id}', [EvaluacionCosechaCampoController::class, 'destroy'])->name('evaluacion.destroy');
 
     // rutas para cierre de visitas 
-    Route::get('/cierre-visitas/create', [App\Http\Controllers\CierreVisitaController::class, 'create'])->name('cierre-visitas.create');
-    Route::post('/cierre-visitas', [App\Http\Controllers\CierreVisitaController::class, 'store'])->name('cierre-visitas.store');
-
+    Route::get('/cierre-visitas/{visita_id}/create', [CierreVisitaController::class, 'create'])->name('cierre-visitas.create');
+    Route::post('/cierre-visitas', [CierreVisitaController::class, 'store'])->name('cierre-visitas.store');
+    
     //rutas para exportacion de visitas
     Route::get('/visitas/{id}/exportar/pdf', [VisitaController::class, 'exportarPDF'])->name('visitas.exportar.pdf');
     Route::get('/visitas/{id}/exportar/excel', [VisitaController::class, 'exportarExcel'])->name('visitas.exportar.excel');

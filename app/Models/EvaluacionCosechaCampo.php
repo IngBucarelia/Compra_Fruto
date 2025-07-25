@@ -13,12 +13,14 @@ class EvaluacionCosechaCampo extends Model
 
     protected $fillable = [
         'visita_id',
+        'indexeddb_id',
         'variedad_fruto',
         'cantidad_racimos',
         'verde',
         'maduro',
         'sobremaduro',
         'pedunculo',
+         'conformacion', 
         'observaciones',
     ];
 

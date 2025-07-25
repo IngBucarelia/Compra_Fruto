@@ -2,12 +2,12 @@ const CACHE_NAME = 'fruto-cache-v2';
 const OFFLINE_URL = '/offline.html'; // debe existir este archivo HTML
 
 const ASSETS_TO_CACHE = [
-  OFFLINE_URL, 
+  OFFLINE_URL,  
   '/build/assets/offline-C2TtRujc.js',   
-  '/build/assets/offline-BP5HB3ti.css', 
-  '/favicon.ico',  
+  '/build/assets/offline-BP5HB3ti.css',  
+  '/favicon.ico',   
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css', 
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' 
 ]; 
  
 self.addEventListener('install', event => {

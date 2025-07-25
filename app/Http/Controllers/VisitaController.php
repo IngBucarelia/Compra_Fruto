@@ -139,41 +139,42 @@ class VisitaController extends Controller
         }
 
    public function detalle($id)
-        {
-            $visita = \App\Models\Visita::with([
-                'area',
-                'fertilizaciones.detalles',
-                'polinizaciones',
-                'sanidad',
-                'suelo',
-                'laboresCultivo',           
-                'evaluacionCosechaCampo',
-                 'cierreVisita' 
-            ])->findOrFail($id);
+    {
+        $visita = Visita::with([
+            'areas', // ✅ CAMBIO: Cargar la relación 'areas' (plural)
+            'fertilizaciones.detalles',
+            'polinizaciones',
+            'sanidad',
+            'suelo',
+            'laboresCultivo', // ✅ CAMBIO: Cargar la relación 'laboresCultivo' (plural)
+            'evaluacionCosechaCampo', // ✅ CAMBIO: Cargar la relación 'evaluacionCosechaCampo' (plural)
+            'cierreVisita',
+            'tecnico' // Asegúrate de cargar la relación con el técnico si la usas
+        ])->findOrFail($id);
 
-            return view('visitas.detalle', compact('visita'));
-        }
+        // Opcional: Para depurar los datos que recibes
+        // Log::info('Datos de visita para detalle:', $visita->toArray());
+
+        return view('visitas.detalle', compact('visita'));
+    }
 
 
         
-        public function exportarPDF($id)
+      public function exportarPDF($id)
     {
         $visita = Visita::with([
             'proveedor',
             'plantacion',
-            'area',
-            // ✅ CAMBIO CLAVE: Cargar la relación 'detalles' en lugar de 'fertilizantes'
+            'areas', // ✅ Asegúrate de que sea 'areas' (plural)
             'fertilizaciones.detalles',
             'polinizaciones',
             'sanidad',
             'suelo',
             'laboresCultivo',
             'evaluacionCosechaCampo',
-            'cierreVisita'
+            'cierreVisita',
+            'tecnico'
         ])->findOrFail($id);
-
-        // Si necesitas depurar los datos que llegan al PDF:
-        // dd($visita->toArray());
 
         $pdf = Pdf::loadView('visitas.exportar_pdf', compact('visita'));
         return $pdf->download("detalle_visita_{$id}.pdf");

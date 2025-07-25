@@ -36,10 +36,15 @@ class Visita extends Model
     {
         return $this->belongsTo(Planificacion::class);
     }
-    public function area()
+    public function area() 
     {
-        return $this->hasOne(Area::class);
+        return $this->hasMany(Area::class);
     }
+    // app/Models/Visita.php
+public function areas()
+{
+    return $this->hasMany(Area::class);
+}
 
     public function fertilizaciones()
     {
@@ -69,14 +74,16 @@ class Visita extends Model
 
     public function laboresCultivo()
     {
-        return $this->hasOne(LaboresCultivo::class);
+        return $this->hasMany(LaboresCultivo::class);
     }
+
 
     // app/Models/Visita.php
 
     public function evaluacionCosechaCampo()
     {
-        return $this->hasOne(EvaluacionCosechaCampo::class);
+               return $this->hasMany(EvaluacionCosechaCampo::class);
+
     }
 
     public function cierreVisita()

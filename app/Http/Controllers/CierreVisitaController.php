@@ -11,18 +11,32 @@ use Illuminate\Support\Facades\Log;
 
 class CierreVisitaController extends Controller
 {
-    public function create(Request $request)
+     public function create(int $visita_id) // ✅ CAMBIO CLAVE: Recibir visita_id como parámetro de ruta
     {
-        $visita_id = $request->query('visita_id');
-        $visita = Visita::with('cierreVisita')->findOrFail($visita_id);
+        $visita = Visita::with([
+            'proveedor',
+            'plantacion',
+            'areas', // Cargar áreas como colección
+            'fertilizaciones.detalles', // Cargar detalles de fertilización
+            'polinizaciones',
+            'sanidad',
+            'suelo',
+            'laboresCultivo', // Cargar labores como colección
+            'evaluacionCosechaCampo', // Cargar evaluaciones como colección
+            'cierreVisita' // Cargar el cierre de visita si ya existe
+        ])->findOrFail($visita_id);
 
-        // Verificar si ya existe un cierre para esta visita
-        if ($visita->cierreVisita) {
-            return redirect()->route('visitas.show', $visita->id)
-                ->with('info', '⚠️ Esta visita ya fue finalizada anteriormente.');
+        // Si ya existe un cierre para esta visita, redirigir
+        // Esto es para evitar crear múltiples cierres si la lógica de tu negocio lo prohíbe.
+        // Si permites un único cierre, esta lógica es correcta.
+        // Si permites múltiples cierres, necesitarías un 'indexeddb_id' para la unicidad.
+        $cierreVisitaExistente = CierreVisita::where('visita_id', $visita_id)->first();
+        if ($cierreVisitaExistente) {
+             return redirect()->route('visitas.show', $visita->id)
+                 ->with('info', '⚠️ Esta visita ya fue finalizada anteriormente.');
         }
 
-        return view('cierre_visitas.create', compact('visita'));
+        return view('cierre_visitas.create', compact('visita', 'cierreVisitaExistente'));
     }
 
 

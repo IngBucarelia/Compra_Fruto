@@ -8,7 +8,7 @@ class Fertilizacion extends Model
 {
         protected $table = 'fertilizaciones';
 
-    protected $fillable = ['visita_id', 'fecha_fertilizacion'];
+    protected $fillable = ['visita_id', 'local_id', 'fecha_fertilizacion'];
 
     public function detalles()
         {

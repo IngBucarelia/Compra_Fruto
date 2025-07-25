@@ -6,42 +6,91 @@ use Illuminate\Support\Facades\Log; // Para registrar errores
 use App\Models\Fertilizacion;
 use App\Models\Visita;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FertilizacionController extends Controller
 {
-   public function create(Request $request)
+    public function create(Request $request)
         {
             $visita_id = $request->query('visita_id');
-            $visita = \App\Models\Visita::with(['proveedor', 'fertilizaciones.fertilizantes', 'area'])->findOrFail($visita_id);
+            // Asegúrate de cargar las relaciones anidadas correctamente para la vista
+            $visita = Visita::with([
+                'proveedor',
+                'plantacion',
+                'areas', // Para mostrar la información del área
+                'fertilizaciones.fertilizantes' // Para mostrar los fertilizantes registrados
+            ])->findOrFail($visita_id);
 
             return view('fertilizaciones.create', compact('visita'));
         }
 
-
-public function store(Request $request)
+        public function store(Request $request)
         {
+            // ✅ PASO DE DEPURACIÓN 1: Descomenta esta línea para ver TODOS los datos que llegan.
+            // Si esta línea no se ejecuta, el problema está en el frontend o la ruta.
+            // dd($request->all());
+
             $data = $request->validate([
                 'visita_id' => 'required|exists:visitas,id',
-                'fecha_fertilizacion' => 'required|date',
-                'fertilizantes.*.nombre' => 'required|string',
-                'fertilizantes.*.cantidad' => 'required|integer|min:1'
+                'fecha_fertilizacion' => 'required|date', // Fecha general de la fertilización
+                'fertilizantes' => 'required|array|min:1', // Debe haber al menos un fertilizante
+                'fertilizantes.*.nombre' => 'required|string|max:255', // Nombre del fertilizante (urea, compost, etc.)
+                'fertilizantes.*.cantidad' => 'required|numeric|min:0', // Cantidad, ahora puede ser decimal
+                'fertilizantes.*.fecha_aplicacion' => 'required|date', // Nueva validación para la fecha por fertilizante
+                'fertilizantes.*.unidad_medida' => 'required|string|in:kg,litros,gramos,unidades', // Nueva validación para la unidad de medida
+            ], [
+                // Mensajes de error personalizados para claridad
+                'fertilizantes.*.nombre.required' => 'El nombre del fertilizante es obligatorio para cada entrada.',
+                'fertilizantes.*.cantidad.required' => 'La cantidad del fertilizante es obligatoria para cada entrada.',
+                'fertilizantes.*.cantidad.numeric' => 'La cantidad debe ser un número.',
+                'fertilizantes.*.cantidad.min' => 'La cantidad debe ser al menos :min.',
+                'fertilizantes.*.fecha_aplicacion.required' => 'La fecha de aplicación es obligatoria para cada fertilizante.',
+                'fertilizantes.*.fecha_aplicacion.date' => 'La fecha de aplicación debe ser una fecha válida.',
+                'fertilizantes.*.unidad_medida.required' => 'La unidad de medida es obligatoria para cada fertilizante.',
+                'fertilizantes.*.unidad_medida.in' => 'La unidad de medida seleccionada no es válida.',
             ]);
 
-            $fertilizacion = Fertilizacion::create([
-                'visita_id' => $data['visita_id'],
-                'fecha_fertilizacion' => $data['fecha_fertilizacion'],
-            ]);
-
-            foreach ($data['fertilizantes'] as $fertil) {
-                $fertilizacion->detalles()->create([
-                    'fertilizante' => $fertil['nombre'],
-                    'cantidad' => $fertil['cantidad'],
+            DB::beginTransaction();
+            try {
+                $fertilizacion = Fertilizacion::create([
+                    'visita_id' => $data['visita_id'],
+                    'fecha_fertilizacion' => $data['fecha_fertilizacion'], // Esta es la fecha general de la fertilización
                 ]);
+
+                foreach ($data['fertilizantes'] as $fertil) {
+                    // ✅ PASO DE DEPURACIÓN 2: Descomenta esta línea para ver los datos de CADA fertilizante
+                    // justo antes de intentar crearlo. Si esta línea no se ejecuta, el problema es antes.
+                    // dd($fertil);
+
+                    $fertilizacion->fertilizantes()->create([
+                        'fertilizante' => $fertil['nombre'], // El campo en la BD es 'fertilizante', no 'nombre'
+                        'cantidad' => $fertil['cantidad'],
+                        'fecha_aplicacion' => $fertil['fecha_aplicacion'], // Guardar la nueva fecha
+                        'unidad_medida' => $fertil['unidad_medida'],       // Guardar la nueva unidad
+                    ]);
+                }
+
+                // Opcional: Actualizar el estado de la visita a 'en_ejecucion' si estaba pendiente
+                $visita = Visita::find($data['visita_id']);
+                if ($visita && $visita->estado === 'pendiente') {
+                    $visita->estado = 'en_ejecucion';
+                    $visita->save();
+                }
+
+                DB::commit();
+
+                return redirect()->route('polinizaciones.create', ['visita_id' => $data['visita_id']])
+                    ->with('success', '✅ Fertilización registrada exitosamente. Continúa con la polinización.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error("Error al guardar fertilización: " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'request' => $request->all()]);
+                // ✅ PASO DE DEPURACIÓN 3: Descomenta esta línea para ver el mensaje de error EXACTO en el navegador.
+                // dd($e->getMessage());
+                return redirect()->back()->with('error', 'Ocurrió un error al guardar la fertilización: ' . $e->getMessage())->withInput();
             }
-
-            return redirect()->route('polinizaciones.create', ['visita_id' => $data['visita_id']]);
-
         }
+
         public function edit($id)
         {
             $fertilizacion = Fertilizacion::with('fertilizantes')->findOrFail($id);

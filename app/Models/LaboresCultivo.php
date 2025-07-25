@@ -10,6 +10,7 @@ class LaboresCultivo extends Model
 
     protected $fillable = [
         'visita_id',
+        'tipo_planta',
         'polinizacion',
         'limpieza_calle',
         'limpieza_plato',
@@ -25,6 +26,7 @@ class LaboresCultivo extends Model
         'calidad_fruta',
         'recoleccion_fruta',
         'drenajes',
+        'observaciones'
     ];
 
     public function visita()

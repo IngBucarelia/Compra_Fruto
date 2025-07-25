@@ -10,6 +10,7 @@ class Sanidad extends Model
 
     protected $fillable = [
         'visita_id',
+        'local_id',
         'opsophanes',
         'pudricion_cogollo',
         'raspador',
