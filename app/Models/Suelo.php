@@ -12,7 +12,7 @@ class Suelo extends Model
     protected $fillable = [
         'visita_id',
         'analisis_foliar',
-        'alanisis_suelo',
+        'analisis_suelo',
         'tipo_suelo'
     ];
 

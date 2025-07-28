@@ -36,14 +36,16 @@ class Visita extends Model
     {
         return $this->belongsTo(Planificacion::class);
     }
-    public function area() 
-    {
-        return $this->hasMany(Area::class);
-    }
-    // app/Models/Visita.php
+    // Para relación uno-a-muchos (una visita tiene muchas áreas)
 public function areas()
 {
     return $this->hasMany(Area::class);
+}
+
+// O si es uno-a-uno (una visita tiene un área)
+public function area()
+{
+    return $this->hasOne(Area::class);
 }
 
     public function fertilizaciones()

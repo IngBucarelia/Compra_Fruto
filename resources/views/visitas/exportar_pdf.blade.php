@@ -29,11 +29,24 @@
             margin-bottom: 8px;
             color: #2F4F4F;
         }
+
+        .company-logo {
+            width: 180px; /* Ancho fijo */
+            height: 60px; /* Alto fijo (ajusta según proporciones de tu logo) */
+            object-fit: contain; /* Mantiene las proporciones */
+            margin: 0 auto; /* Centrado horizontal */
+            display: block; /* Para que funcione el margin auto */
+        }
     </style>
 </head>
 <body>
+    
+
     <div class="title-bar">
-        <h1>🌴 Detalle completo de la Visita Técnica</h1>
+        <div class="logo-container">
+        <img src="{{ public_path('images/logo2.png') }}" class="company-logo" alt="Logo de la empresa">
+    </div>
+        <h1> Detalle completo de la Visita Técnica</h1>
         <p><strong>Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre }}</p>
         <p><strong>Plantación:</strong> {{ $visita->plantacion->nombre ?? 'No registrada' }}</p>
         <p><strong>Fecha de visita:</strong> {{ $visita->fecha }}</p>
@@ -41,7 +54,7 @@
 
     {{-- Área --}}
     <div class="section">
-        <h2>📍 Área(s) registrada(s)</h2>
+        <h2> Área(s) registrada(s)</h2>
         @forelse ($visita->areas as $area) {{-- ✅ CAMBIO CLAVE: Iterar sobre la colección 'areas' --}}
             <div class="data-card">
                 <h5>Área #{{ $loop->index + 1 }} - Material: {{ $area->material }}</h5>
@@ -61,7 +74,7 @@
 
     {{-- Fertilizaciones --}}
     <div class="section">
-        <h2>💧 Fertilizaciones</h2>
+        <h2> Fertilizaciones</h2>
         @forelse ($visita->fertilizaciones as $fert)
             <div class="data-card">
                 <p><strong>Fecha:</strong> {{ $fert->fecha_fertilizacion }}</p>
@@ -78,7 +91,7 @@
 
     {{-- Polinizaciones --}}
     <div class="section">
-        <h2>🌸 Polinizaciones</h2>
+        <h2> Polinizaciones</h2>
         @forelse ($visita->polinizaciones as $poli)
             <div class="data-card">
                 <p>
@@ -96,7 +109,7 @@
 
     {{-- Sanidad --}}
     <div class="section">
-        <h2>🧪 Sanidad</h2>
+        <h2> Sanidad</h2>
         @if ($visita->sanidad)
             <div class="data-card">
                 <table>
@@ -120,7 +133,7 @@
 
     {{-- Suelo --}}
     <div class="section">
-        <h2>🧬 Análisis de Suelo</h2>
+        <h2> Análisis de Suelo</h2>
         @if ($visita->suelo)
             <div class="data-card">
                 <table>
@@ -136,7 +149,7 @@
 
     {{-- Labores de Cultivo --}}
     <div class="section">
-        <h2>🌾 Labores de Cultivo</h2>
+        <h2> Labores de Cultivo</h2>
         @forelse ($visita->laboresCultivo as $labor) {{-- ✅ CAMBIO CLAVE: Iterar sobre la colección 'laboresCultivo' --}}
             <div class="data-card">
                 <h5>Labor para: {{ ucfirst($labor->tipo_planta ?? 'N/A') }}</h5>
@@ -151,8 +164,8 @@
                             'fertilizacion' => 'Fertilización',
                             'enmiendas' => 'Enmiendas',
                             'ubicacion_tusa_fibra' => 'Ubicación tusa/fibra',
-                            'ubicacion_hoja' => 'Ubicación hoja',
-                            'lugar_ubicacion_hoja' => 'Lugar ubicación hoja',
+                            'ubicacion_hoja' => 'Ubicación hoja en Barrera',
+                            'lugar_ubicacion_hoja' => 'Ubicación hoja en Plato',
                             'plantas_nectariferas' => 'Plantas nectaríferas',
                             'cobertura' => 'Cobertura',
                             'labor_cosecha' => 'Labor cosecha',
@@ -175,7 +188,7 @@
 
     {{-- Evaluación Cosecha --}}
     <div class="section">
-        <h2>🍌 Evaluación de Cosecha en Campo</h2>
+        <h2> Evaluación de Cosecha en Campo</h2>
         @forelse ($visita->evaluacionCosechaCampo as $evaluacion) {{-- ✅ CAMBIO CLAVE: Iterar sobre la colección 'evaluacionCosechaCampo' --}}
             <div class="data-card">
                 <h5>Evaluación #{{ $loop->index + 1 }} - Variedad: {{ ucfirst($evaluacion->variedad_fruto) }}</h5>
@@ -199,7 +212,7 @@
 
     {{-- Cierre de Visita --}}
     <div class="section">
-        <h2>🔏 Cierre de Visita</h2>
+        <h2> Cierre de Visita</h2>
         @if ($visita->cierreVisita)
             <div class="data-card">
                 <table>

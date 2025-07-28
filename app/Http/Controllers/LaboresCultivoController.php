@@ -81,9 +81,8 @@ class LaboresCultivoController extends Controller
 
             DB::commit();
 
-            return redirect()->route('evaluacion.create', $visitaId)
+            return redirect()->route('evaluacion.create', ['visita_id' => $visitaId])
                 ->with('success', '✅ Registros de labores de cultivo guardados correctamente.');
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             Log::error("Error de validación al guardar labores de cultivo: " . $e->getMessage(), ['errors' => $e->errors(), 'request' => $request->all()]);

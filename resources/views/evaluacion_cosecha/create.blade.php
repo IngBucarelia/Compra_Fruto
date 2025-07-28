@@ -10,8 +10,7 @@
     border-radius: 8px; /* Añadido para consistencia */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Añadido para consistencia */
     max-width: 800px; /* Limita el ancho en pantallas muy grandes */
-    margin-left: auto; /* Centra el contenedor */
-    margin-right: auto; /* Centra el contenedor */
+    margin-left: -35px !important;
     margin-top: 25px; /* Margen superior para separación */
 }
 
@@ -203,10 +202,10 @@
                     📍 Área(s) registrada(s)
                 </button>
             </h2>
-            <div id="collapseArea" class="accordion-collapse collapse show" data-bs-parent="#acordeonEvaluacion">
+            <div id="collapseArea" class="accordion-collapse collapse show" data-bs-parent="#acordeonSuelo">
                 <div class="accordion-body">
-                    @if ($visita->areas->count() > 0)
-                        @foreach ($visita->areas as $area)
+                    @if ($visita->areas->count() > 0) {{-- ✅ Cambiado a $visita->areas->count() --}}
+                        @foreach ($visita->areas as $area) {{-- ✅ Iterar sobre las áreas --}}
                             <div class="area-info-card mb-3">
                                 <h5>Área #{{ $loop->index + 1 }} - Material: {{ $area->material }}</h5>
                                 <ul>
@@ -214,8 +213,20 @@
                                     <li><strong>Estado:</strong> {{ $area->estado }}</li>
                                     <li><strong>Año siembra:</strong> {{ $area->anio_siembra }}</li>
                                     <li><strong>Área (m²):</strong> {{ $area->area }}</li>
-                                    <li><strong>Orden Plantis:</strong> {{ $area->orden_plantis_numero }}</li>
-                                    <li><strong>Estado Orden:</strong> {{ $area->estado_oren_plantis }}</li>
+                                    <li><strong>Área total en finca (Hectáreas):</strong> {{ $area->area_total_finca_hectareas ?? 'N/A' }}</li>
+                                    <li><strong>Número de palmas (Total Finca):</strong> {{ $area->numero_palmas_total_finca ?? 'N/A' }}</li>
+                                    <li><strong>Área de palmas en desarrollo (Hectáreas):</strong> {{ $area->area_palmas_desarrollo_hectareas ?? 'N/A' }}</li>
+                                    <li><strong>Número de palmas (Desarrollo):</strong> {{ $area->numero_palmas_desarrollo ?? 'N/A' }}</li>
+                                    <li><strong>Área de palmas en producción (Hectáreas):</strong> {{ $area->area_palmas_produccion_hectareas ?? 'N/A' }}</li>
+                                    <li><strong>Número de palmas (Producción):</strong> {{ $area->numero_palmas_produccion ?? 'N/A' }}</li>
+                                    <li><strong>Ciclos de Cosecha:</strong> {{ $area->ciclos_cosecha ?? 'N/A' }}</li>
+                                    <li><strong>Producción (Toneladas por Mes):</strong> {{ $area->produccion_toneladas_por_mes ?? 'N/A' }}</li>
+                                    <li><strong>Aplica Orden Plantis:</strong> {{ $area->aplica_orden_plantis ? 'Sí' : 'No' }}</li>
+                                    @if ($area->aplica_orden_plantis)
+                                        <li><strong>Orden Plantis N°:</strong> {{ $area->orden_plantis_numero ?? 'N/A' }}</li>
+                                        <li><strong>Número de Plantas (Orden Plantis):</strong> {{ $area->numero_plantas_orden_plantis ?? 'N/A' }}</li>
+                                        <li><strong>Estado Orden Plantis:</strong> {{ $area->estado_oren_plantis ?? 'N/A' }}</li>
+                                    @endif
                                 </ul>
                                 <div class="d-flex justify-content-end mt-2">
                                     <a href="{{ route('areas.edit', $area->id) }}" class="btn btn-warning btn-sm">✏️ Editar esta área</a>
@@ -223,29 +234,46 @@
                             </div>
                         @endforeach
                     @else
-                        <p class="text-muted">No se ha registrado área.</p>
+                        <p class="text-muted">No se ha registrado información de área.</p>
                     @endif
                 </div>
             </div>
         </div>
 
-        {{-- Fertilizaciones --}}
+         {{-- Fertilizaciones --}}
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingFert">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFert">
-                    💧 Fertilizaciones
+                    💧 Fertilizaciones registradas
                 </button>
             </h2>
-            <div id="collapseFert" class="accordion-collapse collapse" data-bs-parent="#acordeonEvaluacion">
+            <div id="collapseFert" class="accordion-collapse collapse" data-bs-parent="#acordeonSanidad">
                 <div class="accordion-body">
                     @if ($visita->fertilizaciones->count())
                         @foreach ($visita->fertilizaciones as $fertilizacion)
                             <div class="fertilizacion-info-card mb-3">
-                                <strong>Fecha:</strong> {{ $fertilizacion->fecha_fertilizacion }}
-                                <ul>
-                                    @foreach ($fertilizacion->detalles as $f)
-                                        <li>{{ ucfirst($f->fertilizante) }} - {{ $f->cantidad }} kg</li>
-                                    @endforeach
+                                <strong>Fecha General:</strong> {{ $fertilizacion->fecha_fertilizacion }}
+                                <ul class="list-group mt-2">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>Fertilizante</th>
+                                                    <th>Cantidad (kg)</th>
+                                                    <th>Fecha de Aplicación</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($fertilizacion->fertilizantes as $fertilizante)
+                                                    <tr>
+                                                        <td>{{ ucfirst($fertilizante->fertilizante) }}</td>
+                                                        <td class="text-right">{{ number_format($fertilizante->cantidad, 2) }}</td>
+                                                        <td>{{ $fertilizante->fecha_aplicacion ? \Carbon\Carbon::parse($fertilizante->fecha_aplicacion)->format('d/m/Y') : 'N/A' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </ul>
                                 <div class="d-flex justify-content-end mt-2">
                                     <a href="{{ route('fertilizaciones.edit', $fertilizacion->id) }}" class="btn btn-warning btn-sm">✏️ Editar esta fertilización</a>
@@ -263,16 +291,44 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingPol">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePol">
-                    🌸 Polinizaciones
+                    🌸 Polinizaciones registradas
                 </button>
             </h2>
-            <div id="collapsePol" class="accordion-collapse collapse" data-bs-parent="#acordeonEvaluacion">
+            <div id="collapsePol" class="accordion-collapse collapse" data-bs-parent="#acordeonSanidad">
                 <div class="accordion-body">
                     @if ($visita->polinizaciones->count())
                         <ul class="list-group">
-                            @foreach ($visita->polinizaciones as $p)
+                            @foreach ($visita->polinizaciones as $poli)
                                 <li class="list-group-item polinizacion-info-card">
-                                    📅 {{ $p->fecha }} | Pases: <strong>{{ $p->n_pases }}</strong>, Ronda: <strong>{{ $p->ciclos_ronda }}</strong>, ANA: <strong>{{ $p->ana }}</strong> ({{ $p->tipo_ana }}), Talco: <strong>{{ $p->talco }}</strong>
+                                   <div class="table-responsive my-3">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Pases</th>
+                                                <th>Ciclos</th>
+                                                <th>ANA</th>
+                                                <th>Talco</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ \Carbon\Carbon::parse($poli->fecha)->format('d/m/Y') }}</td>
+                                                <td class="text-center">{{ $poli->n_pases }}</td>
+                                                <td class="text-center">{{ $poli->ciclos_ronda }}</td>
+                                                <td>{{ $poli->ana }} ({{ $poli->tipo_ana }})</td>
+                                                <td class="text-center">{{ $poli->talco }}</td>
+                                                <td class="text-center">
+                                                    <a href="{{ route('polinizaciones.edit', $poli->id) }}" 
+                                                    class="btn btn-warning btn-sm">
+                                                    ✏️ Editar
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                                 </li>
                             @endforeach
                         </ul>
@@ -282,6 +338,7 @@
                 </div>
             </div>
         </div>
+
 
         {{-- Sanidad --}}
         <div class="accordion-item">

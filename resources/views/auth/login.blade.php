@@ -89,6 +89,7 @@
 <body>
     <!-- El HTML se mantiene igual -->
     <div class="login-container">
+        
        
         <h1 style="text-align: center; 
                     
@@ -102,7 +103,15 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
         <img style=" margin-bottom:-40px;"  src="/images/logo.png" alt="Logo Empresa" class="logo">
          <h3 style="color: wheat">Ingrese al Sistema</h3>
         
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('login') }}"> 
+            @if($errors->any())
+        <div class="alert alert-danger">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+    
             @csrf
             <div class="input-group">
                 <label for="email" style="color: rgb(242, 231, 211)">Correo Institucional</label>
@@ -112,6 +121,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
                 <label for="password" style="color: rgb(246, 236, 216)">Contraseña</label>
                 <input style="border-radius: 15px;" id="password" type="password" name="password" required>
             </div>
+            
             <button style="border-radius: 30px;" type="submit" class="btn-login">Ingresar</button>
         </form>
 
@@ -119,5 +129,67 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             <a href="{{ route('register') }}">¿No tienes cuenta? Regístrate</a>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // Detectar si es móvil
+    const isMobile = /mobile/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        axios.defaults.withCredentials = true;
+        
+        // Configurar CSRF para móviles
+        axios.get('/sanctum/csrf-cookie').then(() => {
+            console.log('CSRF configurado para móvil');
+            
+            // Interceptar el envío del formulario
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                axios.post(this.action, formData, {
+                    withCredentials: true,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                .then(response => {
+                    // Verificar si hay redirección en la respuesta
+                    if (response.data.redirect) {
+                        // Forzar recarga completa para móviles
+                        window.location.href = response.data.redirect;
+                        window.location.reload(true);
+                    } else {
+                        // Redirección por defecto si no viene en la respuesta
+                        window.location.href = '/dashboard';
+                    }
+                })
+                .catch(error => {
+                    // Mostrar errores de autenticación
+                    let errorMessage = 'Error de autenticación';
+                    if (error.response && error.response.data && error.response.data.error) {
+                        errorMessage = error.response.data.error;
+                    }
+                    
+                    // Mostrar mensaje de error en el formulario
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger';
+                    errorDiv.textContent = errorMessage;
+                    
+                    // Limpiar errores anteriores
+                    const oldError = document.querySelector('.alert-danger');
+                    if (oldError) oldError.remove();
+                    
+                    // Insertar nuevo mensaje
+                    document.querySelector('.login-container').prepend(errorDiv);
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error configurando CSRF:', error);
+        });
+    }
+</script>
 </body>
 </html>

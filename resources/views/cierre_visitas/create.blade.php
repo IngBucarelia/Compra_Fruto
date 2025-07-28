@@ -142,12 +142,21 @@
 
         {{-- Galería de imágenes --}}
         <div class="mb-3">
-            <h5>📸 Fotos de la visita (opcional)</h5>
-            <input type="file" id="imagenesInput" class="form-control" accept="image/*" capture="environment" multiple />
-            <div id="imagenesPreview" class="row mt-3">
-                {{-- Las imágenes se previsualizarán aquí --}}
-            </div>
+        <h5>📸 Fotos de la visita (opcional)</h5>
+        <div class="d-flex gap-2 mb-2">
+            <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('imagenesInput').click()">
+                <i class="fas fa-camera"></i> Tomar foto
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('galeriaInput').click()">
+                <i class="fas fa-images"></i> Seleccionar de galería
+            </button>
         </div>
+        <!-- Input para cámara -->
+        <input type="file" id="imagenesInput" class="d-none" accept="image/*" capture="environment" multiple />
+        <!-- Input para galería -->
+        <input type="file" id="galeriaInput" class="d-none" accept="image/*" multiple />
+        <div id="imagenesPreview" class="row mt-3"></div>
+    </div>
 
         <button type="submit" class="btn btn-success">✅ Finalizar visita</button>
     </form>

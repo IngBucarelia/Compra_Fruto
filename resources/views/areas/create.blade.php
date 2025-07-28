@@ -31,12 +31,42 @@
         gap: 10px;
         margin-bottom: 30px;
     }
-    @media (min-width: 768px) {
+    @media (max-width: 968px) {
         .button-group-top {
             flex-direction: row;
             justify-content: flex-start;
         }
+
+         .container.offline-form-container {
+        padding: 15px;
+            margin-top: 15px;
+            border-radius: 0;
+            box-shadow: none;
+            width: 100%;
+            max-width: none;
+            margin-left: -35px !important;
     }
+
+    .title{
+    text-align: center;
+    font-family: Arial Black;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fdffe5;
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    margin-bottom: 25px;
+}
+    }
+
+    .title{
+    text-align: center;
+    font-family: Arial Black;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fdffe5;
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    margin-bottom: 25px;
+}
 
     /* Estilos para los formularios de área dinámicos */
     .area-form-card {
@@ -95,14 +125,14 @@
                 @endforeach
             </ul>
         </div>
-    @endif
+    @endif 
     <h3 class="title">🌴🌴 Información de plantación - Área 🌴🌴</h3>
     <div class="info-visita mb-4">
         <h3>
             <br>
-            Fecha Visita: <span class="text-primary">{{ $visita->fecha}}</span> <br>
-            Proveedor:<span class="text-primary"> {{ $visita->proveedor->proveedor_nombre }} </span><br>
-            Plantación: <span class="text-primary">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
+            Fecha Visita: <span style="color: wheat" >{{ $visita->fecha}}</span> <br>
+            Proveedor:<span style="color: wheat" > {{ $visita->proveedor->proveedor_nombre }} </span><br>
+            Plantación: <span style="color: wheat">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
         </h3>
     </div>
 

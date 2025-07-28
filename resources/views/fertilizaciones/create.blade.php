@@ -4,7 +4,15 @@
 <style>
     /* Puedes pegar el contenido del bloque 'Estilos CSS para Formularios Responsivos (Reutilizable)' aquí
        si no lo tienes en un archivo CSS global enlazado en layouts/app.blade.php. */
-
+    .container {
+        background-color: rgba(129, 165, 114, 0.929);
+        padding: 20px;
+        border-radius: 8px; /* Añadido para consistencia */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Añadido para consistencia */
+        max-width: 800px; /* Limita el ancho en pantallas muy grandes */
+        margin-left: -35px !important; /* Centra el contenedor */
+        margin-top: 25px; /* Margen superior para separación */
+    }
     /* Estilos específicos para este formulario si los necesitas */
     .container.form-container { /* Nueva clase para el contenedor principal */
         background-color: rgba(129, 165, 114, 0.929);
@@ -12,8 +20,7 @@
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         max-width: 800px; /* Limita el ancho en pantallas muy grandes */
-        margin-left: auto; /* Centra el contenedor */
-        margin-right: auto; /* Centra el contenedor */
+        
         margin-top: 25px;
     }
 
@@ -99,15 +106,16 @@
     }
 
     /* Media Queries para Responsividad (móviles) */
-    @media (max-width: 767.98px) {
-        .container.form-container {
-            padding: 15px;
+    @media (max-width: 967.98px) {
+        .container.offline-form-container {
+        padding: 15px;
             margin-top: 15px;
             border-radius: 0;
             box-shadow: none;
             width: 100%;
             max-width: none;
-        }
+            margin-left: -35px !important;
+    }
         .title {
             font-size: 1.8em;
             margin-bottom: 20px;

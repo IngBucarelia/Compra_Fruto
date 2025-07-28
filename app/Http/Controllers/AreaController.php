@@ -24,12 +24,17 @@ class AreaController extends Controller
      * Show the form for creating a new resource.
      */
     public function create(Request $request)
-        {
-            $visita_id = $request->query('visita_id');
-            $visita = \App\Models\Visita::findOrFail($visita_id);
-
-            return view('areas.create', compact('visita'));
-        }
+    {
+        $visita_id = $request->query('visita_id');
+        
+        $visita = Visita::with([
+            'proveedor', 
+            'area', // Ahora será un solo modelo, no una colección
+            'fertilizaciones.fertilizantes'
+        ])->findOrFail($visita_id);
+        
+        return view('areas.create', compact('visita'));
+    }
 
 
     /**

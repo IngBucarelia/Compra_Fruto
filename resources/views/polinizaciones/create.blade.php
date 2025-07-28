@@ -38,7 +38,7 @@
     }
 </style>
 <div class="container" >
-<h3 class="title">🌴 Información de previa plantación - Polinización 🌴</h3><h3><br><br>Fecha Visita: <span style="color: wheat">{{ $visita->fecha}}</span> <br> Proveedor:<span style="color: wheat"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
+<h3 class="title">🌸 Información de previa plantación - Polinización 🌸</h3><h3><br><br>Fecha Visita: <span style="color: wheat">{{ $visita->fecha}}</span> <br> Proveedor:<span style="color: wheat"> {{ $visita->proveedor->proveedor_nombre }} </span><br> Plantación:
     <span style="color: wheat">{{ $visita->plantacion->nombre ?? 'Sin nombre de plantación' }}</span>
 </h3>
 <form id="formRedireccion" class="mt-4">
@@ -73,23 +73,42 @@
     <div class="accordion mb-4" id="accordionPolinizacion" style="background-color: darkseagreen !important">
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingArea">
-                <button style="background-color: darkseagreen !important; color:aliceblue" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArea" >
-                    📍 Área registrada
+                <button style="background-color: darkseagreen !important; color:aliceblue" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArea" aria-controls="collapseArea">
+                    📍 Información del Área(s)
                 </button>
             </h2>
-            <div id="collapseArea" class="accordion-collapse collapse show" data-bs-parent="#accordionPolinizacion">
+            <div id="collapseArea" class="accordion-collapse collapse show" aria-labelledby="headingArea" data-bs-parent="#accordionArea">
                 <div class="accordion-body" style="background-color: rgb(209, 241, 209) !important; color:rgb(31, 32, 34)">
-                    @if ($visita->area)
-                        <ul>
-                            <li><strong>Material:</strong> {{ $visita->area->material }}</li>
-                            <li><strong>Estado:</strong> {{ $visita->area->estado }}</li>
-                            <li><strong>Año siembra:</strong> {{ $visita->area->anio_siembra }}</li>
-                            <li><strong>Área (m²):</strong> {{ $visita->area->area }}</li>
-                            <li><strong>Orden Plantis N°:</strong> {{ $visita->area->orden_plantis_numero }}</li>
-                            <li><strong>Estado orden Plantis:</strong> {{ $visita->area->estado_orden_plantis }}</li>
-                        </ul>
+                    @if ($visita->areas->count() > 0)
+                        @foreach ($visita->areas as $area)
+                            <div class="area-info-card mb-3">
+                                <h5>Área - Material: {{ $area->material }}</h5>
+                                <ul>
+                                    <li><strong>Estado:</strong> {{ $area->estado }}</li>
+                                    <li><strong>Año siembra:</strong> {{ $area->anio_siembra }}</li>
+                                    <li><strong>Área (m²):</strong> {{ $area->area }}</li>
+                                    <li><strong>Área Total Finca (Ha):</strong> {{ $area->area_total_finca_hectareas ?? 'N/A' }}</li>
+                                    <li><strong>Palmas Total Finca:</strong> {{ $area->numero_palmas_total_finca ?? 'N/A' }}</li>
+                                    <li><strong>Área Palmas Desarrollo (Ha):</strong> {{ $area->area_palmas_desarrollo_hectareas ?? 'N/A' }}</li>
+                                    <li><strong>Palmas Desarrollo:</strong> {{ $area->numero_palmas_desarrollo ?? 'N/A' }}</li>
+                                    <li><strong>Área Palmas Producción (Ha):</strong> {{ $area->area_palmas_produccion_hectareas ?? 'N/A' }}</li>
+                                    <li><strong>Palmas Producción:</strong> {{ $area->numero_palmas_produccion ?? 'N/A' }}</li>
+                                    <li><strong>Ciclos de Cosecha:</strong> {{ $area->ciclos_cosecha ?? 'N/A' }}</li>
+                                    <li><strong>Producción Toneladas/Mes:</strong> {{ $area->produccion_toneladas_por_mes ?? 'N/A' }}</li>
+                                    <li><strong>Aplica Orden Plantis:</strong> {{ $area->aplica_orden_plantis ? 'Sí' : 'No' }}</li>
+                                    @if ($area->aplica_orden_plantis)
+                                        <li><strong>Orden Plantis N°:</strong> {{ $area->orden_plantis_numero ?? 'N/A' }}</li>
+                                        <li><strong>Número de Plantas (Orden Plantis):</strong> {{ $area->numero_plantas_orden_plantis ?? 'N/A' }}</li>
+                                        <li><strong>Estado Orden Plantis:</strong> {{ $area->estado_oren_plantis ?? 'N/A' }}</li>
+                                    @endif
+                                </ul>
+                                <div class="d-flex justify-content-end mt-2">
+                                    <a href="{{ route('areas.edit', $area->id) }}" class="btn btn-warning btn-sm">✏️ Editar esta área</a>
+                                </div>
+                            </div>
+                        @endforeach
                     @else
-                        <p class="text-muted">No hay información de área registrada.</p>
+                        <p class="text-muted">No se ha registrado área para esta visita.</p>
                     @endif
                 </div>
             </div>
@@ -107,14 +126,29 @@
                     @if ($visita->fertilizaciones->count())
                         @foreach ($visita->fertilizaciones as $fertilizacion)
                             <div class="mb-3">
-                                <h6>📅 {{ $fertilizacion->fecha_fertilizacion }}</h6>
+                                <h6>📅 Fecha Registro <br> {{ $fertilizacion->fecha_fertilizacion }}</h6>
                                 <ul class="list-group">
-                                    @foreach ($fertilizacion->fertilizantes as $fertilizante)
-                                        <li class="list-group-item d-flex justify-content-between">
-                                            {{ ucfirst($fertilizante->fertilizante) }}
-                                            <span>{{ $fertilizante->cantidad }} kg</span>
-                                        </li>
-                                    @endforeach
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>Fertilizante</th>
+                                                    <th>Cantidad (kg)</th>
+                                                    <th>Fecha de Aplicación</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($fertilizacion->fertilizantes as $fertilizante)
+                                                    <tr>
+                                                        <td>{{ ucfirst($fertilizante->fertilizante) }}</td>
+                                                        <td class="text-right">{{ number_format($fertilizante->cantidad, 2) }}</td>
+                                                        <td>{{ $fertilizante->fecha_aplicacion ? \Carbon\Carbon::parse($fertilizante->fecha_aplicacion)->format('d/m/Y') : 'N/A' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </ul>
                             </div>
                         @endforeach
@@ -172,9 +206,9 @@
     <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-secondary mt-4">
         ⬅️ Volver al detalle de la visita
     </a>
-     <a href="{{ route('sanidades.create', $visita->id) }}" class="btn btn-secondary mt-4">
-        ⬅️ Pasar a Sanidad Directamente
-    </a>
+    <!--<a href="{{ route('sanidades.create', $visita->id) }}" class="btn btn-secondary mt-4">
+        ⬅️ Pasar a Sanidad Directamente 
+    </a> -->
 
     @if (session('success'))
         <div class="alert alert-success mt-3">
