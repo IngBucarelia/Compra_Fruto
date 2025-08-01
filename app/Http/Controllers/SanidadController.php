@@ -36,7 +36,7 @@ public function store(Request $request)
             'raspador' => 'nullable|integer|min:0|max:100',
             'palmarum' => 'nullable|integer|min:0|max:100',
             'strategus' => 'nullable|integer|min:0|max:100',
-            'leptoparsha' => 'nullable|integer|min:0|max:100',
+            'leptopharsa' => 'nullable|integer|min:0|max:100',
             'pestalotiopsis' => 'nullable|integer|min:0|max:100',
             'pudricion_basal' => 'nullable|integer|min:0|max:100',
             'pudricion_estipe' => 'nullable|integer|min:0|max:100',
@@ -77,7 +77,7 @@ public function store(Request $request)
                 'raspador' => 'nullable|integer|min:0|max:100',
                 'palmarum' => 'nullable|integer|min:0|max:100',
                 'strategus' => 'nullable|integer|min:0|max:100',
-                'leptoparsha' => 'nullable|integer|min:0|max:100',
+                'leptopharsa' => 'nullable|integer|min:0|max:100',
                 'pestalotiopsis' => 'nullable|integer|min:0|max:100',
                 'pudricion_basal' => 'nullable|integer|min:0|max:100',
                 'pudricion_estipe' => 'nullable|integer|min:0|max:100',
@@ -106,7 +106,6 @@ public function store(Request $request)
             // ✅ AÑADIDO: Validación para 'local_id'
             $request->validate([
                 'visita_id' => 'required|integer|exists:visitas,id', // Asegura que la visita exista
-                'local_id' => 'required|string|max:36', // UUID es de 36 caracteres
                 'opsophanes' => 'nullable|integer|min:0|max:100',
                 'pudricion_cogollo' => 'nullable|integer|min:0|max:100',
                 'raspador' => 'nullable|integer|min:0|max:100',
@@ -125,7 +124,7 @@ public function store(Request $request)
                 // ✅ CAMBIO CLAVE: Usar 'local_id' para buscar y actualizar o crear el registro
                 // Esto permite manejar múltiples registros de sanidad por visita y la edición offline.
                 Sanidad::updateOrCreate(
-                    ['local_id' => $data['local_id']], // Clave única para buscar
+                     // Clave única para buscar
                     $data // Datos a crear o actualizar
                 );
 
@@ -145,7 +144,7 @@ public function store(Request $request)
                 // ✅ CORRECCIÓN: Evaluar la expresión ?? fuera de la interpolación de cadena
                 $logLocalId = $data['local_id'] ?? 'N/A';
                 Log::error("Error al guardar Sanidad (ID Local: {$logLocalId}): " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'data' => $data]);
-                return response()->json(['message' => 'Error interno del servidor al sincronizar Sanidad.', 'error' => $e->getMessage()], 500);
+                return response()->json(['message' => 'Error internoeeeeee del servidor al sincronizar Sanidad.', 'error' => $e->getMessage()], 500);
             }
 
         } catch (\Illuminate\Validation\ValidationException $e) {

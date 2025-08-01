@@ -167,89 +167,107 @@ class EvaluacionCosechaCampoController extends Controller
         }
     }
 
-        public function syncOffline(Request $request)
-    {
-        // Obtiene todos los datos JSON de la petición.
-        // Se espera un array de objetos JSON, donde cada objeto es un registro de evaluación.
-        $data = $request->json()->all();
+       public function syncOffline(Request $request)
+        {
+            $data = $request->json()->all();
+            
+            Log::info('Datos recibidos para evaluacion_cosecha:', [
+                'raw_data' => $request->getContent(), 
+                'parsed_data' => $data
+            ]);
 
-        // ✅ MUY IMPORTANTE PARA DEPURAR: Revisa este log en storage/logs/laravel.log
-        // para ver EXACTAMENTE qué datos está recibiendo el controlador.
-        Log::info('Datos recibidos para sincronizar Evaluación de Cosecha de Campo (offline):', $data);
+            // Validar que sea un array
+            if (!is_array($data)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Formato inválido. Se esperaba un array de evaluaciones.'
+                ], 422);
+            }
 
-        // Validar que el dato recibido sea un array y que cada elemento cumpla las reglas.
-        if (!is_array($data)) {
-            Log::error("Datos de evaluación de cosecha no son un array.", ['data' => $data]);
-            return response()->json(['message' => 'Formato de datos inválido. Se esperaba un array de evaluaciones.'], 422);
-        }
+            DB::beginTransaction();
+            try {
+                $sincronizados = 0;
+                $errores = [];
 
-        DB::beginTransaction();
-        try {
-            $sincronizadosCount = 0;
-            $erroresValidacion = [];
+                foreach ($data as $index => $evaluacion) {
+                    // Validar estructura básica
+                    if (!is_array($evaluacion)) {
+                        $errores[] = [
+                            'index' => $index,
+                            'error' => 'El registro no es un array válido'
+                        ];
+                        continue;
+                    }
 
-            foreach ($data as $index => $evaluacionEntry) {
-                // Validar cada registro de evaluación individualmente
-                $validator = Validator::make($evaluacionEntry, [
-                    'visita_id' => 'required|integer|exists:visitas,id',
-                    'indexeddb_id' => 'required|string', // ID único generado en el frontend (IndexedDB)
-                    'variedad_fruto' => 'required|string|in:guinense,hibrido',
-                    'cantidad_racimos' => 'required|integer|min:0',
-                    'verde' => 'nullable|integer|min:0|max:100',
-                    'maduro' => 'nullable|integer|min:0|max:100',
-                    'sobremaduro' => 'nullable|integer|min:0|max:100',
-                    'pedunculo' => 'nullable|integer|min:0|max:100',
-                    'conformacion' => 'nullable|string|max:255', // ✅ NUEVO CAMPO: Conformación
-                    'observaciones' => 'nullable|string|max:1000',
+                    // Validar campos requeridos
+                    $validator = Validator::make($evaluacion, [
+                        'visita_id' => 'required|exists:visitas,id',
+                        'indexeddb_id' => 'required|string',
+                        'variedad_fruto' => 'required|in:guinense,hibrido',
+                        'cantidad_racimos' => 'required|integer|min:0',
+                        'verde' => 'nullable|integer|min:0|max:100',
+                        'maduro' => 'nullable|integer|min:0|max:100',
+                        'sobremaduro' => 'nullable|integer|min:0|max:100',
+                        'pedunculo' => 'nullable|integer|min:0|max:100',
+                        'conformacion' => 'nullable|string|max:255',
+                        'observaciones' => 'nullable|string|max:1000'
+                    ]);
+
+                    if ($validator->fails()) {
+                        $errores[] = [
+                            'index' => $index,
+                            'error' => 'Error de validación',
+                            'errors' => $validator->errors()->all()
+                        ];
+                        continue;
+                    }
+
+                    // Preparar datos para guardar
+                    $evaluacionData = [
+                        'visita_id' => $evaluacion['visita_id'],
+                        'indexeddb_id' => $evaluacion['indexeddb_id'],
+                        'variedad_fruto' => $evaluacion['variedad_fruto'],
+                        'cantidad_racimos' => $evaluacion['cantidad_racimos'],
+                        'verde' => $evaluacion['verde'] ?? null,
+                        'maduro' => $evaluacion['maduro'] ?? null,
+                        'sobremaduro' => $evaluacion['sobremaduro'] ?? null,
+                        'pedunculo' => $evaluacion['pedunculo'] ?? null,
+                        'conformacion' => $evaluacion['variedad_fruto'] === 'hibrido' ? ($evaluacion['conformacion'] ?? null) : null,
+                        'observaciones' => $evaluacion['observaciones'] ?? null,
+                        'created_at' => $evaluacion['created_at'] ?? now(),
+                        'updated_at' => $evaluacion['updated_at'] ?? now()
+                    ];
+
+                    // Guardar o actualizar
+                    EvaluacionCosechaCampo::updateOrCreate(
+                        ['indexeddb_id' => $evaluacion['indexeddb_id']],
+                        $evaluacionData
+                    );
+                    
+                    $sincronizados++;
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sincronización completada',
+                    'sincronizados' => $sincronizados,
+                    'errores' => $errores
                 ]);
 
-                if ($validator->fails()) {
-                    $erroresValidacion[] = [
-                        'index' => $index,
-                        'data' => $evaluacionEntry,
-                        'errors' => $validator->errors()->all()
-                    ];
-                    Log::warning("Error de validación para registro de evaluación #{$index}:", $validator->errors()->all());
-                    continue; // Saltar a la siguiente evaluación si falla la validación
-                }
-
-                // Asegurarse de que 'conformacion' sea null si no es 'hibrido'
-                // Esto es importante si el campo no se envía en el frontend para 'guinense'
-                if (isset($evaluacionEntry['variedad_fruto']) && $evaluacionEntry['variedad_fruto'] !== 'hibrido') {
-                    $evaluacionEntry['conformacion'] = null;
-                }
-
-                // Utiliza updateOrCreate para insertar o actualizar el registro.
-                // La clave para buscar el registro existente es 'visita_id' y 'indexeddb_id'.
-                EvaluacionCosechaCampo::updateOrCreate(
-                    [
-                        'visita_id' => $evaluacionEntry['visita_id'],
-                        'indexeddb_id' => $evaluacionEntry['indexeddb_id'] // ✅ Usar indexeddb_id para unicidad
-                    ],
-                    $evaluacionEntry // Todos los datos validados
-                );
-                $sincronizadosCount++;
-            }
-
-            DB::commit();
-
-            if (count($erroresValidacion) > 0) {
-                Log::error("Algunos registros de Evaluación de Cosecha fallaron la validación durante la sincronización.", ['errores' => $erroresValidacion]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error("Error sincronizando evaluaciones: " . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
                 return response()->json([
-                    'message' => "Se sincronizaron {$sincronizadosCount} registros. Algunos registros tuvieron errores de validación.",
-                    'sincronizados' => $sincronizadosCount,
-                    'errores_validacion' => $erroresValidacion
-                ], 200); // Devuelve 200 OK pero con advertencias
+                    'success' => false,
+                    'message' => 'Error al sincronizar evaluaciones',
+                    'error' => $e->getMessage()
+                ], 500);
             }
-
-            Log::info('Todos los registros de Evaluación de Cosecha sincronizados con éxito.', ['visita_id' => $data[0]['visita_id'] ?? 'N/A', 'count' => $sincronizadosCount]);
-            return response()->json(['message' => "Evaluaciones de Cosecha sincronizadas con éxito. Total: {$sincronizadosCount} registros."]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error inesperado al sincronizar Evaluación de Cosecha: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Error interno del servidor al sincronizar Evaluación de Cosecha.', 'error' => $e->getMessage()], 500);
         }
-    }
 }
 

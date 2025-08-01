@@ -186,94 +186,113 @@ class LaboresCultivoController extends Controller
                 // controllador offline
 
                 
-           public function syncOffline(Request $request)
-    {
-        // Obtiene todos los datos JSON de la petición.
-        // Se espera un array de objetos JSON, donde cada objeto es un registro de labor.
-        $data = $request->json()->all();
+          public function syncOffline(Request $request)
+                {
+                    // Obtener datos JSON
+                    $data = $request->json()->all();
+                    
+                    Log::info('Datos recibidos para sincronizar Labores de Cultivo (offline):', [
+                        'raw_data' => $request->getContent(), 
+                        'parsed_data' => $data
+                    ]);
 
-        // ✅ MUY IMPORTANTE PARA DEPURAR: Revisa este log en storage/logs/laravel.log
-        // para ver EXACTAMENTE qué datos está recibiendo el controlador.
-        Log::info('Datos recibidos para sincronizar Labores de Cultivo (offline):', $data);
+                    // Validar que sea un array
+                    if (!is_array($data)) {
+                        return response()->json([
+                            'message' => 'Formato inválido. Se esperaba un array de labores.'
+                        ], 422);
+                    }
 
-        // Validar que el dato recibido sea un array y que cada elemento cumpla las reglas.
-        // Asumimos que $data es un array de objetos de labor.
-        if (!is_array($data)) {
-            Log::error("Datos de labores de cultivo no son un array.", ['data' => $data]);
-            return response()->json(['message' => 'Formato de datos inválido. Se esperaba un array de labores.'], 422);
-        }
+                    DB::beginTransaction();
+                    try {
+                        $sincronizadosCount = 0;
+                        $erroresValidacion = [];
 
-        DB::beginTransaction();
-        try {
-            $sincronizadosCount = 0;
-            $erroresValidacion = [];
+                        foreach ($data as $index => $labor) {
+                            // Validar estructura básica
+                            if (!is_array($labor)) {
+                                $erroresValidacion[] = [
+                                    'index' => $index,
+                                    'error' => 'El registro no es un array válido'
+                                ];
+                                continue;
+                            }
 
-            foreach ($data as $index => $laborEntry) {
-                // Validar cada registro de labor individualmente
-                $validator = Validator::make($laborEntry, [
-                    'visita_id' => 'required|integer|exists:visitas,id',
-                    'indexeddb_id' => 'required|string', // ID único generado en el frontend (IndexedDB)
-                    'tipo_planta' => 'required|string|in:guinense,hibrido',
-                    'polinizacion' => 'nullable|integer|min:0|max:100',
-                    'limpieza_calle' => 'nullable|integer|min:0|max:100',
-                    'limpieza_plato' => 'nullable|integer|min:0|max:100',
-                    'poda' => 'nullable|integer|min:0|max:100',
-                    'fertilizacion' => 'nullable|integer|min:0|max:100',
-                    'enmiendas' => 'nullable|integer|min:0|max:100',
-                    'ubicacion_tusa_fibra' => 'nullable|integer|min:0|max:100',
-                    'ubicacion_hoja' => 'nullable|integer|min:0|max:100',
-                    'lugar_ubicacion_hoja' => 'nullable|integer|min:0|max:100',
-                    'plantas_nectariferas' => 'nullable|integer|min:0|max:100',
-                    'cobertura' => 'nullable|integer|min:0|max:100',
-                    'labor_cosecha' => 'nullable|integer|min:0|max:100',
-                    'calidad_fruta' => 'nullable|integer|min:0|max:100',
-                    'recoleccion_fruta' => 'nullable|integer|min:0|max:100',
-                    'drenajes' => 'nullable|integer|min:0|max:100',
-                    'observaciones' => 'nullable|string|max:1000', // Campo de observaciones generales
-                ]);
+                            // Validar campos requeridos
+                            $validator = Validator::make($labor, [
+                                'visita_id' => 'required|integer|exists:visitas,id',
+                                'indexeddb_id' => 'required|string',
+                                'tipo_planta' => 'required|string|in:guinense,hibrido',
+                                'observaciones' => 'nullable|string|max:1000',
+                                // Validar campos numéricos opcionales
+                                'polinizacion' => 'nullable|integer|min:0|max:100',
+                                'limpieza_calle' => 'nullable|integer|min:0|max:100',
+                                // ... agregar validación para los demás campos numéricos
+                            ]);
 
-                if ($validator->fails()) {
-                    $erroresValidacion[] = [
-                        'index' => $index,
-                        'data' => $laborEntry,
-                        'errors' => $validator->errors()->all()
-                    ];
-                    Log::warning("Error de validación para registro de labor #{$index}:", $validator->errors()->all());
-                    continue; // Saltar a la siguiente labor si falla la validación
+                            if ($validator->fails()) {
+                                $erroresValidacion[] = [
+                                    'index' => $index,
+                                    'error' => 'Error de validación',
+                                    'errors' => $validator->errors()->all()
+                                ];
+                                continue;
+                            }
+
+                            // Preparar datos para guardar
+                            $laborData = [
+                                'visita_id' => $labor['visita_id'],
+                                'indexeddb_id' => $labor['indexeddb_id'],
+                                'tipo_planta' => $labor['tipo_planta'],
+                                'observaciones' => $labor['observaciones'] ?? null,
+                                // Procesar campos numéricos
+                                'polinizacion' => isset($labor['polinizacion']) ? (int)$labor['polinizacion'] : null,
+                                'limpieza_calle' => isset($labor['limpieza_calle']) ? (int)$labor['limpieza_calle'] : null,
+                                'limpieza_plato' => isset($labor['limpieza_plato']) ? (int)$labor['limpieza_plato'] : null,
+                                'poda' => isset($labor['poda']) ? (int)$labor['poda'] : null,
+                                'fertilizacion' => isset($labor['fertilizacion']) ? (int)$labor['fertilizacion'] : null,
+                                'enmiendas' => isset($labor['enmiendas']) ? (int)$labor['enmiendas'] : null,
+                                'ubicacion_tusa_fibra' => isset($labor['ubicacion_tusa_fibra']) ? (int)$labor['ubicacion_tusa_fibra'] : null,
+                                'ubicacion_hoja' => isset($labor['ubicacion_hoja']) ? (int)$labor['ubicacion_hoja'] : null,
+                                'lugar_ubicacion_hoja' => isset($labor['lugar_ubicacion_hoja']) ? (int)$labor['lugar_ubicacion_hoja'] : null,
+                                'plantas_nectariferas' => isset($labor['plantas_nectariferas']) ? (int)$labor['plantas_nectariferas'] : null,
+                                'cobertura' => isset($labor['cobertura']) ? (int)$labor['cobertura'] : null,
+                                'labor_cosecha' => isset($labor['labor_cosecha']) ? (int)$labor['labor_cosecha'] : null,
+                                'calidad_fruta' => isset($labor['calidad_fruta']) ? (int)$labor['calidad_fruta'] : null,
+                                'recoleccion_fruta' => isset($labor['recoleccion_fruta']) ? (int)$labor['recoleccion_fruta'] : null,
+                                'drenajes' => isset($labor['drenajes']) ? (int)$labor['drenajes'] : null,
+                                // ... procesar los demás campos numéricos de la misma forma
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+
+                            // Guardar o actualizar
+                            LaboresCultivo::updateOrCreate(
+                                ['indexeddb_id' => $labor['indexeddb_id']],
+                                $laborData
+                            );
+                            
+                            $sincronizadosCount++;
+                        }
+
+                        DB::commit();
+
+                        return response()->json([
+                            'message' => 'Sincronización completada',
+                            'sincronizados' => $sincronizadosCount,
+                            'errores' => $erroresValidacion
+                        ]);
+
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        Log::error("Error sincronizando labores: " . $e->getMessage(), [
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        
+                        return response()->json([
+                            'message' => 'Error al sincronizar labores',
+                            'error' => $e->getMessage()
+                        ], 500);
+                    }
                 }
-
-                // Utiliza updateOrCreate para insertar o actualizar el registro.
-                // La clave para buscar el registro existente es 'visita_id' y 'indexeddb_id'.
-                // 'indexeddb_id' es crucial para identificar un registro específico que viene del frontend.
-                LaboresCultivo::updateOrCreate(
-                    [
-                        'visita_id' => $laborEntry['visita_id'],
-                        'indexeddb_id' => $laborEntry['indexeddb_id'] // ✅ Usar indexeddb_id para unicidad
-                    ],
-                    $laborEntry // Todos los datos validados
-                );
-                $sincronizadosCount++;
-            }
-
-            DB::commit();
-
-            if (count($erroresValidacion) > 0) {
-                Log::error("Algunos registros de Labores de Cultivo fallaron la validación durante la sincronización.", ['errores' => $erroresValidacion]);
-                return response()->json([
-                    'message' => "Se sincronizaron {$sincronizadosCount} registros. Algunos registros tuvieron errores de validación.",
-                    'sincronizados' => $sincronizadosCount,
-                    'errores_validacion' => $erroresValidacion
-                ], 200); // Devuelve 200 OK pero con advertencias
-            }
-
-            Log::info('Todos los registros de Labores de Cultivo sincronizados con éxito.', ['visita_id' => $data[0]['visita_id'] ?? 'N/A', 'count' => $sincronizadosCount]);
-            return response()->json(['message' => "Labores de Cultivo sincronizadas con éxito. Total: {$sincronizadosCount} registros."]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error inesperado al sincronizar Labores de Cultivo: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Error interno del servidor al sincronizar Labores de Cultivo.', 'error' => $e->getMessage()], 500);
-        }
-    }
-
 }

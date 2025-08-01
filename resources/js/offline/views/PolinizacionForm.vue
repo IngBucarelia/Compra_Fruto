@@ -1,4 +1,5 @@
 <template>
+  <div class="container">
   <div class="offline-container offline-form-container">
     <h2 class="offline-title">🌱 Polinización - Registros Previos</h2>
 
@@ -157,6 +158,7 @@
       <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
@@ -204,19 +206,21 @@ export default {
         this.formulariosPolinizacion.splice(index, 1);
       }
     },
-    async cargarDatosPrevios() {
+   async cargarDatosPrevios() {
       try {
         // Cargar todas las áreas
-        this.areasInfo = await getAllDataFromStore('area');
-        this.areasInfo = this.areasInfo.filter(area => area.visita_id == this.visitaId);
+        const allAreas = await getAllDataFromStore('area');
+        this.areasInfo = allAreas.filter(area => area.visita_id == this.visitaId);
         
         // Cargar todas las fertilizaciones
-        this.fertilizaciones = await getAllDataFromStore('fertilizacion');
-        this.fertilizaciones = this.fertilizaciones.filter(fert => fert.visita_id == this.visitaId);
+        const allFertilizaciones = await getAllDataFromStore('fertilizacion');
+        this.fertilizaciones = allFertilizaciones.filter(fert => fert.visita_id == this.visitaId);
         
-        // Cargar polinizaciones existentes
-        this.polinizacionesGuardadas = await getAllDataFromStore('polinizacion');
-        this.polinizacionesGuardadas = this.polinizacionesGuardadas.filter(pol => pol.visita_id == this.visitaId);
+        // Cargar polinizaciones existentes (ordenadas por fecha descendente)
+        const allPolinizaciones = await getAllDataFromStore('polinizacion');
+        this.polinizacionesGuardadas = allPolinizaciones
+          .filter(pol => pol.visita_id == this.visitaId)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       } catch (error) {
         console.error('Error cargando datos:', error);
       }
@@ -232,49 +236,58 @@ export default {
           return;
         }
 
-        for (const form of polinizacionesValidas) {
-          const polinizacionData = {
-            ...form,
-            visita_id: this.visitaId,
-            // Convertir campos numéricos
-            n_pases: parseInt(form.n_pases),
-            ciclos_ronda: parseInt(form.ciclos_ronda),
-            ana: parseFloat(form.ana),
-            talco: parseFloat(form.talco)
-          };
-          await saveFormData('polinizacion', polinizacionData);
+        // Generar un ID único para cada polinización
+        const polinizacionesParaGuardar = polinizacionesValidas.map(form => ({
+          ...form,
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2), // ID único
+          visita_id: this.visitaId,
+          created_at: new Date().toISOString(),
+          n_pases: parseInt(form.n_pases),
+          ciclos_ronda: parseInt(form.ciclos_ronda),
+          ana: parseFloat(form.ana),
+          talco: parseFloat(form.talco)
+        }));
+
+        // Guardar todas las polinizaciones
+        for (const polinizacion of polinizacionesParaGuardar) {
+          await saveFormData('polinizacion', polinizacion);
         }
 
+        // Actualizar la lista de polinizaciones guardadas
         await this.cargarDatosPrevios();
+        
+        // Limpiar formularios y dejar uno vacío
         this.formulariosPolinizacion = [this.nuevoFormularioPolinizacion()];
-        alert(`✅ ${polinizacionesValidas.length} polinizaciones guardadas correctamente`);
+        
+        alert(`✅ ${polinizacionesParaGuardar.length} polinizaciones guardadas correctamente`);
       } catch (error) {
         console.error('Error guardando polinizaciones:', error);
-        alert('Error al guardar las polinizaciones');
+        alert('Error al guardar las polinizaciones: ' + error.message);
       }
     },
-     async eliminarPolinizacion(localId) {
+     async eliminarPolinizacion(id) {
       if (confirm('¿Eliminar esta polinización permanentemente?')) {
         try {
-          // Cargar todas las polinizaciones
+          // Obtener todas las polinizaciones
           const todasPolinizaciones = await getAllDataFromStore('polinizacion');
           
-          // Filtrar para mantener todas excepto la que queremos eliminar
-          const polinizacionesActualizadas = todasPolinizaciones.filter(pol => pol.id !== localId);
+          // Filtrar para quitar la que queremos eliminar
+          const polinizacionesActualizadas = todasPolinizaciones.filter(pol => pol.id !== id);
           
-          // Eliminar todas las polinizaciones
+          // Limpiar el store completo
           await clearStore('polinizacion');
           
-          // Guardar las polinizaciones actualizadas (excepto la eliminada)
+          // Volver a guardar todas excepto la eliminada
           for (const pol of polinizacionesActualizadas) {
             await saveFormData('polinizacion', pol);
           }
           
+          // Actualizar la vista
           await this.cargarDatosPrevios();
           alert('Polinización eliminada correctamente');
         } catch (error) {
           console.error('Error eliminando polinización:', error);
-          alert('Error al eliminar la polinización: ' + error.message);
+          alert('Error al eliminar la polinización');
         }
       }
     },
@@ -311,14 +324,31 @@ export default {
 </script>
 
 <style scoped>
+
 @import '../styles/offline.css';
 
+
+  .container.offline-form-container {
+          background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
+          margin-left: -80px !important;
+          margin-top: 50px !important;
+      }
+
+
+  .offline-form-container h2.title {
+      text-align: center;
+      font-family: Arial Black;
+      font-weight: bold;
+      font-size: 30px;
+      color: #fdffe5;
+      text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+  }
 
 .offline-form-container {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
-}
+} 
 
 .polinizacion-form-group {
   border: 1px solid #dee2e6;
@@ -345,6 +375,29 @@ export default {
 }
 
 @media (max-width: 768px) {
+
+    .container{
+      margin-left: -70px !important;
+      margin-top: 70px !important;
+    }
+
+    .container.offline-form-container {
+          background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
+          margin-left: -40px;
+          margin-top: 50px;
+      }
+
+
+  .offline-form-container h2.title {
+      text-align: center;
+      font-family: Arial Black;
+      font-weight: bold;
+      font-size: 30px;
+      color: #fdffe5;
+      text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+  }
+
+
   .offline-container {
     margin-left: -180px;
   }

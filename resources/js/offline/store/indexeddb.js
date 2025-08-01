@@ -93,4 +93,45 @@ export async function clearStore(formName) {
   request.onerror = () => console.error('Error limpiando store', request.error);
 }
 
+// En tu archivo store/indexeddb.js
+export async function clearAllStores() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('tu-base-de-datos'); // Usa el nombre de tu DB
+    
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const transaction = db.transaction(db.objectStoreNames, 'readwrite');
+      
+      let storesCleared = 0;
+      const totalStores = db.objectStoreNames.length;
+      
+      if (totalStores === 0) {
+        resolve();
+        return;
+      }
+      
+      Array.from(db.objectStoreNames).forEach(storeName => {
+        const store = transaction.objectStore(storeName);
+        const clearRequest = store.clear();
+        
+        clearRequest.onsuccess = () => {
+          storesCleared++;
+          if (storesCleared === totalStores) {
+            resolve();
+          }
+        };
+        
+        clearRequest.onerror = (error) => {
+          console.error(`Error limpiando store ${storeName}:`, error);
+          reject(error);
+        };
+      });
+    };
+    
+    request.onerror = (event) => {
+      reject(event.target.error);
+    };
+  });
+}
+
 

@@ -327,113 +327,111 @@ class AreaController extends Controller
     // controllador offline
      
 
-    public function syncOffline(Request $request)
+     public function syncOffline(Request $request)
     {
-        $submissions = $request->input('submissions');
-        $results = [];
+        $payload = $request->json()->all();
+        
+        Log::info('Datos recibidos para sincronizar Area (offline):', [
+            'raw_data' => $request->getContent(),
+            'parsed_payload' => $payload
+        ]);
 
-        // Asegurarse de que 'submissions' sea un array válido
-        if (!is_array($submissions)) {
-            Log::error('Invalid sync data: "submissions" is not an array.', ['request' => $request->all()]);
-            return response()->json(['message' => 'Invalid sync data.'], 400);
+        // Validar que el payload tenga la estructura correcta
+        if (!isset($payload['submissions']) || !is_array($payload['submissions'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Formato inválido. Se espera un objeto con clave "submissions" conteniendo un array.'
+            ], 400);
         }
 
-        foreach ($submissions as $submission) {
-            $formName = $submission['formName'] ?? null;
-            $formData = $submission['formData'] ?? [];
-            $local_id = $submission['local_id'] ?? null; // El ID único generado en el frontend
-
-            // Log para depuración de cada envío
-            Log::info("Processing offline submission for form: {$formName}, local_id: {$local_id}", ['formData' => $formData]);
-
+        $results = [];
+        
+        foreach ($payload['submissions'] as $submission) {
             try {
-                if ($formName === 'area') {
-                    $rules = [
-                        'visita_id' => 'required|exists:visitas,id',
-                        'local_id' => 'required|string|max:36', // ✅ Validar el local_id (UUID)
-                        'material' => 'required|in:guinense,hibrido',
-                        'estado' => 'required|in:desarrollo,produccion',
-                        'anio_siembra' => 'required|date',
-                        'area' => 'required|numeric|min:0',
-                        'area_total_finca_hectareas' => 'nullable|numeric|min:0',
-                        'numero_palmas_total_finca' => 'nullable|integer|min:0',
-                        'area_palmas_desarrollo_hectareas' => 'nullable|numeric|min:0',
-                        'numero_palmas_desarrollo' => 'nullable|integer|min:0',
-                        'area_palmas_produccion_hectareas' => 'nullable|numeric|min:0',
-                        'numero_palmas_produccion' => 'nullable|integer|min:0',
-                        'ciclos_cosecha' => 'nullable|integer|min:0',
-                        'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
-                        'aplica_orden_plantis' => 'required|boolean',
-                        'orden_plantis_numero' => 'nullable|integer|min:0',
-                        'numero_plantas_orden_plantis' => 'nullable|integer|min:0',
-                        'estado_oren_plantis' => 'nullable|in:desarrollo,produccion',
+                $local_id = $submission['local_id'] ?? null;
+                $formData = $submission['formData'] ?? [];
+                $visita_id = $formData['visita_id'] ?? null;
+
+                if (!$local_id) {
+                    $results[] = [
+                        'local_id' => $local_id,
+                        'success' => false,
+                        'message' => 'local_id es requerido'
                     ];
-
-                    // Reglas condicionales para 'aplica_orden_plantis'
-                    // Asegúrate de que 'aplica_orden_plantis' se interprete como booleano
-                    if (isset($formData['aplica_orden_plantis']) && (bool)$formData['aplica_orden_plantis']) {
-                        $rules['orden_plantis_numero'] = 'required|integer|min:0';
-                        $rules['numero_plantas_orden_plantis'] = 'required|integer|min:0';
-                        $rules['estado_oren_plantis'] = 'required|in:desarrollo,produccion';
-                    }
-
-                    $validator = Validator::make($formData, $rules);
-
-                    if ($validator->fails()) {
-                        // Devuelve los errores de validación específicos para este envío
-                        $results[] = [
-                            'id' => $local_id, // Usar local_id para identificar el error en el frontend
-                            'formName' => $formName,
-                            'success' => false,
-                            'message' => 'Validation error.',
-                            'errors' => $validator->errors()->all() // Mensajes de error detallados
-                        ];
-                        continue; // Pasa al siguiente envío en el bucle
-                    }
-
-                    $validatedData = $validator->validated();
-
-                    // Asegurar que los campos condicionales sean null si aplica_orden_plantis es false
-                    if (!(bool)$validatedData['aplica_orden_plantis']) {
-                        $validatedData['orden_plantis_numero'] = null;
-                        $validatedData['numero_plantas_orden_plantis'] = null;
-                        $validatedData['estado_oren_plantis'] = null;
-                    }
-
-                    // ✅ Usar 'local_id' para buscar y actualizar o crear el registro
-                    Area::updateOrCreate(
-                        ['local_id' => $validatedData['local_id']], // Clave para buscar
-                        $validatedData // Datos a crear o actualizar
-                    );
-
-                    // Opcional: Actualizar el estado de la visita a 'en_ejecucion'
-                    $visita = Visita::find($validatedData['visita_id']);
-                    if ($visita && $visita->estado === 'pendiente') {
-                        $visita->estado = 'en_ejecucion';
-                        $visita->save();
-                    }
-
-                    $results[] = ['id' => $local_id, 'formName' => $formName, 'success' => true];
-
-                } else {
-                    // Aquí puedes añadir lógica para otros formName (ej. 'fertilizacion', 'polinizacion')
-                    // Por ahora, si el formName no es 'area', lo marcamos como no soportado.
-                    $results[] = ['id' => $local_id, 'formName' => $formName, 'success' => false, 'message' => 'Form type not supported.'];
+                    continue;
                 }
 
-            } catch (\Exception $e) {
-                // Captura cualquier otro error inesperado
-                Log::error("Unexpected error syncing offline data for form: {$formName}, local_id: {$local_id}. Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'data' => $formData]);
+                // Validación de datos
+                $validator = Validator::make($formData, [
+                    'visita_id' => 'required|exists:visitas,id',
+                    'material' => 'required|in:guinense,hibrido',
+                    'estado' => 'required|in:desarrollo,produccion',
+                    'anio_siembra' => 'required|date',
+                    'area' => 'required|numeric|min:0',
+                    'area_total_finca_hectareas' => 'nullable|numeric|min:0',
+                    'numero_palmas_total_finca' => 'nullable|integer|min:0',
+                    'area_palmas_desarrollo_hectareas' => 'nullable|numeric|min:0',
+                    'numero_palmas_desarrollo' => 'nullable|integer|min:0',
+                    'area_palmas_produccion_hectareas' => 'nullable|numeric|min:0',
+                    'numero_palmas_produccion' => 'nullable|integer|min:0',
+                    'ciclos_cosecha' => 'nullable|integer|min:0',
+                    'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
+                    'aplica_orden_plantis' => 'required|boolean',
+                    'orden_plantis_numero' => 'nullable|required_if:aplica_orden_plantis,true|integer|min:0',
+                    'numero_plantas_orden_plantis' => 'nullable|required_if:aplica_orden_plantis,true|integer|min:0',
+                    'estado_oren_plantis' => 'nullable|required_if:aplica_orden_plantis,true|in:desarrollo,produccion',
+                ]);
+
+                if ($validator->fails()) {
+                    $results[] = [
+                        'local_id' => $local_id,
+                        'success' => false,
+                        'message' => 'Error de validación',
+                        'errors' => $validator->errors()->all()
+                    ];
+                    continue;
+                }
+
+                $validatedData = $validator->validated();
+
+                // Asegurar campos nulos cuando no aplica orden plantis
+                if (!$validatedData['aplica_orden_plantis']) {
+                    $validatedData['orden_plantis_numero'] = null;
+                    $validatedData['numero_plantas_orden_plantis'] = null;
+                    $validatedData['estado_oren_plantis'] = null;
+                }
+
+                // Crear o actualizar el área
+                Area::updateOrCreate(
+                    ['local_id' => $local_id],
+                    $validatedData
+                );
+
                 $results[] = [
-                    'id' => $local_id,
-                    'formName' => $formName,
+                    'local_id' => $local_id,
+                    'success' => true,
+                    'message' => 'Área sincronizada correctamente'
+                ];
+
+            } catch (\Exception $e) {
+                Log::error("Error sincronizando área: " . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString(),
+                    'data' => $submission
+                ]);
+                
+                $results[] = [
+                    'local_id' => $local_id ?? 'desconocido',
                     'success' => false,
-                    'message' => 'Internal server error: ' . $e->getMessage()
+                    'message' => 'Error interno: ' . $e->getMessage()
                 ];
             }
         }
 
-        return response()->json(['results' => $results]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Proceso de sincronización completado',
+            'results' => $results
+        ]);
     }
 
 }

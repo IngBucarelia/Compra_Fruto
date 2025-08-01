@@ -9,6 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\VisitaExport;
 use App\Models\Area;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log; 
+
 
 
 
@@ -248,6 +250,35 @@ class VisitaController extends Controller
     {
         // Implementar lógica similar para fertilización
     }
+
+    public function updateStatus(Request $request, Visita $visita)
+    {
+        // Valida que el campo 'estado' esté presente y sea una cadena
+        $request->validate([
+            'estado' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Actualiza el campo 'estado' de la visita
+            $visita->estado = 'finalizado';
+            $visita->save();
+
+            Log::info("Estado de la visita {$visita->id} actualizado a: {$request->input('estado')}");
+
+            return response()->json([
+                'message' => 'Estado de la visita actualizado exitosamente.',
+                'visita' => $visita,
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Error al actualizar el estado de la visita {$visita->id}: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Error al actualizar el estado de la visita.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
 
 

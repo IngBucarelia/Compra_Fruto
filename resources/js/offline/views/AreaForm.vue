@@ -226,6 +226,14 @@ export default {
     }
   },
   methods: {
+    generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  },
+
     nuevoFormularioArea() {
       return {
         material: '',
@@ -288,18 +296,19 @@ export default {
         }
 
         for (const form of areasValidas) {
+          // Generar local_id único usando nuestra función alternativa
+          const local_id = form.local_id || this.generateUUID();
+          
           const areaData = {
             ...form,
+            local_id, // Añadir local_id único
             visita_id: this.visitaId,
-            // No incluyas local_id aquí, ya que tu IndexedDB usa autoIncrement
             aplica_orden_plantis: Boolean(form.aplica_orden_plantis),
-            // Asegúrate que los campos numéricos sean números
-            area_total_finca_hectareas: parseFloat(form.area_total_finca_hectareas) || null,
-            numero_palmas_total_finca: parseInt(form.numero_palmas_total_finca) || null,
-            // Repite para otros campos numéricos
+            // Convertir campos numéricos
+            area: parseFloat(form.area),
+            // ... (resto de las conversiones)
           };
           
-          // Guardar en IndexedDB
           await saveFormData('area', areaData);
         }
 
@@ -370,6 +379,8 @@ export default {
 
 <style scoped>
 @import '../styles/offline.css';
+
+
 
 .offline-form-container {
   max-width: 1000px;

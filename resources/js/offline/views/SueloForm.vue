@@ -3,65 +3,91 @@
     <h2 class="offline-title" >🌱 Suelo - Registros Previos </h2>
 
     <div class="row mb-4">
-      <!-- Área -->
+      <!-- Tarjeta: Áreas -->
       <div class="col-md-6">
-        <div class="card border-success mb-3">
-          <div class="card-header bg-success text-white">📍 Información del Área</div>
-          <div class="card-body" v-if="area">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
-              <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
-              <li class="list-group-item"><strong>Año siembra:</strong> {{ area.anio_siembra }}</li>
-              <li class="list-group-item"><strong>Área (m²):</strong> {{ area.area }}</li>
-              <li class="list-group-item"><strong>Orden Plantis N°:</strong> {{ area.orden_plantis_numero }}</li>
-              <li class="list-group-item"><strong>Estado orden Plantis:</strong> {{ area.estado_oren_plantis }}</li>
-            </ul>
+        <div class="card border-success">
+          <div class="card-header bg-success text-white">
+            📍 Áreas Registradas
           </div>
-          <p v-else class="text-muted">Sin datos de área.</p>
+          <div class="card-body">
+            <div v-if="areasInfo.length > 0">
+              <div v-for="(area, index) in areasInfo" :key="area.id" class="mb-3 area-card">
+                <h5>Área #{{ index + 1 }}</h5>
+                <ul class="list-group">
+                  <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
+                  <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
+                  <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
+                  <li class="list-group-item"><strong>Área (m²):</strong> {{ area.area }}</li>
+                  
+                  <li class="list-group-item"><strong>Área Total Finca (Ha):</strong> {{ area.area_total_finca_hectareas || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>N° Palmas Total Finca:</strong> {{ area.numero_palmas_total_finca || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Área Palmas Desarrollo (Ha):</strong> {{ area.area_palmas_desarrollo_hectareas || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>N° Palmas Desarrollo:</strong> {{ area.numero_palmas_desarrollo || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Área Palmas Producción (Ha):</strong> {{ area.area_palmas_produccion_hectareas || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>N° Palmas Producción:</strong> {{ area.numero_palmas_produccion || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Ciclos de Cosecha:</strong> {{ area.ciclos_cosecha || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>Producción (Toneladas/Mes):</strong> {{ area.produccion_toneladas_por_mes || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Aplica Orden Plantis:</strong> {{ area.aplica_orden_plantis ? 'Sí' : 'No' }}</li>
+                  
+                  <template v-if="area.aplica_orden_plantis">
+                    <li class="list-group-item"><strong>Orden Plantis N°:</strong> {{ area.orden_plantis_numero || 'N/A' }}</li>
+                    <li class="list-group-item"><strong>Estado Orden Plantis:</strong> {{ area.estado_oren_plantis || 'N/A' }}</li>
+                    <li class="list-group-item"><strong>N° Plantas Orden Plantis:</strong> {{ area.numero_plantas_orden_plantis || 'N/A' }}</li>
+                  </template>
+                </ul>
+              </div>
+            </div>
+            <p v-else class="text-muted">No hay áreas registradas</p>
+          </div>
         </div>
       </div>
 
-      
       <!-- Tarjeta: Fertilizaciones -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="card border-primary">
           <div class="card-header bg-primary text-white">
-            💧 Fertilizaciones
+            💧 Fertilizaciones Registradas
           </div>
-          <div class="card-body" v-if="fertilizaciones.length">
-            <div v-for="(fert, index) in fertilizaciones" :key="index">
-              <h6>📅 {{ fert.fecha_fertilizacion }}</h6>
-              <ul class="list-group">
-                <li v-for="(item, i) in fert.fertilizantes" :key="i" class="list-group-item">
-                  {{ item.nombre }} - {{ item.cantidad }} kg
-                </li>
-              </ul>
+          <div class="card-body">
+            <div v-if="fertilizaciones.length > 0">
+              <div v-for="(fert, index) in fertilizaciones" :key="index" class="mb-3">
+                <h5>📅 {{ formatDate(fert.fecha_fertilizacion) }}</h5>
+                <ul class="list-group">
+                  <li v-for="(item, i) in fert.fertilizantes" :key="i" class="list-group-item">
+                    <strong>{{ item.nombre }}</strong> - 
+                    {{ item.cantidad }} {{ item.unidad_medida }} 
+                    <span v-if="item.fecha_aplicacion">(Aplicado: {{ formatDate(item.fecha_aplicacion) }})</span>
+                  </li>
+                </ul>
+              </div>
             </div>
+            <p v-else class="text-muted">No hay fertilizaciones registradas</p>
           </div>
-          <p v-else class="text-muted">Sin fertilizaciones</p>
         </div>
       </div>
 
-      <!-- Tarjeta: Polinizaciones -->
-      <div class="col-md-4">
-        <div class="card border-warning">
-          <div class="card-header bg-warning text-dark">
-            🌸 Polinizaciones
+      <div v-if="polinizaciones.length > 0">
+        <h4 class="mb-3">Polinizaciones Registradas</h4>
+        <div v-for="(poli, index) in polinizaciones" :key="poli.local_id" class="card border-info form-group mb-3">
+          <div class="card-header bg-info text-white">
+            🌸 Polinización #{{ index + 1 }}
           </div>
-          <div class="card-body" v-if="polinizaciones.length">
-            <div v-for="(poli, index) in polinizaciones" :key="index">
-              <h6>📅 {{ poli.fecha }}</h6>
-              <ul class="list-group">
-                <li class="list-group-item">Pases: {{ poli.n_pases }}</li>
-                <li class="list-group-item">Ciclos: {{ poli.ciclos_ronda }}</li>
-                <li class="list-group-item">ANA: {{ poli.ana }} ({{ poli.tipo_ana }})</li>
-                <li class="list-group-item">Talco: {{ poli.talco }} kg</li>
-              </ul>
-            </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item"><strong>Fecha:</strong> {{ poli.fecha }}</li>
+              <li class="list-group-item"><strong>N° Pases:</strong> {{ poli.n_pases }}</li>
+              <li class="list-group-item"><strong>Ciclos:</strong> {{ poli.ciclos_ronda }}</li>
+              <li class="list-group-item"><strong>ANA:</strong> {{ poli.ana }} ({{ poli.tipo_ana }})</li>
+              <li class="list-group-item"><strong>Talco:</strong> {{ poli.talco }} kg</li>
+            </ul>
           </div>
-          <p v-else class="text-muted">Sin polinizaciones</p>
         </div>
       </div>
+      <p v-else class="text-muted">No hay polinizaciones registradas.</p>   
 
       <!-- Sanidad -->
       <div class="col-md-6">
@@ -132,13 +158,13 @@
 </template>
 
 <script>
-import { getFormDataByVisita, saveFormData } from '../store/indexeddb'
+import { getFormDataByVisita, saveFormData, getAllDataFromStore } from '../store/indexeddb';
 
 export default {
   data() {
     return {
       visitaId: null,
-      area: null,
+      areasInfo: [],
       fertilizaciones: [],
       polinizaciones: [],
       sanidad: null,
@@ -146,29 +172,86 @@ export default {
         analisis_foliar: '',
         alanalisis_suelo: '',
         tipo_suelo: ''
-      }
+      },
+      canSync: navigator.onLine
     }
   },
   async mounted() {
-    this.visitaId = new URLSearchParams(window.location.search).get('visita_id') || localStorage.getItem('visita_id')
-    localStorage.setItem('visita_id', this.visitaId)
+    this.visitaId = new URLSearchParams(window.location.search).get('visita_id') || localStorage.getItem('visita_id');
+    localStorage.setItem('visita_id', this.visitaId);
 
-    this.area = await getFormDataByVisita('area', this.visitaId)
-     const fert = await getFormDataByVisita('fertilizacion', this.visitaId);
+    // Cargar todas las áreas
+    await this.loadAreas();
+    
+    // Cargar otros datos
+    const fert = await getFormDataByVisita('fertilizacion', this.visitaId);
     this.fertilizaciones = Array.isArray(fert) ? fert : fert ? [fert] : [];
+    
     const poli = await getFormDataByVisita('polinizacion', this.visitaId);
     this.polinizaciones = Array.isArray(poli) ? poli : poli ? [poli] : [];
-    this.sanidad = await getFormDataByVisita('sanidad', this.visitaId)
+    
+    this.sanidad = await getFormDataByVisita('sanidad', this.visitaId);
+
+    // Eventos para detectar cambios en la conexión
+    window.addEventListener('online', this.updateOnlineStatus);
+    window.addEventListener('offline', this.updateOnlineStatus);
+  },
+  beforeUnmount() {
+    window.removeEventListener('online', this.updateOnlineStatus);
+    window.removeEventListener('offline', this.updateOnlineStatus);
   },
   methods: {
+    updateOnlineStatus() {
+      this.canSync = navigator.onLine;
+    },
+    async loadAreas() {
+      try {
+        const allAreas = await getAllDataFromStore('area');
+        this.areasInfo = Array.isArray(allAreas) ? 
+          allAreas.filter(item => item.visita_id == this.visitaId) : [];
+      } catch (error) {
+        console.error('Error cargando áreas:', error);
+      }
+    },
     async guardar() {
-      const data = { ...this.form, visita_id: this.visitaId }
-      await saveFormData('suelo', data)
-      alert('✅ Suelo guardado localmente')
+      try {
+        const data = { 
+          ...this.form, 
+          visita_id: this.visitaId,
+          created_at: new Date().toISOString()
+        };
+        await saveFormData('suelo', data);
+        alert('✅ Datos de suelo guardados correctamente');
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        alert('Error al guardar los datos de suelo');
+      }
     },
     irALaboresCultivo() {
       this.$router.push(`/labores?visita_id=${this.visitaId}`);
     },
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      try {
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? 'Fecha inválida' : 
+          date.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+      } catch {
+        return 'N/A';
+      }
+    },
+    async sincronizar() {
+      if (!this.canSync) {
+        alert('No hay conexión a internet');
+        return;
+      }
+      alert('Sincronización iniciada...');
+      // Aquí iría tu lógica de sincronización
+    }
   }
 }
 </script>

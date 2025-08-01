@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 
+
 class CierreVisitaController extends Controller
 {
      public function create(int $visita_id) // ✅ CAMBIO CLAVE: Recibir visita_id como parámetro de ruta
@@ -89,43 +90,70 @@ class CierreVisitaController extends Controller
     }
         // zona de sincronizar con offline 
 
-          public function syncOffline(Request $request)
-    {
-        $data = $request->json()->all();
-        Log::info('Datos recibidos para sincronizar Cierre de Visita:', $data);
+     public function syncOffline(Request $request)
+        {
+            // Log de depuración
+            Log::info('Datos recibidos para sincronizar cierre de visita:', $request->all());
 
-        try {
-            $request->validate([
-                'visita_id' => 'required|integer',
-                'fecha_cierre' => 'required|date',
-                'estado_visita' => 'required|string|in:completado,pendiente,cancelado',
-                'observaciones_finales' => 'nullable|string', // ✅ CAMBIO DE NOMBRE
-                'recomendaciones' => 'nullable|string',      // ✅ NUEVO CAMPO
+            try {
+                // Validación correcta usando el facade Validator o el método validate() del request
+                $validatedData = $request->validate([
+                    'visita_id' => 'nullable|integer|exists:visitas,id',
+                    'fecha_cierre' => 'required|date',
+                    'estado_visita' => 'required|string|in:completado,pendiente,cancelado',
+                    'observaciones_finales' => 'nullable|string',
+                    'recomendaciones' => 'nullable|string',
+                    'firma_responsable' => 'required|string',
+                    'firma_recibe' => 'required|string',
+                    'firma_testigo' => 'nullable|string',
+                    'imagenes' => 'nullable|array',
+                    'imagenes.*' => 'nullable|string', // Aceptamos strings Base64 directamente
+                    'finalizada_en' => 'nullable|date'
+                ]);
 
-                'firma_responsable' => 'required|string', // ✅ CAMBIO DE NOMBRE
-                'firma_recibe' => 'required|string',
-                'firma_testigo' => 'nullable|string',
-                'imagenes' => 'nullable|array',
-                'imagenes.*' => 'nullable|string',
-                'finalizada_en' => 'nullable|date', // ✅ NUEVO CAMPO
-            ]);
+                // Procesamiento de imágenes (opcional, si necesitas guardarlas como archivos)
+                if (!empty($validatedData['imagenes'])) {
+                    $validatedData['imagenes'] = json_encode($validatedData['imagenes']); // Guardar como JSON
+                }
 
-            CierreVisita::updateOrCreate(
-                ['visita_id' => $data['visita_id']],
-                $data
-            );
+                // Buscar o crear el registro
+                $cierreVisita = CierreVisita::updateOrCreate(
+                    ['visita_id' => $validatedData['visita_id']],
+                    $validatedData
+                );
 
-            Log::info('Registro de Cierre de Visita sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
-            return response()->json(['message' => 'Cierre de Visita sincronizado con éxito.']);
+                Log::info('Cierre de visita sincronizado exitosamente', ['id' => $cierreVisita->id]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error("Error de validación al sincronizar Cierre de Visita: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
-            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            Log::error("Error inesperado al sincronizar Cierre de Visita: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Error interno del servidor al sincronizar Cierre de Visita.', 'error' => $e->getMessage()], 500);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cierre de visita sincronizado correctamente',
+                    'data' => $cierreVisita
+                ]);
+
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Error de validación al sincronizar cierre de visita', [
+                    'errors' => $e->errors(),
+                    'input' => $request->all()
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $e->errors()
+                ], 422);
+                
+            } catch (\Exception $e) {
+                Log::error('Error al sincronizar cierre de visita: ' . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error interno del servidor',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
         }
-    }
     // fin de sincronizador 
 
 }
