@@ -27,7 +27,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background-image: url('{{ asset('images/fondo.jpg') }}'); 
+            background-image: url('{{ asset('images/fondo.webp') }}'); 
             background-size: contain;
             background-position: center;
             height: 100vh;

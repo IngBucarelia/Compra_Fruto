@@ -12,7 +12,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
-            background: url('/images/fondo1.jpg') no-repeat center center fixed;
+            background: url('/images/fondo1.webp') no-repeat center center fixed;
             background-size: cover;
             min-height: 100vh;
             display: flex;
@@ -100,7 +100,7 @@ color: #fff;
 text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
                     margin-bottom:-30px;">Aplicación <br> Compra Fruto</h1>
         
-        <img style=" margin-bottom:-40px;"  src="/images/logo.png" alt="Logo Empresa" class="logo">
+        <img style=" margin-bottom:-40px;"  src="/images/logo.webp" alt="Logo Empresa" class="logo">
          <h3 style="color: wheat">Ingrese al Sistema</h3>
         
         <form method="POST" action="{{ route('login') }}"> 

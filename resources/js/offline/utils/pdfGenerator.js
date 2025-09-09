@@ -63,7 +63,7 @@ export async function generarResumenPDF({
 
     // --- ÁREAS
     if (areas && areas.length > 0) {
-      addTitulo('📍 Información de Áreas')
+      addTitulo(' Información de Áreas')
       areas.forEach((area, index) => {
         saltarSiEsNecesario(80); // Estimar espacio para cada área
         doc.setFontSize(12);
@@ -74,6 +74,7 @@ export async function generarResumenPDF({
           startY: y,
           head: [['Campo', 'Valor']],
           body: [
+            ['Variedad', area.variedad || 'N/A'],
             ['Material', area.material || 'N/A'],
             ['Estado', area.estado || 'N/A'],
             ['Año Siembra', formatDate(area.anio_siembra)],
@@ -104,7 +105,7 @@ export async function generarResumenPDF({
 
     // --- FERTILIZACIONES
     if (fertilizaciones && fertilizaciones.length > 0) {
-      addTitulo('💧 Fertilizaciones')
+      addTitulo(' Fertilizaciones')
       fertilizaciones.forEach((f) => {
         saltarSiEsNecesario(30); // Estimar espacio para cada fertilización
         doc.setFontSize(12);
@@ -129,7 +130,7 @@ export async function generarResumenPDF({
 
     // --- POLINIZACIONES
     if (polinizaciones && polinizaciones.length > 0) {
-      addTitulo('🌸 Polinizaciones')
+      addTitulo(' Polinizaciones')
       polinizaciones.forEach((p, index) => {
         saltarSiEsNecesario(50); // Estimar espacio
         doc.setFontSize(12);
@@ -154,42 +155,95 @@ export async function generarResumenPDF({
       });
     }
 
-    // --- SANIDAD
-    if (sanidad) {
-      addTitulo('🦠 Sanidad')
-      saltarSiEsNecesario(80); // Estimar espacio
-      autoTable(doc, {
+// --- SANIDAD
+if (sanidad) {
+    addTitulo(' Sanidad');
+    saltarSiEsNecesario(120);
+
+    // --- TABLA PRINCIPAL DE SANIDAD
+    const sanidadBody = [
+        ['Censo de enfermedades', sanidad.censo_enfermedades ? 'Sí' : 'No'],
+        ['Ciclos lectura enfermedades', sanidad.ciclos_lectura_enfermedades || 'N/A'],
+        ['Ciclos lectura plagas', sanidad.ciclos_lectura_plagas || 'N/A'],
+        ['Otros', sanidad.otros || 'N/A']
+    ];
+
+    autoTable(doc, {
         startY: y,
         head: [['Campo', 'Valor']],
-        body: [
-          ['Opsophanes', formatPercentage(sanidad.opsophanes)],
-          ['Pudrición Cogollo', formatPercentage(sanidad.pudricion_cogollo)],
-          ['Raspador', formatPercentage(sanidad.raspador)],
-          ['Palmarum', formatPercentage(sanidad.palmarum)],
-          ['Strategus', formatPercentage(sanidad.strategus)],
-          ['Leptopharsa', formatPercentage(sanidad.leptopharsa)],
-          ['Pestalotiopsis', formatPercentage(sanidad.pestalotiopsis)],
-          ['Pudrición Basal', formatPercentage(sanidad.pudricion_basal)],
-          ['Pudrición Estípite', formatPercentage(sanidad.pudricion_estipe)],
-          ['Otros', sanidad.otros || 'N/A'],
-        ],
+        body: sanidadBody,
         theme: 'grid',
         styles: { fontSize: 10, cellPadding: 2 },
         columnStyles: { 0: { fontStyle: 'bold' } }
-      });
-      y = doc.lastAutoTable.finalY + 5;
-      if (sanidad.observaciones) {
+    });
+
+    y = doc.lastAutoTable.finalY + 5;
+
+    // --- ENFERMEDADES DINÁMICAS
+    if (sanidad.enfermedades && sanidad.enfermedades.length > 0) {
+        addTitulo('Enfermedades');
+        const enfBody = sanidad.enfermedades.map(enf => [
+            enf.nombre || '-',
+            enf.estado || '-'
+        ]);
+        autoTable(doc, {
+            startY: y,
+            head: [['Nombre', 'Estado (%)']],
+            body: enfBody,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 2 }
+        });
+        y = doc.lastAutoTable.finalY + 5;
+    }
+
+    // --- PLAGAS DINÁMICAS
+    if (sanidad.plagas && sanidad.plagas.length > 0) {
+        addTitulo('Plagas');
+        const plagasBody = sanidad.plagas.map(pla => [
+            pla.nombre || '-',
+            pla.estado || '-'
+        ]);
+        autoTable(doc, {
+            startY: y,
+            head: [['Nombre', 'Estado']],
+            body: plagasBody,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 2 }
+        });
+        y = doc.lastAutoTable.finalY + 5;
+    }
+
+    // --- OBSERVACIONES
+    if (sanidad.observaciones) {
         doc.setFontSize(10);
         doc.text('Observaciones:', 10, y);
         y += 5;
         doc.text(doc.splitTextToSize(sanidad.observaciones, 180), 10, y);
         y += 10;
-      }
     }
+
+    // --- DATOS DE TRAMPAS
+    if (sanidad.trampas && sanidad.trampas.length > 0) {
+        addTitulo('Trampas de Palmarum');
+        const trampaBody = sanidad.trampas.map(trampa => [
+            trampa.ciclos ?? '-',
+            trampa.machos ?? '-',
+            trampa.hembras ?? '-'
+        ]);
+        autoTable(doc, {
+            startY: y,
+            head: [['Ciclos', 'Machos Capturados', 'Hembras Capturadas']],
+            body: trampaBody,
+            theme: 'grid',
+            styles: { fontSize: 10, cellPadding: 2 }
+        });
+        y = doc.lastAutoTable.finalY + 5;
+    }
+}
 
     // --- SUELO
     if (suelo) {
-      addTitulo('🧪 Análisis de Suelo')
+      addTitulo('Análisis de Suelo')
       saltarSiEsNecesario(40); // Estimar espacio
       autoTable(doc, {
         startY: y,
@@ -208,7 +262,7 @@ export async function generarResumenPDF({
 
     // --- LABORES DE CULTIVO
     if (laboresCultivo && laboresCultivo.length > 0) {
-      addTitulo('🚜 Labores de Cultivo')
+      addTitulo('Labores de Cultivo')
       laboresCultivo.forEach((labor, index) => {
         saltarSiEsNecesario(100); // Estimar espacio para cada labor
         doc.setFontSize(12);
@@ -255,7 +309,7 @@ export async function generarResumenPDF({
 
     // --- EVALUACIÓN DE COSECHA
     if (evaluacionesCosecha && evaluacionesCosecha.length > 0) {
-      addTitulo('🌴 Evaluación de Cosecha')
+      addTitulo('Evaluación de Cosecha')
       evaluacionesCosecha.forEach((evaluacion, index) => {
         saltarSiEsNecesario(60); // Estimar espacio
         doc.setFontSize(12);
@@ -285,7 +339,7 @@ export async function generarResumenPDF({
 
     // --- CIERRE DE VISITA
     if (cierreVisita && cierreVisita.fecha_cierre) {
-      addTitulo('✅ Cierre de Visita');
+      addTitulo('Cierre de Visita');
       saltarSiEsNecesario(40); // Estimar espacio
       autoTable(doc, {
         startY: y,
@@ -316,7 +370,7 @@ export async function generarResumenPDF({
     };
 
     if (cierreVisita && (cierreVisita.firma_responsable || cierreVisita.firma_recibe || cierreVisita.firma_testigo)) {
-      addTitulo('🖋️ Firmas de la Visita');
+      addTitulo('Firmas de la Visita');
       addFirma('Firma quien realiza', cierreVisita.firma_responsable); // Acceder desde cierreVisita
       addFirma('Firma quien recibe', cierreVisita.firma_recibe);     // Acceder desde cierreVisita
       addFirma('Firma testigo', cierreVisita.firma_testigo);         // Acceder desde cierreVisita

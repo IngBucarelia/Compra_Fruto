@@ -10,7 +10,7 @@
         border-radius: 8px; /* Añadido para consistencia */
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Añadido para consistencia */
         max-width: 900px !important; /* Ajusta el ancho para mejor visualización */
-        margin-left: -35px !important;
+        
         margin-top: 25px; /* Margen superior para separación */
     }
 
@@ -27,6 +27,7 @@
     .info-detail span {
         color: wheat;
     }
+    
 
     .accordion-item .accordion-button {
         background-color: darkseagreen !important;
@@ -74,7 +75,7 @@
     /* Media Queries para Responsividad */
     @media (max-width: 767.98px) {
         .container {
-            margin-left: 0;
+            margin-left: -35px !important;
             width: 100%;
             padding: 15px;
             border-radius: 0;
@@ -122,6 +123,16 @@
                                     <li><strong>Área (m²):</strong> {{ $area->area }}</li>
                                     <li><strong>Orden Plantis:</strong> {{ $area->orden_plantis_numero }}</li>
                                     <li><strong>Estado orden Plantis:</strong> {{ $area->estado_oren_plantis }}</li>
+                                    <li><strong>Área total finca (hectáreas):</strong> {{ $area->area_total_finca_hectareas }}</li>
+                                    <li><strong>Número de palmas total finca:</strong> {{ $area->numero_palmas_total_finca }}</li>
+                                    <li><strong>Área palmas desarrollo (hectáreas):</strong> {{ $area->area_palmas_desarrollo_hectareas }}</li>
+                                    <li><strong>Número de palmas desarrollo:</strong> {{ $area->numero_palmas_desarrollo }}</li>
+                                    <li><strong>Área palmas producción (hectáreas):</strong> {{ $area->area_palmas_produccion_hectareas }}</li>
+                                    <li><strong>Número de palmas producción:</strong> {{ $area->numero_palmas_produccion }}</li>
+                                    <li><strong>Ciclos de cosecha:</strong> {{ $area->ciclos_cosecha }}</li>
+                                    <li><strong>Producción (toneladas/mes):</strong> {{ $area->produccion_toneladas_por_mes }}</li>
+                                    <li><strong>Aplica orden plantis:</strong> {{ $area->aplica_orden_plantis ? 'Sí' : 'No' }}</li>
+                                    <li><strong>Número plantas orden plantis:</strong> {{ $area->numero_plantas_orden_plantis }}</li>
                                 </ul>
                             </div>
                         @endforeach
@@ -236,33 +247,119 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingSanidad">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSanidad">
-                    🧪 Sanidad
+                    🧪 Sanidades registradas
                 </button>
             </h2>
-            <div id="collapseSanidad" class="accordion-collapse collapse" data-bs-parent="#acordeonDetalleVisita">
+            <div id="collapseSanidad" class="accordion-collapse collapse" data-bs-parent="#acordeonSuelo">
                 <div class="accordion-body">
-                    @if ($visita->sanidad)
-                        <div class="data-card">
-                            <ul>
-                                <li><strong>Opsophanes:</strong> {{ $visita->sanidad->opsophanes }}%</li>
-                                <li><strong>Pudrición cogollo:</strong> {{ $visita->sanidad->pudricion_cogollo }}%</li>
-                                <li><strong>Raspador:</strong> {{ $visita->sanidad->raspador }}%</li>
-                                <li><strong>Palmarum:</strong> {{ $visita->sanidad->palmarum }}%</li>
-                                <li><strong>Strategus:</strong> {{ $visita->sanidad->strategus }}%</li>
-                                <li><strong>Leptoparsa:</strong> {{ $visita->sanidad->leptopharsa }}%</li>
-                                <li><strong>Pestalotiopsis:</strong> {{ $visita->sanidad->pestalotiopsis }}%</li>
-                                <li><strong>Pudrición basal:</strong> {{ $visita->sanidad->pudricion_basal }}%</li>
-                                <li><strong>Pudrición estipe:</strong> {{ $visita->sanidad->pudricion_estipe }}%</li>
-                                <li><strong>Otros:</strong> {{ $visita->sanidad->otros }}</li>
-                                <li><strong>Observaciones:</strong> {{ $visita->sanidad->observaciones }}</li>
-                            </ul>
-                        </div>
+                    @if ($visita->sanidades->count() > 0)
+                        @foreach ($visita->sanidades as $sanidad)
+                            <div class="sanidad-info-card mb-3 p-3 border rounded shadow-sm">
+                                <h5>Sanidad #{{ $loop->index + 1 }}</h5>
+                                <ul class="list-unstyled">
+                                    
+                                    {{-- Enfermedades (nuevas relaciones) --}}
+                                    @if ($sanidad->enfermedades && $sanidad->enfermedades->count())
+                                        <li>
+                                            <strong>Enfermedades:</strong>
+                                            <ul class="mb-2" style="list-style: none; padding-left: 0;">
+                                                @foreach ($sanidad->enfermedades as $enf)
+                                                    <li>
+                                                        {{ $enf->nombre_enfermedad }} - 
+                                                        <strong>Estado:</strong> {{ $enf->estado ?? '-' }}%
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @endif
+
+                                    {{-- Plagas (nuevas relaciones) --}}
+                                    @if ($sanidad->plagas && $sanidad->plagas->count())
+                                        <li>
+                                            <strong>Plagas:</strong>
+                                            <ul class="mb-2" style="list-style: none; padding-left: 0;">
+                                                @foreach ($sanidad->plagas as $pla)
+                                                    <li>
+                                                        {{ $pla->nombre_plaga }} - 
+                                                        <strong>Estado:</strong> {{ $pla->estado ?? '-' }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @endif
+
+                                    {{-- Enfermedades (legacy) --}}
+                                    @php
+                                        $legacyEnfermedades = [
+                                            'opsophanes' => 'Opsophanes',
+                                            'pudricion_cogollo' => 'Pudrición del cogollo',
+                                            'raspador' => 'Raspador',
+                                            'palmarum' => 'Palmarum',
+                                            'strategus' => 'Strategus',
+                                            'leptopharsa' => 'Leptopharsa',
+                                            'pestalotiopsis' => 'Pestalotiopsis',
+                                            'pudricion_basal' => 'Pudrición basal',
+                                            'pudricion_estipe' => 'Pudrición estipe',
+                                        ];
+                                    @endphp
+                                    @if (collect($legacyEnfermedades)->some(fn($_, $key) => $sanidad->$key))
+                                        <li>
+                                            <strong>Enfermedades (legacy):</strong>
+                                            <ul class="mb-2" style="list-style: none; padding-left: 0;">
+                                                @foreach ($legacyEnfermedades as $field => $label)
+                                                    @if ($sanidad->$field)
+                                                        <li>{{ $label }}: {{ $sanidad->$field }}%</li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        </li>
+                                    @endif
+
+                                    {{-- Plagas (legacy) --}}
+                                    @if ($sanidad->plaga)
+                                        <li>
+                                            <strong>Plaga (legacy):</strong> 
+                                            {{ $sanidad->plaga }} 
+                                            @if($sanidad->estado_plaga) - ({{ $sanidad->estado_plaga }}) @endif
+                                        </li>
+                                    @endif
+
+                                    {{-- Otros datos --}}
+                                    <li><strong>Otros:</strong> {{ $sanidad->otros ?? '-' }}</li>
+                                    <li><strong>Observaciones:</strong> {{ $sanidad->observaciones ?? 'Sin observaciones' }}</li>
+                                    <li><strong>Censo de enfermedades:</strong> {{ $sanidad->censo_enfermedades ? 'Sí' : 'No' }}</li>
+                                    <li><strong>Ciclos lectura enfermedades:</strong> {{ $sanidad->ciclos_lectura_enfermedades ?? '-' }}</li>
+                                    <li><strong>Ciclos lectura plagas:</strong> {{ $sanidad->ciclos_lectura_plagas ?? '-' }}</li>
+                                </ul>
+
+                                {{-- Mostrar información de trampas si existen --}}
+                                @if ($sanidad->trampas->count() > 0)
+                                    <h6 class="mt-4">Datos de Trampas de Palmarum</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach ($sanidad->trampas as $trampa)
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Ciclos: {{ $trampa->ciclos ?? '-' }}</span>
+                                                <span>Machos capturados: {{ $trampa->machos_capturados ?? '-' }}</span>
+                                                <span>Hembras capturadas: {{ $trampa->hembras_capturadas ?? '-' }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="text-muted mt-2">No se registraron trampas de Palmarum para esta sanidad.</p>
+                                @endif
+
+                                <div class="d-flex justify-content-end mt-2">
+                                    <a href="{{ route('sanidades.edit', $sanidad->id) }}" class="btn btn-warning btn-sm">✏️ Editar esta sanidad</a>
+                                </div>
+                            </div>
+                        @endforeach
                     @else
-                        <p class="text-muted">No se ha registrado información de sanidad.</p>
+                        <p class="text-muted">No hay datos de sanidad registrados.</p>
                     @endif
                 </div>
             </div>
         </div>
+
 
         {{-- Suelo --}}
         <div class="accordion-item">
@@ -277,7 +374,7 @@
                         <div class="data-card">
                             <ul>
                                 <li><strong>Análisis foliar:</strong> {{ ucfirst($visita->suelo->analisis_foliar) }}</li>
-                                <li><strong>Análisis suelo:</strong> {{ ucfirst($visita->suelo->alanalisis_suelo) }}</li>
+                                <li><strong>Análisis suelo:</strong> {{ ucfirst($visita->suelo->analisis_suelo) }}</li>
                                 <li><strong>Tipo de suelo:</strong> {{ ucfirst($visita->suelo->tipo_suelo) }}</li>
                             </ul>
                         </div>
@@ -411,19 +508,30 @@
                                 </div>
                             @endif
 
-                            {{-- Imágenes finales --}}
-                            @if (is_array($visita->cierreVisita->imagenes) && count($visita->cierreVisita->imagenes))
-                                <div class="mt-4">
-                                    <strong>🖼️ Imágenes finales:</strong><br>
-                                    <div class="row">
-                                        @foreach ($visita->cierreVisita->imagenes as $img)
-                                            <div class="col-md-4 col-6 mb-3"> {{-- Col-6 para móviles --}}
-                                                <img src="{{ $img }}" class="img-fluid rounded shadow img-thumb">
-                                            </div>
-                                        @endforeach
+                             {{-- Imágenes finales --}}
+                                @php
+                                    // Manejo seguro del campo 'imagenes'
+                                    $imagenes = [];
+                                    if ($visita->cierreVisita && $visita->cierreVisita->imagenes) {
+                                        $imagenes = is_array($visita->cierreVisita->imagenes) 
+                                            ? $visita->cierreVisita->imagenes 
+                                            : json_decode($visita->cierreVisita->imagenes, true) ?? [];
+                                    }
+                                @endphp
+                                
+                                {{-- Verificamos si hay imágenes --}}
+                                @if (count($imagenes) > 0)
+                                    <div class="mt-4">
+                                        <strong>🖼️ Tomas destacadas durante la visita:</strong><br>
+                                        <div class="row">
+                                            @foreach ($imagenes as $img)
+                                                <div class="col-md-4 col-6 mb-3">
+                                                    <img src="{{ $img }}" class="img-fluid rounded shadow img-thumb">
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
                         </div>
                     @else
                         <p class="text-muted">No se ha registrado el cierre de visita.</p>
@@ -453,22 +561,29 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function descargarPDFConSweet() {
-            Swal.fire({
-                title: 'Generando PDF...',
-                text: 'Esto puede tardar unos segundos',
-                imageUrl: '{{ asset('images/loader.gif') }}',
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false
-            });
+    Swal.fire({
+        title: 'Generando PDF...',
+        text: 'Esto puede tardar unos segundos',
+        imageUrl: '{{ asset('images/loader.gif') }}',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    });
 
-            const iframe = document.getElementById('descargaPDFiframe');
-            iframe.src = "{{ route('visitas.exportar.pdf', $visita->id) }}";
+    const url = "{{ route('visitas.exportar.pdf', $visita->id) }}";
 
-            setTimeout(() => {
-                Swal.close();
-            }, 16000); // Ajusta el tiempo según la velocidad de generación
-        }
+    // Llamamos a la URL en una nueva pestaña para evitar que el navegador
+    // bloquee la descarga. El servidor debe enviar la cabecera 'Content-Disposition'
+    // para forzar la descarga del archivo.
+    window.open(url, '_blank');
+
+    // Esperamos un momento antes de cerrar el SweetAlert.
+    // Aunque el archivo se descargue, la ventana emergente de SweetAlert debe cerrarse
+    // manualmente ya que no tiene forma de saber cuando el archivo se ha descargado.
+    setTimeout(() => {
+        Swal.close();
+    }, 5000); // 5 segundos es usualmente suficiente.
+}
 
         function descargarExcelConSweet() {
             Swal.fire({

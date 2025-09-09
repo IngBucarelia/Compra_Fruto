@@ -235,6 +235,15 @@ export async function sincronizarDatosOffline() {
             if (storeName === 'sanidad' && !registroParaEnviar.local_id) {
                 // Asume que 'registroOriginal' tiene una propiedad 'id' que es la clave de IndexedDB.
                 // Si tu clave de IndexedDB es diferente (ej. 'uuid', 'key'), ajusta 'registroOriginal.id' aquí.
+                registroParaEnviar.enfermedades = (registroParaEnviar.enfermedades || []).map(e => ({
+                    nombre: e.nombre || e.nombre_enfermedad || '',
+                    estado: e.estado != null ? String(e.estado) : null
+                }));
+
+                registroParaEnviar.plagas = (registroParaEnviar.plagas || []).map(p => ({
+                    nombre: p.nombre || p.nombre_plaga || '',
+                    estado: p.estado != null ? String(p.estado) : null
+                }));
                 registroParaEnviar.local_id = registroOriginal.id || crypto.randomUUID(); // Fallback a UUID si no hay ID
                 console.log(`[${storeName}] Añadiendo local_id: ${registroParaEnviar.local_id} al registro.`);
             }
@@ -325,4 +334,6 @@ export async function sincronizarDatosOffline() {
         alert(`⚠️ Sincronización finalizada con algunos errores. Registros sincronizados: ${totalSincronizados}. Por favor, revisa la consola del navegador para ver los detalles de los errores.`);
         console.error('Resumen de errores de sincronización:', errores);
     }
+
+    return totalSincronizados;
 }

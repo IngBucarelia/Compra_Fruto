@@ -1,7 +1,7 @@
 <template>
   <div class="offline-container offline-form-container">
     <h2 class="offline-title">📋 Revisión Final de Formulario (Modo Offline)</h2>
-
+   <div class="row mb-4">
     <!-- Contenedor principal para las secciones, para que se apilen correctamente -->
     <div class="all-sections-container">
       <!-- Áreas -->
@@ -10,37 +10,38 @@
           📍 Áreas Registradas
         </div>
         <div class="card-body">
-          <div v-if="areas && areas.length > 0">
-            <div v-for="(area, index) in areas" :key="area.local_id || index" class="mb-3 area-card">
-              <h5>Área #{{ index + 1 }}</h5>
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item"><strong>Material:</strong> {{ area.material || 'N/A' }}</li>
-                <li class="list-group-item"><strong>Estado:</strong> {{ area.estado || 'N/A' }}</li>
-                <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
-                <li class="list-group-item"><strong>Área (m²):</strong> {{ area.area || 'N/A' }}</li>
-                
-                <li class="list-group-item"><strong>Área Total Finca (Ha):</strong> {{ area.area_total_finca_hectareas || 'N/A' }}</li>
-                <li class="list-group-item"><strong>N° Palmas Total Finca:</strong> {{ area.numero_palmas_total_finca || 'N/A' }}</li>
-                
-                <li class="list-group-item"><strong>Área Palmas Desarrollo (Ha):</strong> {{ area.area_palmas_desarrollo_hectareas || 'N/A' }}</li>
-                <li class="list-group-item"><strong>N° Palmas Desarrollo:</strong> {{ area.numero_palmas_desarrollo || 'N/A' }}</li>
-                
-                <li class="list-group-item"><strong>Área Palmas Producción (Ha):</strong> {{ area.area_palmas_produccion_hectareas || 'N/A' }}</li>
-                <li class="list-group-item"><strong>N° Palmas Producción:</strong> {{ area.numero_palmas_produccion || 'N/A' }}</li>
-                
-                <li class="list-group-item"><strong>Ciclos de Cosecha:</strong> {{ area.ciclos_cosecha || 'N/A' }}</li>
-                <li class="list-group-item"><strong>Producción (Toneladas/Mes):</strong> {{ area.produccion_toneladas_por_mes || 'N/A' }}</li>
-                
-                <li class="list-group-item"><strong>Aplica Orden Plantis:</strong> {{ area.aplica_orden_plantis ? 'Sí' : 'No' }}</li>
-                
-                <template v-if="area.aplica_orden_plantis">
-                  <li class="list-group-item"><strong>Orden Plantis N°:</strong> {{ area.orden_plantis_numero || 'N/A' }}</li>
-                  <li class="list-group-item"><strong>Estado Orden Plantis:</strong> {{ area.estado_oren_plantis || 'N/A' }}</li>
-                  <li class="list-group-item"><strong>N° Plantas Orden Plantis:</strong> {{ area.numero_plantas_orden_plantis || 'N/A' }}</li>
-                </template>
-              </ul>
+          <div v-if="areas.length > 0">
+              <div v-for="(area, index) in areas" :key="area.id" class="mb-3 area-card">
+                <h5>Área #{{ index + 1 }}</h5>
+               <ul class="list-group">
+                   <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
+                  <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
+                  <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
+                  <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
+                  <li class="list-group-item"><strong>Área (m²):</strong> {{ area.area }}</li>
+                  
+                  <li class="list-group-item"><strong>Área Total Finca (Ha):</strong> {{ area.area_total_finca_hectareas || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>N° Palmas Total Finca:</strong> {{ area.numero_palmas_total_finca || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Área Palmas Desarrollo (Ha):</strong> {{ area.area_palmas_desarrollo_hectareas || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>N° Palmas Desarrollo:</strong> {{ area.numero_palmas_desarrollo || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Área Palmas Producción (Ha):</strong> {{ area.area_palmas_produccion_hectareas || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>N° Palmas Producción:</strong> {{ area.numero_palmas_produccion || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Ciclos de Cosecha:</strong> {{ area.ciclos_cosecha || 'N/A' }}</li>
+                  <li class="list-group-item"><strong>Producción (Toneladas/Mes):</strong> {{ area.produccion_toneladas_por_mes || 'N/A' }}</li>
+                  
+                  <li class="list-group-item"><strong>Aplica Orden Plantis:</strong> {{ area.aplica_orden_plantis ? 'Sí' : 'No' }}</li>
+                  
+                  <template v-if="area.aplica_orden_plantis">
+                    <li class="list-group-item"><strong>Orden Plantis N°:</strong> {{ area.orden_plantis_numero || 'N/A' }}</li>
+                    <li class="list-group-item"><strong>Estado Orden Plantis:</strong> {{ area.estado_oren_plantis || 'N/A' }}</li>
+                    <li class="list-group-item"><strong>N° Plantas Orden Plantis:</strong> {{ area.numero_plantas_orden_plantis || 'N/A' }}</li>
+                  </template>
+                </ul>
+              </div>
             </div>
-          </div>
           <p v-else class="text-muted">No hay áreas registradas</p>
         </div>
       </div>
@@ -90,25 +91,72 @@
       </div>
 
       <!-- Sanidad -->
-      <div class="card border-danger mb-4" v-if="sanidad">
-        <div class="card-header bg-danger text-white">🦠 Sanidad</div>
-        <div class="card-body">
-          <ul class="list-group list-group-flush">
-              <li class="list-group-item">Opsophanes: {{ formatPercentage(sanidad.opsophanes) }}</li>
-              <li class="list-group-item">Pudrición Cogollo: {{ formatPercentage(sanidad.pudricion_cogollo) }}</li>
-              <li class="list-group-item">Raspador: {{ formatPercentage(sanidad.raspador) }}</li>
-              <li class="list-group-item">Palmarum: {{ formatPercentage(sanidad.palmarum) }}</li>
-              <li class="list-group-item">Strategus: {{ formatPercentage(sanidad.strategus) }}</li>
-              <li class="list-group-item">Leptopharsa: {{ formatPercentage(sanidad.leptopharsa) }}</li>
-              <li class="list-group-item">Pestalotiopsis: {{ formatPercentage(sanidad.pestalotiopsis) }}</li>
-              <li class="list-group-item">Pudrición Basal: {{ formatPercentage(sanidad.pudricion_basal) }}</li>
-              <li class="list-group-item">Pudrición Estípite: {{ formatPercentage(sanidad.pudricion_estipe) }}</li>
-              <li class="list-group-item">Otros: {{ sanidad.otros || 'N/A' }}</li>
-              <li class="list-group-item">Observaciones: {{ sanidad.observaciones || 'N/A' }}</li>
+      <div class="col-md-6">
+        <div class="card border-danger mb-3">
+          <div class="card-header bg-danger text-white">🦠 Sanidad</div>
+          <div class="card-body" v-if="sanidad">
+            <ul class="list-group list-group-flush">
+              <!-- Enfermedades -->
+              <li v-if="sanidad.enfermedades && sanidad.enfermedades.length > 0" class="list-group-item">
+                <h6>Enfermedades:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(enf, eIndex) in sanidad.enfermedades" :key="eIndex" class="list-group-item">
+                    <strong>Nombre:</strong> {{ enf.nombre || '-' }},
+                    <strong>Estado (%):</strong> {{ enf.estado || '-' }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">No hay enfermedades registradas.</li>
+
+              <!-- Plagas -->
+              <li v-if="sanidad.plagas && sanidad.plagas.length > 0" class="list-group-item">
+                <h6>Plagas:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(pla, pIndex) in sanidad.plagas" :key="pIndex" class="list-group-item">
+                    <strong>Nombre:</strong> {{ pla.nombre || '-' }},
+                    <strong>Estado:</strong> {{ pla.estado || '-' }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">No hay plagas registradas.</li>
+
+              <!-- Censo y ciclos -->
+              <li v-if="sanidad.censo_enfermedades !== undefined" class="list-group-item">
+                <strong>Censo de enfermedades:</strong> {{ sanidad.censo_enfermedades ? 'Sí' : 'No' }}
+              </li>
+              <li v-if="sanidad.ciclos_lectura_enfermedades" class="list-group-item">
+                <strong>Ciclos lectura enfermedades:</strong> {{ sanidad.ciclos_lectura_enfermedades }}
+              </li>
+              <li v-if="sanidad.ciclos_lectura_plagas" class="list-group-item">
+                <strong>Ciclos lectura plagas:</strong> {{ sanidad.ciclos_lectura_plagas }}
+              </li>
+
+              <!-- Otros y observaciones -->
+              <li v-if="sanidad.otros" class="list-group-item">
+                <strong>Otros:</strong> {{ sanidad.otros }}
+              </li>
+              <li v-if="sanidad.observaciones" class="list-group-item">
+                <strong>Observaciones:</strong> {{ sanidad.observaciones }}
+              </li>
+
+              <!-- Trampas -->
+              <li v-if="sanidad.trampas && sanidad.trampas.length > 0" class="list-group-item">
+                <h6 class="mt-2">Trampas de Palmarum:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(trampa, index) in sanidad.trampas" :key="index" class="list-group-item">
+                    Ciclos: {{ trampa.ciclos || '-' }}, Machos: {{ trampa.machos }}, Hembras: {{ trampa.hembras }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">
+                No hay trampas registradas.
+              </li>
             </ul>
+          </div>
+          <p v-else class="text-muted card-body">Sin sanidad registrada.</p>
         </div>
       </div>
-      <p v-else class="text-muted text-center mb-4">No hay datos de sanidad registrados.</p>
+      
 
       <!-- Suelo -->
       <div class="card border-warning mb-4" v-if="suelo">
@@ -345,7 +393,33 @@
       Estado: {{ isOnline ? 'Online' : 'Offline' }}
     </p>
     </div>
+    </div>
+    </div>
+
+    <!-- Modal de Sincronización -->
+<div>
+  <!-- Botón para abrir modal -->
+  <button @click="sincronizarTodo" class="btn btn-primary">
+    Sincronizar
+  </button>
+
+  <!-- Modal -->
+  <div v-if="mostrar" class="modal-overlay">
+    <div class="modal-contenido">
+      <h3 v-if="!completo">⏳ Sincronizando...</h3>
+      <h3 v-else>✅ ¡Sincronización Completa!</h3>
+
+      <p v-if="!completo">Por favor espera mientras se sincronizan los datos.</p>
+      <p v-else>Los datos se sincronizaron correctamente.</p>
+
+      <button v-if="completo" @click="mostrar = false" class="btn btn-success">
+        Cerrar
+      </button>
+    </div>
   </div>
+</div>
+
+
 </template>
 
 <script>
@@ -357,6 +431,24 @@ import { sincronizarDatosOffline } from '../utils/sincronizador'
 export default {
   data() {
     return {
+      diseaseFieldMapInvertido: {
+      'opsophanes': 'Opsophanes',
+      'pudricion_cogollo': 'Pudrición del cogollo',
+      'raspador': 'Raspador',
+      'palmarum': 'Palmarum',
+      'strategus': 'Strategus',
+      'leptopharsa': 'Leptopharsa',
+      'pestalotiopsis': 'Pestalotiopsis',
+      'pudricion_basal': 'Pudrición basal',
+      'pudricion_estipe': 'Pudrición estipe',
+      'vaso_de_escoba': 'Vaso de escoba',
+      'lignina': 'Lignina',
+      'hojas_rojas': 'Hojas rojas',
+      'anillos': 'Anillos',
+      'corte_en_v': 'Corte en V',
+        // indica si ya terminó
+    },mostrar: false,   // controla visibilidad del modal
+      completo: false,
       visitaId: null,
       areas: [],
       fertilizaciones: [],
@@ -390,6 +482,8 @@ export default {
         if (!str) return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
       },
+
+      
       // Método para formatear fechas
       formatDate(dateString) {
         if (!dateString) return 'N/A';
@@ -431,6 +525,13 @@ export default {
           // Redirección inmediata
           window.location.href = '/dashboard';
         },
+
+         mostrarModal() {
+          const modalEl = document.getElementById('miModal');
+          const modal = new Modal(modalEl);
+          modal.show();
+        },
+
 
     async loadAllData() {
       try {
@@ -529,21 +630,41 @@ export default {
       })
     },
     async sincronizarTodo() {
-      if (!this.isOnline) {
-        alert('No hay conexión a internet. Por favor, conéctate para sincronizar los datos.');
-        return;
-      }
-      // Muestra un mensaje de carga o spinner si lo deseas
-      // this.isLoading = true; 
-      try {
-        await sincronizarDatosOffline();
-      } catch (error) {
-        console.error('Error general al iniciar la sincronización:', error);
-        // Manejar el error a nivel de UI si es necesario
-      } finally {
-        // this.isLoading = false;
-      }
-    },
+          if (!this.isOnline) {
+            alert('No hay conexión a internet. Por favor, conéctate para sincronizar los datos.');
+            return;
+          }
+
+          this.mostrar = true;
+          this.completo = false;
+
+
+          try {
+            // 🔹 Primero sincronizas todo
+            await sincronizarDatosOffline();
+
+            // 🔹 Luego actualizas el estado de la visita a "finalizado"
+            const visitaId = this.visita_id; // <-- asegúrate de tener este valor en tu componente
+            await fetch(`/visitas/${visitaId}/update-status`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+              }
+            });
+            this.completo = true;
+
+
+            alert("✅ Sincronización completa y estado de la visita actualizado.");
+          } catch (error) {
+            console.error('Error general al iniciar la sincronización:', error);
+            this.mostrar = false;
+          } finally {
+            if (modalInstance) modalInstance.close();
+
+          }
+        },
+
     
     /**
      * Actualiza el estado 'isOnline' cuando el navegador se conecta.
@@ -715,5 +836,22 @@ export default {
     }
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-contenido {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 350px;
+  text-align: center;
+}
 
 </style>

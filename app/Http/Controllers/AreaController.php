@@ -59,9 +59,10 @@ class AreaController extends Controller
         try {
             foreach ($submittedAreas as $index => $areaData) {
                 $rules = [
-                    'material' => 'required|in:guinense,hibrido',
+                    'variedad' => 'required',
+                    'material' => 'required',
                     'estado' => 'required|in:desarrollo,produccion',
-                    'anio_siembra' => 'required|date',
+                    'anio_siembra' => 'required',
                     'area' => 'required|numeric|min:0',
                     'area_total_finca_hectareas' => 'nullable|numeric|min:0',
                     'numero_palmas_total_finca' => 'nullable|integer|min:0',
@@ -78,7 +79,7 @@ class AreaController extends Controller
                 ];
 
                 if (isset($areaData['aplica_orden_plantis']) && (bool)$areaData['aplica_orden_plantis']) {
-                    $rules['orden_plantis_numero'] = 'required|integer|min:0';
+                    $rules['orden_plantis_numero'] = 'nullable|integer|min:0';
                     $rules['numero_plantas_orden_plantis'] = 'required|integer|min:0';
                     $rules['estado_oren_plantis'] = 'required|in:desarrollo,produccion';
                 }
@@ -239,8 +240,9 @@ class AreaController extends Controller
                 if ($formName === 'area') {
                     $rules = [
                         'visita_id' => 'required|exists:visitas,id',
-                        'local_id' => 'required|string|max:36', // ✅ Validar el local_id (UUID)
-                        'material' => 'required|in:guinense,hibrido',
+                        'local_id' => 'required|string|max:36', 
+                        'variedad' => 'required',
+                        'material' => 'required',
                         'estado' => 'required|in:desarrollo,produccion',
                         'anio_siembra' => 'required|date',
                         'area' => 'required|numeric|min:0',
@@ -351,7 +353,9 @@ class AreaController extends Controller
                 $local_id = $submission['local_id'] ?? null;
                 $formData = $submission['formData'] ?? [];
                 $visita_id = $formData['visita_id'] ?? null;
-
+                if (isset($formData['anio_siembra']) && is_numeric($formData['anio_siembra'])) {
+                        $formData['anio_siembra'] = $formData['anio_siembra'] . '-01-01';
+                    }
                 if (!$local_id) {
                     $results[] = [
                         'local_id' => $local_id,
@@ -364,7 +368,8 @@ class AreaController extends Controller
                 // Validación de datos
                 $validator = Validator::make($formData, [
                     'visita_id' => 'required|exists:visitas,id',
-                    'material' => 'required|in:guinense,hibrido',
+                    'variedad'  => 'required',
+                    'material' => 'required',
                     'estado' => 'required|in:desarrollo,produccion',
                     'anio_siembra' => 'required|date',
                     'area' => 'required|numeric|min:0',

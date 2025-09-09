@@ -1,56 +1,103 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Sanidad;
 use App\Models\Visita;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB; // Necesario si usas transacciones o DB::beginTransaction
-
-
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class SanidadController extends Controller
 {
-public function create(Request $request)
+    /**
+     * Formulario para crear sanidad en una visita
+     */
+    public function create(Request $request)
     {
         $visita_id = $request->query('visita_id');
-        
+
         $visita = Visita::with([
             'area',
             'fertilizaciones.fertilizantes',
             'polinizaciones',
-            'sanidades' 
+            'sanidades.enfermedades',
+            'sanidades.plagas',
+            'sanidades.trampas'
         ])->findOrFail($visita_id);
 
         return view('sanidades.create', compact('visita'));
     }
 
-
-public function store(Request $request)
+    /**
+     * Guardar una nueva sanidad con enfermedades, plagas y trampas
+     */
+    public function store(Request $request)
     {
         $data = $request->validate([
             'visita_id' => 'required|exists:visitas,id',
-            'opsophanes' => 'nullable|integer|min:0|max:100',
-            'pudricion_cogollo' => 'nullable|integer|min:0|max:100',
-            'raspador' => 'nullable|integer|min:0|max:100',
-            'palmarum' => 'nullable|integer|min:0|max:100',
-            'strategus' => 'nullable|integer|min:0|max:100',
-            'leptopharsa' => 'nullable|integer|min:0|max:100',
-            'pestalotiopsis' => 'nullable|integer|min:0|max:100',
-            'pudricion_basal' => 'nullable|integer|min:0|max:100',
-            'pudricion_estipe' => 'nullable|integer|min:0|max:100',
             'otros' => 'nullable|string|max:255',
             'observaciones' => 'nullable|string|max:1000',
+            'censo_enfermedades' => 'nullable|boolean',
+            'ciclos_lectura_enfermedades' => 'nullable|string|max:255',
+            'ciclos_lectura_plagas' => 'nullable|string|max:255',
+
+            'enfermedades' => 'nullable|array',
+            'enfermedades.*.nombre' => 'required|string|max:255',
+            'enfermedades.*.estado' => 'nullable|string|max:255',
+
+            'plagas' => 'nullable|array',
+            'plagas.*.nombre' => 'required|string|max:255',
+            'plagas.*.estado' => 'nullable|string|max:255',
+
+            'trampas' => 'nullable|array',
+            'trampas.*.ciclos' => 'nullable|string|max:255',
+            'trampas.*.machos' => 'nullable|integer|min:0',
+            'trampas.*.hembras' => 'nullable|integer|min:0',
         ]);
 
+        $data['censo_enfermedades'] = $request->has('censo_enfermedades');
 
-        Sanidad::create($data);
+        DB::transaction(function () use ($data) {
+            $sanidad = Sanidad::create($data);
 
-      return redirect()->route('suelos.create', ['visita_id' => $data['visita_id']])
-    ->with('success', 'Registro de sanidad guardado correctamente.');
- }
+            if (!empty($data['enfermedades'])) {
+                foreach ($data['enfermedades'] as $enf) {
+                    $sanidad->enfermedades()->create([
+                        'nombre_enfermedad' => $enf['nombre'],
+                        'estado' => $enf['estado'] ?? null,
+                    ]);
+                }
+            }
 
+            if (!empty($data['plagas'])) {
+                foreach ($data['plagas'] as $pla) {
+                    $sanidad->plagas()->create([
+                        'nombre_plaga' => $pla['nombre'],
+                        'estado' => $pla['estado'] ?? null,
+                    ]);
+                }
+            }
+
+            if (!empty($data['trampas'])) {
+                foreach ($data['trampas'] as $trampaData) {
+                    $sanidad->trampas()->create([
+                        'ciclos' => $trampaData['ciclos'] ?? null,
+                        'machos_capturados' => $trampaData['machos'] ?? null,
+                        'hembras_capturadas' => $trampaData['hembras'] ?? null,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('suelos.create', ['visita_id' => $data['visita_id']])
+            ->with('success', 'Registro de sanidad guardado correctamente.');
+    }
+
+
+    /**
+     * Eliminar sanidad
+     */
     public function destroy($id)
     {
         $sanidad = Sanidad::findOrFail($id);
@@ -61,103 +108,177 @@ public function store(Request $request)
             ->with('success', 'Sanidad eliminada correctamente.');
     }
 
+    /**
+     * Formulario de edición
+     */
     public function edit($id)
-        {
-            $sanidad = Sanidad::findOrFail($id);
-            $visita = $sanidad->visita;
+    {
+        $sanidad = Sanidad::with(['enfermedades', 'plagas', 'trampas'])->findOrFail($id);
+        $visita = $sanidad->visita;
 
-            return view('sanidades.edit', compact('sanidad', 'visita'));
-        }
+        return view('sanidades.edit', compact('sanidad', 'visita'));
+    }
 
+    /**
+     * Actualizar sanidad con relaciones
+     */
     public function update(Request $request, $id)
-        {
-            $data = $request->validate([
-                'opsophanes' => 'nullable|integer|min:0|max:100',
-                'pudricion_cogollo' => 'nullable|integer|min:0|max:100',
-                'raspador' => 'nullable|integer|min:0|max:100',
-                'palmarum' => 'nullable|integer|min:0|max:100',
-                'strategus' => 'nullable|integer|min:0|max:100',
-                'leptopharsa' => 'nullable|integer|min:0|max:100',
-                'pestalotiopsis' => 'nullable|integer|min:0|max:100',
-                'pudricion_basal' => 'nullable|integer|min:0|max:100',
-                'pudricion_estipe' => 'nullable|integer|min:0|max:100',
-                'otros' => 'nullable|string|max:255',
-                'observaciones' => 'nullable|string|max:1000',
-            ]);
+    {
+        $data = $request->validate([
+            'visita_id' => 'required|exists:visitas,id',
+            'otros' => 'nullable|string|max:255',
+            'observaciones' => 'nullable|string|max:1000',
+            'censo_enfermedades' => 'nullable|boolean',
+            'ciclos_lectura_enfermedades' => 'nullable|string|max:255',
+            'ciclos_lectura_plagas' => 'nullable|string|max:255',
 
+            'enfermedades' => 'nullable|array',
+            'enfermedades.*.nombre' => 'required|string|max:255',
+            'enfermedades.*.estado' => 'nullable|string|max:255',
+
+            'plagas' => 'nullable|array',
+            'plagas.*.nombre' => 'required|string|max:255',
+            'plagas.*.estado' => 'nullable|string|max:255',
+
+            'trampas' => 'nullable|array',
+            'trampas.*.ciclos' => 'nullable|string|max:255',
+            'trampas.*.machos' => 'nullable|integer|min:0',
+            'trampas.*.hembras' => 'nullable|integer|min:0',
+        ]);
+
+        $data['censo_enfermedades'] = $request->has('censo_enfermedades');
+
+        DB::transaction(function () use ($data, $id) {
             $sanidad = Sanidad::findOrFail($id);
             $sanidad->update($data);
 
-            return redirect()->route('suelos.create', ['visita_id' => $sanidad->visita_id])
-                ->with('success', '✅ Sanidad actualizada correctamente.');
-        }
+            $sanidad->enfermedades()->delete();
+            $sanidad->plagas()->delete();
+            $sanidad->trampas()->delete();
 
-                // controllador offline
+            if (!empty($data['enfermedades'])) {
+                foreach ($data['enfermedades'] as $enf) {
+                    $sanidad->enfermedades()->create([
+                        'nombre_enfermedad' => $enf['nombre'],
+                        'estado' => $enf['estado'] ?? null,
+                    ]);
+                }
+            }
+
+            if (!empty($data['plagas'])) {
+                foreach ($data['plagas'] as $pla) {
+                    $sanidad->plagas()->create([
+                        'nombre_plaga' => $pla['nombre'],
+                        'estado' => $pla['estado'] ?? null,
+                    ]);
+                }
+            }
+
+            if (!empty($data['trampas'])) {
+                foreach ($data['trampas'] as $trampa) {
+                    $sanidad->trampas()->create([
+                        'ciclos' => $trampa['ciclos'] ?? null,
+                        'machos_capturados' => $trampa['machos'] ?? null,
+                        'hembras_capturadas' => $trampa['hembras'] ?? null,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('suelos.create', ['visita_id' => $data['visita_id']])
+            ->with('success', '✅ Sanidad actualizada correctamente.');
+}
 
 
-    public function syncOffline(Request $request)
+    /**
+     * Sincronización offline → online
+     */
+   public function syncOffline(Request $request)
     {
         $data = $request->json()->all();
-        // ✅ CORRECCIÓN: Evaluar la expresión ?? fuera de la interpolación de cadena
         $logLocalId = $data['local_id'] ?? 'N/A';
         Log::info('Datos recibidos para sincronizar Sanidad:', ['data' => $data, 'local_id' => $logLocalId]);
 
         try {
-            // ✅ AÑADIDO: Validación para 'local_id'
             $request->validate([
-                'visita_id' => 'required|integer|exists:visitas,id', // Asegura que la visita exista
-                'opsophanes' => 'nullable|integer|min:0|max:100',
-                'pudricion_cogollo' => 'nullable|integer|min:0|max:100',
-                'raspador' => 'nullable|integer|min:0|max:100',
-                'palmarum' => 'nullable|integer|min:0|max:100',
-                'strategus' => 'nullable|integer|min:0|max:100',
-                'leptopharsa' => 'nullable|integer|min:0|max:100',
-                'pestalotiopsis' => 'nullable|integer|min:0|max:100',
-                'pudricion_basal' => 'nullable|integer|min:0|max:100',
-                'pudricion_estipe' => 'nullable|integer|min:0|max:100',
+                'local_id' => 'required',
+                'visita_id' => 'required|integer|exists:visitas,id',
                 'otros' => 'nullable|string|max:255',
                 'observaciones' => 'nullable|string',
+                'censo_enfermedades' => 'nullable|boolean',
+                'ciclos_lectura_enfermedades' => 'nullable|string|max:255',
+                'ciclos_lectura_plagas' => 'nullable|string|max:255',
+
+                'enfermedades' => 'nullable|array',
+                'enfermedades.*.nombre' => 'required|string|max:255',
+                'enfermedades.*.estado' => 'nullable|string|max:255',
+
+                'plagas' => 'nullable|array',
+                'plagas.*.nombre' => 'required|string|max:255',
+                'plagas.*.estado' => 'nullable|string|max:255',
+
+                'trampas' => 'nullable|array',
+                'trampas.*.ciclos' => 'nullable|string|max:255',
+                'trampas.*.machos' => 'nullable|integer|min:0',
+                'trampas.*.hembras' => 'nullable|integer|min:0',
             ]);
 
-            DB::beginTransaction(); // Iniciar transacción para asegurar la atomicidad
-            try {
-                // ✅ CAMBIO CLAVE: Usar 'local_id' para buscar y actualizar o crear el registro
-                // Esto permite manejar múltiples registros de sanidad por visita y la edición offline.
-                Sanidad::updateOrCreate(
-                     // Clave única para buscar
-                    $data // Datos a crear o actualizar
-                );
+            DB::beginTransaction();
 
-                // Opcional: Actualizar el estado de la visita a 'en_ejecucion'
-                $visita = Visita::find($data['visita_id']);
-                if ($visita && $visita->estado === 'pendiente') {
-                    $visita->estado = 'en_ejecucion';
-                    $visita->save();
-                }
+            $sanidad = Sanidad::updateOrCreate(
+                ['local_id' => $data['local_id'], 'visita_id' => $data['visita_id']],
+                $data
+            );
 
-                DB::commit(); // Confirmar la transacción
-                Log::info('Registro de Sanidad sincronizado con éxito.', ['visita_id' => $data['visita_id'], 'local_id' => $data['local_id']]);
-                return response()->json(['message' => 'Sanidad sincronizada con éxito.', 'local_id' => $data['local_id']]);
+            $sanidad->enfermedades()->delete();
+            $sanidad->plagas()->delete();
+            $sanidad->trampas()->delete();
 
-            } catch (\Exception $e) {
-                DB::rollBack(); // Revertir la transacción en caso de error
-                // ✅ CORRECCIÓN: Evaluar la expresión ?? fuera de la interpolación de cadena
-                $logLocalId = $data['local_id'] ?? 'N/A';
-                Log::error("Error al guardar Sanidad (ID Local: {$logLocalId}): " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'data' => $data]);
-                return response()->json(['message' => 'Error internoeeeeee del servidor al sincronizar Sanidad.', 'error' => $e->getMessage()], 500);
+            foreach ($data['enfermedades'] ?? [] as $enf) {
+                $sanidad->enfermedades()->create([
+                    'nombre_enfermedad' => $enf['nombre'],
+                    'estado' => $enf['estado'] ?? null,
+                ]);
             }
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error("Error de validación al sincronizar Sanidad: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
-            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+            foreach ($data['plagas'] ?? [] as $pla) {
+                $sanidad->plagas()->create([
+                    'nombre_plaga' => $pla['nombre'],
+                    'estado' => $pla['estado'] ?? null,
+                ]);
+            }
+
+            foreach ($data['trampas'] ?? [] as $trampa) {
+                $sanidad->trampas()->create([
+                    'ciclos' => $trampa['ciclos'] ?? null,
+                    'machos_capturados' => $trampa['machos'] ?? null,
+                    'hembras_capturadas' => $trampa['hembras'] ?? null,
+                ]);
+            }
+
+            $visita = Visita::find($data['visita_id']);
+            if ($visita && $visita->estado === 'pendiente') {
+                $visita->estado = 'en_ejecucion';
+                $visita->save();
+            }
+
+            DB::commit();
+
+            Log::info('✅ Sanidad sincronizada correctamente.', [
+                'visita_id' => $data['visita_id'],
+                'local_id' => $data['local_id']
+            ]);
+
+            return response()->json(['message' => 'Sanidad sincronizada con éxito', 'local_id' => $data['local_id']]);
+
         } catch (\Exception $e) {
-            // ✅ CORRECCIÓN: Evaluar la expresión ?? fuera de la interpolación de cadena
-            $logLocalId = $data['local_id'] ?? 'N/A';
-            Log::error("Error inesperado al sincronizar Sanidad: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString(), 'local_id' => $logLocalId]);
-            return response()->json(['message' => 'Error interno del servidor al sincronizar Sanidad.', 'error' => $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error("❌ Error al sincronizar Sanidad (local_id: {$logLocalId}): " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $data
+            ]);
+            return response()->json(['message' => 'Error interno al sincronizar Sanidad', 'error' => $e->getMessage()], 500);
         }
     }
-
-
 
 }

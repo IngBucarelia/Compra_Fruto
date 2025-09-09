@@ -161,47 +161,78 @@
     </div>
     <h3>🌾Formulario de Registro de Polinización - {{ $visita->proveedor->proveedor_nombre }}</h3>
 
-    {{-- Formulario de polinización --}}
-    <form method="POST" action="{{ route('polinizaciones.store') }}">
-        @csrf
-        <input type="hidden" name="visita_id" value="{{ $visita->id }}">
+    <!-- Verificación de áreas híbridas -->
+    @php
+        $tieneAreasHibridas = false;
+        foreach ($visita->areas as $area) {
+            if (strtolower($area->material) === 'hibrido') {
+                $tieneAreasHibridas = true;
+                break;
+            }
+        }
+    @endphp
 
-        <div class="mb-3">
-            <label>📅 Fecha de polinización:</label>
-            <input type="date" name="fecha" class="form-control" required>
-        </div>
+    @if($tieneAreasHibridas)
+        <!-- Mostrar formulario de polinización si hay áreas híbridas -->
+        <h3>🌾Formulario de Registro de Polinización - {{ $visita->proveedor->proveedor_nombre }}</h3>
+        <form method="POST" action="{{ route('polinizaciones.store') }}">
+            @csrf
+            <input type="hidden" name="visita_id" value="{{ $visita->id }}">
 
-        <div class="mb-3">
-            <label>🔁 Número de pases:</label>
-            <input type="number" name="n_pases" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label>📅 Fecha de polinización:</label>
+                <input type="date" name="fecha" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>🔄 Ciclos por ronda:</label>
-            <input type="number" name="ciclos_ronda" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label>🔁 Número de pases:</label>
+                <input type="number" name="n_pases" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>💊 Cantidad de ANA aplicada:</label>
-            <input type="number" step="0.01" name="ana" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label>🔄 Ciclos por ronda:</label>
+                <input type="number" name="ciclos_ronda" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>💧 Tipo de ANA:</label>
-            <select name="tipo_ana" class="form-control" required>
-                <option value="">Seleccione</option>
-                <option value="solido">Sólido</option>
-                <option value="liquido">Líquido</option>
-            </select>
-        </div>
+            <div class="mb-3">
+                <label>💊 Cantidad de ANA aplicada:</label>
+                <input type="number" step="0.01" name="ana" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>🌫️ Cantidad de talco aplicado:</label>
-            <input type="number" step="0.01" name="talco" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label>💧 Tipo de ANA:</label>
+                <select name="tipo_ana" class="form-control" required>
+                    <option value="">Seleccione</option>
+                    <option value="solido">Sólido</option>
+                    <option value="liquido">Líquido</option>
+                </select>
+            </div>
 
-        <button type="submit" class="btn btn-primary">💾 Guardar polinización</button>
-    </form>
+            <div class="mb-3">
+                <label>🌫️ Cantidad de talco aplicado:</label>
+                <input type="number" step="0.01" name="talco" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">💾 Guardar polinización</button>
+        </form>
+            @else
+            <div class="alert alert-info mt-4">
+                <h4>⚠️ No aplica polinización</h4>
+                <p>Ninguna de las áreas registradas tiene material "Híbrido".</p>
+                
+                <!-- Botón para continuar a Sanidad -->
+                <a href="{{ route('sanidades.create', ['visita_id' => $visita->id]) }}" 
+                   class="btn btn-primary mt-2">
+                    → Continuar a Sanidad
+                </a>
+                
+                <!-- Opcional: Botón para volver -->
+                <a href="{{ route('visitas.show', $visita->id) }}" 
+                   class="btn btn-secondary mt-2 ms-2">
+                    ⬅️ Volver
+                </a>
+            </div>
+        @endif
 
     <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-secondary mt-4">
         ⬅️ Volver al detalle de la visita

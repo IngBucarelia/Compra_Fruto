@@ -16,6 +16,7 @@
               <div v-for="(area, index) in areasInfo" :key="area.id" class="mb-3 area-card">
                 <h5>Área #{{ index + 1 }}</h5>
                 <ul class="list-group">
+                  <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
                   <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
                   <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
                   <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
@@ -94,44 +95,114 @@
 
 
 
-    <h2>🪩 Registro de Sanidad (Modo Offline)</h2>
+   <h2>Registro de Sanidad (Modo Offline)</h2>
 
-    <!-- Formulario Sanidad -->
     <form @submit.prevent="guardar">
-      <div id="enfermedades-container">
-    <div class="enfermedad-group mb-3" v-for="(entry, index) in dynamicDiseases" :key="entry.id">
-      <button type="button" class="remove-enfermedad-btn" @click="removeEnfermedad(index)">✖️</button>
-      <div class="form-group mb-3">
-        <label>Enfermedad:</label>
-        <select 
-          v-model="entry.name" 
-          class="form-control" 
-          required
-          @change="handleDiseaseChange(entry.id, $event.target.value)"
-        >
-          <option value="">Seleccione enfermedad</option>
-          <option v-for="option in diseaseOptions" :value="option.value" :key="option.value">
-            {{ option.text }}
-          </option>
-        </select>
-      </div>
-      <div class="form-group mb-3">
-        <label>Porcentaje de afectación (%):</label>
-        <input
-          type="number"
-          class="form-control"
-          v-model="entry.percentage"
-          min="0"
-          max="100"
-          required
-          @input="handlePercentageChange(entry.id, $event.target.value)"
-        />
-      </div>
-    </div>
-  </div>
+      <!-- Enfermedades -->
+      <h3>Enfermedades</h3>
+      <div v-for="(enf, index) in dynamicEnfermedades" :key="enf.id" class="mb-3 p-3 border rounded">
+        <button type="button" class="btn btn-danger btn-sm float-end" @click="removeEnfermedad(index)">Eliminar</button>
+        
+        <div class="form-group mb-2">
+          <label>Nombre de la enfermedad:</label>
+          <select v-model="enf.nombre" class="form-select">
+            <option value="">-- Seleccione --</option>
+            <option value="Pudrición de cogollo (pc)">Pudrición de cogollo (pc)</option>
+            <option value="Pestalotiopsis">Pestalotiopsis</option>
+            <option value="Pudrición basal">Pudrición basal</option>
+            <option value="Budrición de estipite">Budrición de estipite</option>
+            <option value="Pudrición de racimos">Pudrición de racimos</option>
+            <option value="Racimos malogros">Racimos malogros</option>
+          </select>
+        </div>
 
-  <button type="button" class="btn btn-info mb-3" @click="addEnfermedad()">+ Añadir enfermedad</button>
+        <div class="form-group mb-2">
+          <label>Estado (% afectación):</label>
+          <input type="number" min="0" max="100" v-model="enf.estado" class="form-control" placeholder="Porcentaje afectado" />
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary mb-3" @click="addEnfermedad()">+ Agregar Enfermedad</button>
 
+      <!-- Plagas -->
+      <h3>Plagas</h3>
+      <div v-for="(pla, index) in dynamicPlagas" :key="pla.id" class="mb-3 p-3 border rounded">
+        <button type="button" class="btn btn-danger btn-sm float-end" @click="removePlaga(index)">Eliminar</button>
+        
+        <div class="form-group mb-2">
+          <label>Nombre de la plaga:</label>
+          <select v-model="pla.nombre" class="form-select">
+            <option value="">-- Seleccione --</option>
+            <option value="Leptopharsa gibbicarina">Leptopharsa gibbicarina</option>
+            <option value="Stenoma cecropia">Stenoma cecropia</option>
+            <option value="Leucothyreus femaratus">Leucothyreus femaratus</option>
+            <option value="Brassolis sophorae">Brassolis sophorae</option>
+            <option value="Euprosterna eleasa">Euprosterna eleasa</option>
+            <option value="Sibine fusca">Sibine fusca</option>
+            <option value="Opsiphanes cassina">Opsiphanes cassina</option>
+            <option value="Automeris liberia">Automeris liberia</option>
+            <option value="Dirphia gragatus">Dirphia gragatus</option>
+            <option value="Cephaloleia vagelineata">Cephaloleia vagelineata</option>
+            <option value="Demotispa neivai">Demotispa neivai</option>
+            <option value="Loxotoma elegans">Loxotoma elegans</option>
+            <option value="Hispoleptis subfasciata">Hispoleptis subfasciata</option>
+            <option value="Haplaxius crudus">Haplaxius crudus</option>
+            <option value="Rhynchophorus palmarum">Rhynchophorus palmarum</option>
+            <option value="Strategus aloeus">Strategus aloeus</option>
+            <option value="Sagalassa valida">Sagalassa valida</option>
+          </select>
+        </div>
+
+        <div class="form-group mb-2">
+          <label>Estado:</label>
+          <select v-model="pla.estado" class="form-select">
+            <option value="">-- Seleccione --</option>
+            <option value="Larva">Larva</option>
+            <option value="Ninfa">Ninfa</option>
+            <option value="Adulto">Adulto</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary mb-3" @click="addPlaga()">+ Agregar Plaga</button>
+
+      <!-- Campos estáticos -->
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" v-model="form.censo_enfermedades" id="censoEnfermedadesCheck">
+        <label class="form-check-label" for="censoEnfermedadesCheck">
+          Realizó censo de enfermedades
+        </label>
+      </div>
+
+      <div class="form-group mb-3" v-if="form.censo_enfermedades">
+        <label>Ciclos de lectura de enfermedades:</label>
+        <input type="text" v-model="form.ciclos_lectura_enfermedades" class="form-control" />
+      </div>
+
+      <div class="form-group mb-3">
+        <label>Ciclos de lectura de plagas:</label>
+        <input type="text" v-model="form.ciclos_lectura_plagas" class="form-control" />
+      </div>
+
+      <!-- Trampas -->
+      <hr>
+      <h3>Trampas de Palmarum</h3>
+      <div v-for="(trampa, index) in dynamicTraps" :key="trampa.id" class="trampa-group mb-3 p-3 border rounded">
+        <button type="button" class="btn btn-danger btn-sm float-end" @click="removeTrampa(index)">Eliminar</button>
+        <div class="form-group mb-2">
+          <label>Ciclos:</label>
+          <input type="text" v-model="trampa.ciclos" class="form-control form-control-sm" />
+        </div>
+        <div class="form-group mb-2">
+          <label>Machos capturados:</label>
+          <input type="number" v-model="trampa.machos" class="form-control form-control-sm" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Hembras capturadas:</label>
+          <input type="number" v-model="trampa.hembras" class="form-control form-control-sm" min="0" />
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary mb-3" @click="addTrampa()">+ Agregar Trampa</button>
+
+      <!-- Otros -->
       <div class="form-group mb-3">
         <label>Otros (descripción):</label>
         <input type="text" v-model="form.otros" class="form-control" />
@@ -142,39 +213,72 @@
         <textarea v-model="form.observaciones" class="form-control" rows="3"></textarea>
       </div>
 
+      <!-- Botones -->
       <div class="button-group mt-4">
-        <button type="submit" class="btn btn-primary">💾 Guardar Sanidad</button>
-        <button type="button" class="btn btn-success" @click="irASuelo">
-          ➡️ Ir a Estudio de Suelo
-        </button>
-        <button v-if="canSync" @click="sincronizar" class="btn btn-success">🔄 Sincronizar</button>
+        <button type="submit" class="btn btn-primary">Guardar Sanidad</button>
+        <button type="button" class="btn btn-success" @click="irASuelo">Ir a Estudio de Suelo</button>
+        <button v-if="canSync" @click="sincronizar" class="btn btn-success">Sincronizar</button>
         <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
       </div>
     </form>
 
-    <!-- Sección para mostrar sanidades guardadas localmente -->
-    <div class="mt-4 p-3 bg-light rounded">
-      <h4 class="mb-3">Sanidades Guardadas Localmente</h4>
-      <div v-if="localSanidades.length > 0">
-        <div v-for="sanidad in localSanidades" :key="sanidad.local_id" class="card mb-3">
-         
-          
-          <div class="card-body">
-            <ul class="list-group list-group-flush">
-              <template v-for="(value, key) in diseaseFieldMap">
-                <li v-if="sanidad[key]" class="list-group-item">
-                  <strong>{{ value }}:</strong> {{ sanidad[key] }}%
-                </li>
-              </template>
-              <li v-if="sanidad.otros" class="list-group-item"><strong>Otros:</strong> {{ sanidad.otros }}</li>
-              <li v-if="sanidad.observaciones" class="list-group-item"><strong>Observaciones:</strong> {{ sanidad.observaciones }}</li>
-            </ul>
-          </div>
+
+   <!-- Sanidades guardadas localmente -->
+<div class="mt-4 p-3 bg-light rounded">
+  <h4 class="mb-3">Sanidades Guardadas Localmente</h4>
+  <div v-if="localSanidades.length > 0">
+    <div v-for="sanidad in localSanidades" :key="sanidad.id" class="card mb-3">
+      <div class="card-body">
+        <!-- Enfermedades -->
+        <div v-if="sanidad.enfermedades && sanidad.enfermedades.length > 0">
+          <h6>Enfermedades:</h6>
+          <ul class="list-group list-group-flush mb-2">
+            <li v-for="(enf, eIndex) in sanidad.enfermedades" :key="eIndex" class="list-group-item">
+              <strong>Nombre:</strong> {{ enf.nombre || '-' }},
+              <strong>Estado (%):</strong> {{ enf.estado || '-' }}
+            </li>
+          </ul>
         </div>
+        <p v-else class="text-muted">No se registraron enfermedades.</p>
+
+        <!-- Plagas -->
+        <div v-if="sanidad.plagas && sanidad.plagas.length > 0">
+          <h6>Plagas:</h6>
+          <ul class="list-group list-group-flush mb-2">
+            <li v-for="(pla, pIndex) in sanidad.plagas" :key="pIndex" class="list-group-item">
+              <strong>Nombre:</strong> {{ pla.nombre || '-' }},
+              <strong>Estado:</strong> {{ pla.estado || '-' }}
+            </li>
+          </ul>
+        </div>
+        <p v-else class="text-muted">No se registraron plagas.</p>
+
+        <!-- Campos adicionales -->
+        <ul class="list-group list-group-flush">
+          <li v-if="sanidad.censo_enfermedades"><strong>Censo de enfermedades:</strong> Sí</li>
+          <li v-if="sanidad.ciclos_lectura_enfermedades"><strong>Ciclos lectura enfermedades:</strong> {{ sanidad.ciclos_lectura_enfermedades }}</li>
+          <li v-if="sanidad.ciclos_lectura_plagas"><strong>Ciclos lectura plagas:</strong> {{ sanidad.ciclos_lectura_plagas }}</li>
+          <li v-if="sanidad.otros"><strong>Otros:</strong> {{ sanidad.otros }}</li>
+          <li v-if="sanidad.observaciones"><strong>Observaciones:</strong> {{ sanidad.observaciones }}</li>
+        </ul>
+
+        <!-- Trampas -->
+        <div v-if="sanidad.trampas && sanidad.trampas.length > 0" class="mt-3">
+          <h6>Trampas de Palmarum:</h6>
+          <ul class="list-group list-group-flush">
+            <li v-for="(trampa, tIndex) in sanidad.trampas" :key="tIndex" class="list-group-item">
+              Ciclos: {{ trampa.ciclos || '-' }}, Machos: {{ trampa.machos }}, Hembras: {{ trampa.hembras }}
+            </li>
+          </ul>
+        </div>
+        <p v-else class="text-muted mt-2">No se registraron trampas de Palmarum.</p>
       </div>
-      <p v-else class="text-muted">No hay sanidades guardadas localmente.</p>
     </div>
-    </div>
+  </div>
+  <p v-else class="text-muted">No hay sanidades guardadas localmente.</p>
+</div>
+</div>
+
   </div>
 </template>
 
@@ -190,37 +294,23 @@ export default {
       fertilizaciones: [],
       polinizaciones: [],
       form: {
-        opsophanes: null,
-        pudricion_cogollo: null,
-        raspador: null,
-        palmarum: null,
-        strategus: null,
-        leptopharsa: null,
-        pestalotiopsis: null,
-        pudricion_basal: null,
-        pudricion_estipe: null,
+        censo_enfermedades: false,
+        ciclos_lectura_enfermedades: '',
+        ciclos_lectura_plagas: '',
         otros: '',
-        observaciones: ''
+        observaciones: '',
       },
-      dynamicDiseases: [],
-      currentEnfermedadIndex: 0,
+      dynamicEnfermedades: [], // <- Array único para enfermedades
+      dynamicPlagas: [],
+      dynamicTraps: [],
       localSanidades: [],
       canSync: navigator.onLine,
-      diseaseFieldMap: {
-        'Opsophanes': 'opsophanes',
-        'Pudrición del cogollo': 'pudricion_cogollo',
-        'Raspador': 'raspador',
-        'Palmarum': 'palmarum',
-        'Strategus': 'strategus',
-        'Leptopharsa': 'leptopharsa',
-        'Pestalotiopsis': 'pestalotiopsis',
-        'Pudrición basal': 'pudricion_basal',
-        'Pudrición estipe': 'pudricion_estipe'
-      }
-    };
+      currentEnfermedadIndex: 0,
+    }
   },
   computed: {
     diseaseOptions() {
+      // Genera las opciones del select a partir del mapa de campos
       return Object.keys(this.diseaseFieldMap).map(name => ({
         value: name,
         text: name
@@ -231,15 +321,20 @@ export default {
     try {
       this.visitaId = new URLSearchParams(window.location.search).get('visita_id') || localStorage.getItem('visita_id');
       if (!this.visitaId) {
-        console.error('No se encontró visita_id');
+        console.error('No se encontr�� visita_id');
         return;
       }
-      
+
       localStorage.setItem('visita_id', this.visitaId);
       await this.loadInitialData();
-      
-      if (this.dynamicDiseases.length === 0) {
+
+      if (this.dynamicEnfermedades.length === 0) {
         this.addEnfermedad();
+      }
+      
+      // A�0�9adir una trampa por defecto si no hay ninguna
+      if (this.dynamicTraps.length === 0) {
+        this.addTrampa();
       }
 
       window.addEventListener('online', this.updateSyncStatus);
@@ -256,54 +351,72 @@ export default {
     updateSyncStatus() {
       this.canSync = navigator.onLine;
     },
+
     irASuelo() {
       this.$router.push(`/suelo?visita_id=${this.visitaId}`);
     },
 
-    async guardar() {
-    try {
-      // Verificar que tenemos visita_id
-      if (!this.visitaId) {
-        throw new Error('No se encontró el ID de visita');
-      }
-
-      // Preparar datos para guardar
-      const formData = {
-        ...this.form,  // Copia todos los campos del formulario
-        visita_id: this.visitaId,
-        id: uuidv4(),  // Generar un ID único
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      // Procesar enfermedades dinámicas
-      this.dynamicDiseases.forEach(entry => {
-        if (entry.name && entry.percentage !== undefined) {
-          const fieldName = this.diseaseFieldMap[entry.name];
-          if (fieldName) {
-            formData[fieldName] = entry.percentage;
-          }
-        }
+    addEnfermedad(defaultNombre = '', defaultEstado = '') {
+      if (!Array.isArray(this.dynamicEnfermedades)) this.dynamicEnfermedades = [];
+      this.dynamicEnfermedades.push({
+        id: Date.now() + Math.random(),
+        nombre: defaultNombre,
+        estado: defaultEstado
       });
+    },
 
-      // Guardar usando tu IndexedDB existente
-      await saveFormData('sanidad', formData);
-      
-      // Actualizar la lista local
-      await this.loadLocalSanidades();
-      
-      alert('Datos de sanidad guardados correctamente en modo offline');
-      
-    } catch (error) {
-      console.error('Error en guardar:', error);
-      alert('Error al guardar: ' + error.message);
-    }
-  },
-  
+    removeEnfermedad(index) {
+      if (!Array.isArray(this.dynamicEnfermedades)) return;
+      this.dynamicEnfermedades.splice(index, 1);
+      if (this.dynamicEnfermedades.length === 0) this.addEnfermedad();
+    },
+
+
+
+    addPlaga() {
+      this.dynamicPlagas.push({
+        id: Date.now() + Math.random(),
+        nombre: '',
+        estado: ''
+      });
+    },
+    removePlaga(index) {
+      this.dynamicPlagas.splice(index, 1);
+      if (this.dynamicPlagas.length === 0) this.addPlaga();
+    },
+
+    async guardar() {
+      try {
+        if (!this.visitaId) {
+          throw new Error('No se encontró el ID de visita');
+        }
+
+        const formData = {
+          ...this.form,
+          visita_id: this.visitaId,
+          id: uuidv4(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          enfermedades: this.dynamicEnfermedades.filter(e => e.nombre),
+          plagas: this.dynamicPlagas.filter(p => p.nombre),
+          trampas: this.dynamicTraps.filter(t => t.ciclos || t.machos || t.hembras),
+        };
+        await saveFormData('sanidad', formData);
+
+        await this.loadLocalSanidades();
+        
+        alert('Datos de sanidad guardados correctamente en modo offline');
+      } catch (error) {
+        console.error('Error en guardar:', error);
+        alert('Error al guardar: ' + error.message);
+      }
+    },
+
+
     async loadInitialData() {
       try {
         const allAreas = await getAllDataFromStore('area');
-        this.areasInfo = Array.isArray(allAreas) ? 
+        this.areasInfo = Array.isArray(allAreas) ?
           allAreas.filter(item => item.visita_id == this.visitaId) : [];
 
         const allFertilizaciones = await getAllDataFromStore('fertilizacion');
@@ -317,7 +430,7 @@ export default {
         await this.loadLocalSanidades();
         await this.loadExistingSanidadData();
       } catch (error) {
-        console.error('Error cargando datos iniciales:', error);
+        console.log('Error cargando datos iniciales:', error);
       }
     },
     async loadLocalSanidades() {
@@ -326,48 +439,131 @@ export default {
         this.localSanidades = Array.isArray(allSanidades) ?
           allSanidades.filter(item => item.visita_id == this.visitaId) : [];
       } catch (error) {
-        console.error('Error cargando sanidades locales:', error);
+        console.log('Error cargando sanidades locales:', error);
       }
     },
     async loadExistingSanidadData() {
       try {
-        // Cargar datos existentes de sanidad
-        const existingSanidad = this.localSanidades[0]; // Tomamos la primera si existe
-        
-        if (existingSanidad) {
-          // Actualizar el formulario principal
-          Object.keys(this.form).forEach(key => {
-            if (existingSanidad[key] !== undefined) {
-              this.form[key] = existingSanidad[key];
-            }
-          });
+        const existingSanidad = this.localSanidades[0];
+        if (!existingSanidad) return;
 
-          // Cargar enfermedades dinámicas
-          this.dynamicDiseases = [];
-          Object.keys(this.diseaseFieldMap).forEach(name => {
-            const fieldName = this.diseaseFieldMap[name];
-            const percentage = existingSanidad[fieldName];
-            if (percentage !== null && percentage !== '') {
-              this.dynamicDiseases.push({
-                id: this.currentEnfermedadIndex++,
-                name,
-                percentage
-              });
-            }
-          });
+        // Llenar campos del formulario
+        Object.keys(this.form).forEach(key => {
+          if (existingSanidad[key] !== undefined) {
+            this.form[key] = existingSanidad[key];
+          }
+        });
 
-          // Renderizar enfermedades dinámicas
-          this.renderDynamicDiseases();
+        // --- Enfermedades ---
+        if (existingSanidad.enfermedades && Array.isArray(existingSanidad.enfermedades)) {
+          this.dynamicEnfermedades = existingSanidad.enfermedades.map((enf, idx) => ({
+            id: Date.now() + idx,
+            nombre: enf.nombre || '', // aquí se asigna la enfermedad seleccionada
+            estado: enf.estado || '', // si hay algún estado extra
+          }));
+        } else {
+          this.dynamicEnfermedades = [];
+          this.addEnfermedad(); // Siempre tener al menos un select
         }
+
+        // --- Plagas ---
+        if (existingSanidad.trampas && Array.isArray(existingSanidad.trampas)) {
+          this.dynamicTraps = existingSanidad.trampas.map((trampa, index) => ({
+            id: index,
+            ciclos: trampa.ciclos,
+            machos: trampa.machos,
+            hembras: trampa.hembras,
+          }));
+        } else {
+          this.dynamicTraps = [{ id: 0, ciclos: '', machos: null, hembras: null }];
+        }
+
+        // --- Renderizar selects ---
+        this.renderDynamicEnfermedades();
+        this.renderDynamicPlagas();
+
       } catch (error) {
         console.error('Error cargando datos existentes:', error);
       }
     },
+
+
+    // --- Render dinámico para enfermedades ---
+    renderDynamicEnfermedades() {
+      const container = document.getElementById('enfermedades-container');
+      container.innerHTML = ''; // limpiar
+
+      this.dynamicEnfermedades.forEach((enf, index) => {
+        const div = document.createElement('div');
+        div.className = 'row mb-2';
+        div.innerHTML = `
+          <div class="col-md-6 mb-2">
+            <label>Enfermedad:</label>
+            <select class="form-select" name="enfermedades[${index}][nombre]">
+              <option value="">-- Seleccione --</option>
+              <option value="opsophanes" ${enf.nombre === 'opsophanes' ? 'selected' : ''}>Opsophanes</option>
+              <option value="pudricion_cogollo" ${enf.nombre === 'pudricion_cogollo' ? 'selected' : ''}>Pudrición de Cogollo</option>
+              <option value="raspador" ${enf.nombre === 'raspador' ? 'selected' : ''}>Raspador</option>
+              <option value="palmarum" ${enf.nombre === 'palmarum' ? 'selected' : ''}>Palmarum</option>
+              <option value="strategus" ${enf.nombre === 'strategus' ? 'selected' : ''}>Strategus</option>
+              <option value="leptopharsa" ${enf.nombre === 'leptopharsa' ? 'selected' : ''}>Leptopharsa</option>
+              <option value="pestalotiopsis" ${enf.nombre === 'pestalotiopsis' ? 'selected' : ''}>Pestalotiopsis</option>
+              <option value="pudricion_basal" ${enf.nombre === 'pudricion_basal' ? 'selected' : ''}>Pudrición Basal</option>
+              <option value="pudricion_estipe" ${enf.nombre === 'pudricion_estipe' ? 'selected' : ''}>Pudrición de Estípe</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label>% afectación:</label>
+            <input type="number" min="0" max="100" class="form-control" name="enfermedades[${index}][estado]" value="${enf.estado}">
+          </div>
+          <div class="col-md-2 mb-2 d-flex align-items-end">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeEnfermedad(${enf.id})">Eliminar</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    },
+
+    // --- Render dinámico para plagas ---
+    renderDynamicPlagas() {
+      const container = document.getElementById('plagas-container');
+      container.innerHTML = '';
+
+      this.dynamicPlagas.forEach((plaga, index) => {
+        const div = document.createElement('div');
+        div.className = 'row mb-2';
+        div.innerHTML = `
+          <div class="col-md-6 mb-2">
+            <label>Plaga:</label>
+            <select class="form-select" name="plagas[${index}][nombre]">
+              <option value="">-- Seleccione --</option>
+              <option value="palmarum" ${plaga.nombre === 'palmarum' ? 'selected' : ''}>R. palmarum</option>
+              <option value="otra_plaga" ${plaga.nombre === 'otra_plaga' ? 'selected' : ''}>Otra plaga</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-2">
+            <label>Estado:</label>
+            <select class="form-select" name="plagas[${index}][estado]">
+              <option value="">-- Seleccione --</option>
+              <option value="leve" ${plaga.estado === 'leve' ? 'selected' : ''}>Leve</option>
+              <option value="moderada" ${plaga.estado === 'moderada' ? 'selected' : ''}>Moderada</option>
+              <option value="grave" ${plaga.estado === 'grave' ? 'selected' : ''}>Grave</option>
+            </select>
+          </div>
+          <div class="col-md-2 mb-2 d-flex align-items-end">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removePlaga(${plaga.id})">Eliminar</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    },
+
+
     formatDate(dateString) {
       if (!dateString) return 'N/A';
       try {
         const date = new Date(dateString);
-        return isNaN(date.getTime()) ? 'Fecha inválida' : 
+        return isNaN(date.getTime()) ? 'Fecha inv��lida' :
           date.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
@@ -378,100 +574,42 @@ export default {
       }
     },
     resetHiddenDiseaseInputs() {
-      Object.keys(this.diseaseFieldMap).forEach(key => {
-        const fieldName = this.diseaseFieldMap[key];
-        const hiddenInput = document.getElementById(`${fieldName}_hidden`);
-        if (hiddenInput) {
-          hiddenInput.value = '';
-        }
-      });
+      // Esta funci��n no es necesaria para el formulario offline
     },
     updateHiddenDiseaseInputs() {
-      this.resetHiddenDiseaseInputs();
-      this.dynamicDiseases.forEach(entry => {
-        const fieldName = this.diseaseFieldMap[entry.name];
-        if (fieldName) {
-          const hiddenInput = document.getElementById(`${fieldName}_hidden`);
-          if (hiddenInput) {
-            hiddenInput.value = entry.percentage;
-          }
-        }
+      // Esta funci��n no es necesaria para el formulario offline
+    },
+   
+   
+    
+    // M��todos para trampas
+    addTrampa() {
+      this.dynamicTraps.push({
+        id: this.dynamicTraps.length,
+        ciclos: '',
+        machos: null,
+        hembras: null,
       });
     },
-    addEnfermedad(defaultName = '', defaultPercentage = '') {
-      this.dynamicDiseases.push({
-        id: this.currentEnfermedadIndex++,
-        name: defaultName,
-        percentage: defaultPercentage
-      });
-      this.updateHiddenDiseaseInputs();
-    },
-    handleDiseaseChange(index, newName) {
-      const entry = this.dynamicDiseases.find(d => d.id === index);
-      if (entry) {
-        entry.name = newName;
-        this.updateHiddenDiseaseInputs();
-      }
-    },
-    handlePercentageChange(index, newPercentage) {
-      const entry = this.dynamicDiseases.find(d => d.id === index);
-      if (entry) {
-        entry.percentage = newPercentage;
-        this.updateHiddenDiseaseInputs();
-      }
-    },
-    removeEnfermedad(index) {
-      this.dynamicDiseases = this.dynamicDiseases.filter(entry => entry.id !== index);
-      this.updateHiddenDiseaseInputs();
-      
-      if (this.dynamicDiseases.length === 0) {
-        this.addEnfermedad();
+    removeTrampa(index) {
+      this.dynamicTraps.splice(index, 1);
+      if (this.dynamicTraps.length === 0) {
+        this.addTrampa();
       }
     },
     renderDynamicDiseases() {
-      // Este método sería llamado desde el template para renderizar las enfermedades
-      // La implementación exacta depende de cómo quieras manejarlo en el template
+      // Este m��todo ya no es necesario ya que Vue lo hace autom��ticamente
     },
     async submitForm() {
-      try {
-        // Preparar datos para guardar
-        const formData = {
-          ...this.form,
-          visita_id: this.visitaId,
-          id: uuidv4(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-
-        // Añadir datos de enfermedades dinámicas al formulario
-        this.dynamicDiseases.forEach(entry => {
-          const fieldName = this.diseaseFieldMap[entry.name];
-          if (fieldName) {
-            formData[fieldName] = entry.percentage;
-          }
-        });
-
-        // Guardar en IndexedDB
-        await saveFormData('sanidad', formData);
-        
-        // Manejar sincronización si está online
-        if (this.canSync) {
-          await this.syncData();
-        }
-
-        // Redireccionar o mostrar mensaje de éxito
-        alert('Datos guardados correctamente');
-      } catch (error) {
-        console.error('Error al guardar:', error);
-        alert('Error al guardar los datos');
-      }
+      // Esta funci��n fue reemplazada por 'guardar'
     },
     async syncData() {
-      // Implementar lógica de sincronización con el servidor
+      // L��gica para sincronizar datos
     }
   }
 };
 </script>
+
 <style scoped>
 
 @import '../styles/offline.css';

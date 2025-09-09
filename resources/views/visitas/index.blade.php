@@ -80,7 +80,7 @@
 </style>
 
 <div class="container visitas-container">
-    <h2 class="mb-4">Listado de Visitas</h2>
+    <h2 class="mb-4">Listado de Visitas Asignadas al eje Agronómico</h2>
 
     <div class="search-box">
         <a href="{{ route('visitas.create') }}"  class="btn btn-success">Registrar nueva visita</a>
@@ -104,6 +104,7 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th>id visita</th>
                     <th>Fecha</th>
                     <th>Proveedor</th>
                     <th>Tipo</th>
@@ -115,6 +116,7 @@
             <tbody>
                 @foreach ($visitas as $visita)
                     <tr>
+                        <td >{{ $visita->id }}</td>
                         <td data-label="Fecha">{{ $visita->fecha }}</td>
                         <td data-label="Proveedor">{{ $visita->proveedor->proveedor_nombre ?? '-' }}</td>
                         <td data-label="Tipo">{{ $visita->tipo_visita }}</td>
@@ -135,8 +137,7 @@
                         </td>
                         <td data-label="Acciones">
                             <div class="action-buttons">
-                                <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-sm btn-primary">Continuar Visita</a>
-                                <a href="{{ route('visitas.detalle', $visita->id) }}" class="btn btn-sm btn-success">Ver Detalle</a>
+                                <a href="{{ route('visitas.show', $visita->id) }}" class="btn btn-sm btn-primary">Ver Visita</a>
                             </div>
                         </td>
                     </tr>

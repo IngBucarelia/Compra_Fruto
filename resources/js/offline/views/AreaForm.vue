@@ -25,11 +25,31 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-3">
-                <label class="form-label">Material</label>
-                <select v-model="formArea.material" class="form-control" required>
+                <label class="form-label">Variedad</label>
+                <select v-model="formArea.variedad" class="form-control" required>
                   <option value="">Seleccione</option>
                   <option value="guinense">Guinense</option>
                   <option value="hibrido">Híbrido</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label class="form-label">Material</label>
+                <select v-model="formArea.material" class="form-control" required>
+                  <option value="">Seleccione</option>
+                    <option value="cuari x lame">cuari x lame</option>
+                    <option value="cuari x lame – fortuna">cuari x lame – fortuna</option>
+                    <option value="manicore">manicore</option>
+                    <option value="taisha">taisha</option>
+                    <option value="amazon">amazon</option>
+                    <option value="unipalma">unipalma</option>
+                    <option value="deli x lame">deli x lame</option>
+                    <option value="deli x yangambi">deli x yangambi</option>
+                    <option value="kigoma">kigoma</option>
+                    <option value=" # s"> # s</option>
+                    <option value="# pc"># pc</option>
+                    <option value="# c"># c</option>
+                    <option value="paraiso">paraiso</option>
+                    <option value="otro">otro</option>
                 </select>
               </div>
             </div>
@@ -48,7 +68,16 @@
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>Año siembra</label>
-                <input type="date" v-model="formArea.anio_siembra" class="form-control" required />
+                <input 
+                  type="number" 
+                  v-model="formArea.anio_siembra" 
+                  @blur="validateYear" 
+                  class="form-control" 
+                  min="1900" 
+                  :max="new Date().getFullYear()" 
+                  required 
+                  placeholder="Seleccione el año"
+                />
               </div>
             </div>
             <div class="col-md-6">
@@ -164,6 +193,7 @@
         </div>
         <div class="card-body">
           <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
             <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
             <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
             <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
@@ -234,8 +264,19 @@ export default {
     });
   },
 
+  validateYear() {
+    const year = this.formArea.anio_siembra;
+    const currentYear = new Date().getFullYear();
+    
+    if (year < 1900 || year > currentYear) {
+      alert('Por favor ingrese un año válido entre 1900 y ' + currentYear);
+      this.formArea.anio_siembra = '';
+    }
+  },
+
     nuevoFormularioArea() {
       return {
+        variedad :'',
         material: '',
         estado: 'desarrollo',
         anio_siembra: '',

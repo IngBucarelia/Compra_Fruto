@@ -3,7 +3,7 @@
         
        <span style="font-size: 2em;">🌴</span>
         <a href="{{ route('dashboard') }}">
-            <img class="logo" src="{{ asset('images/logo.png') }}" alt="Logo">
+            <img class="logo" src="{{ asset('images/logo.webp') }}" alt="Logo">
         </a>
         <span style="font-size: 2em;">🚜</span>
         <style>

@@ -64,6 +64,12 @@
                 <option value="">Seleccione tipo</option>
                 <option value="Inicial">Inicial</option>
                 <option value="Seguimiento">Seguimiento</option>
+                <option value="Capacitacion">Capacitación</option>
+                <option value="Poa">Poa</option>
+                <option value="Estudio Credito">Edtudio Credito</option>
+                <option value="Inclusion a Pequeños">Inclusion a Pequeños</option>
+                <option value="Solidaridad">Solidaridad</option>
+                <option value="Aps">Aps</option>
             </select>
         </div>
 

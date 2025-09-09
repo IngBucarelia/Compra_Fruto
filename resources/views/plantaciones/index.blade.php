@@ -60,6 +60,7 @@
     <table class="table table-bordered" style="background-color: #fdffe5; border-color:#000">
         <thead>
             <tr>
+                <th>Id plantacion</th>
                 <th>Proveedor</th>
                 <th>Nombre</th>
                 <th>Vereda</th>
@@ -72,6 +73,7 @@
         <tbody>
             @forelse ($plantaciones as $plantacion)
                 <tr>
+                    <td>{{ $plantacion->id }}</td>
                     <td>{{ $plantacion->proveedor->proveedor_nombre }}</td>
                     <td>{{ $plantacion->nombre }}</td>
                     <td>{{ $plantacion->vereda }}</td>

@@ -4,36 +4,50 @@
 
 <style>
 .container{
-        background-color: rgba(129, 165, 114, 0.929);
-        padding: 20px;
-    }
+    background-color: rgba(129, 165, 114, 0.929);
+    padding: 20px;
+    border-radius: 10px;
+}
 
-    .title{
-    text-align: center; 
-    font-family: Arial Black; 
-    font-weight: bold; 
-    font-size: 30px; 
-    color: #fdffe5; 
+.title{
+    text-align: center;
+    font-family: Arial Black;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fdffe5;
     text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-    }
+}
+
+.firma-canvas {
+    background-color: #fff;
+    width: 100%;
+    max-width: 300px;
+    height: 150px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#imagenesPreview img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
 
 
-    @media (max-width: 768px) {
-
-        .container {
+@media (max-width: 768px) {
+    .container {
         margin-left: -35px;
         width: 110%;
-    
-
     }
 
-        .dashboard-content {
-            max-width: 100%;
-        }
-        .dashboard-card {
-            margin-bottom: 15px;
-        }
+    .dashboard-content {
+        max-width: 100%;
     }
+    .dashboard-card {
+        margin-bottom: 15px;
+    }
+}
 </style>
 
 
@@ -161,25 +175,8 @@
         <button type="submit" class="btn btn-success">✅ Finalizar visita</button>
     </form>
 
-    <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
+    <button type="button" class="btn btn-secondary mt-3" onclick="history.back()">Cancelar</button>
 </div>
-
-{{-- Estilos para los canvas de firma --}}
-<style>
-    .firma-canvas {
-        background-color: #fff;
-        width: 100%;
-        max-width: 300px;
-        height: 150px;
-        border: 1px solid #ccc; /* Añadido borde para visibilidad */
-    }
-    #imagenesPreview img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 0.25rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    }
-</style>
 
 {{-- Script para SignaturePad y manejo de imágenes/envío --}}
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
@@ -196,7 +193,7 @@
         firmaPadTestigo = new SignaturePad(document.getElementById('firmaTestigoCanvas'));
 
         // Manejar la carga de imágenes
-        document.getElementById('imagenesInput').addEventListener('change', function(event) {
+        const handleImageChange = function(event) {
             uploadedImagesBase64 = []; // Limpiar array al seleccionar nuevas imágenes
             const files = event.target.files;
             const previewContainer = document.getElementById('imagenesPreview');
@@ -219,7 +216,13 @@
                 };
                 reader.readAsDataURL(file);
             }
-        });
+        };
+
+        // --- CORRECCIÓN APLICADA AQUÍ ---
+        // Ahora ambos inputs, 'imagenesInput' (cámara) y 'galeriaInput' (galería),
+        // tienen su propio listener para la misma función de manejo de imágenes.
+        document.getElementById('imagenesInput').addEventListener('change', handleImageChange);
+        document.getElementById('galeriaInput').addEventListener('change', handleImageChange);
 
         // Manejar el envío del formulario
         document.getElementById('cierreVisitaForm').addEventListener('submit', async function(e) {

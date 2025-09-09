@@ -54,24 +54,72 @@
             </a>
         </li>
         
-        <li class="sidebar-item {{ request()->routeIs('proveedores.*') ? 'active' : '' }}">
-            <a href="{{ route('proveedores.index') }}" class="sidebar-link">
+        <li class="sidebar-item has-submenu {{ request()->routeIs('proveedores.*') ? 'active' : '' }}">
+            <a href="#proveedoresSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
                 <i class="fas fa-truck me-2"></i>
                 <span x-show="sidebarOpen">Proveedores</span>
             </a>
+            <ul id="proveedoresSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('proveedores.*') ? 'show' : '' }}" data-bs-parent="#sidebarMenu">
+                <li class="sidebar-item">
+                    <a href="{{ route('proveedores.index') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Listar Proveedores</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('proveedores.import.form') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Importar</span>
+                    </a>
+                </li>
+            </ul>
         </li>
-        <li class="sidebar-item {{ request()->routeIs('plantaciones.*') ? 'active' : '' }}">
-            <a href="{{ route('plantaciones.index') }}" class="sidebar-link">
-                <i class="fas fa-tractor me-2"></i>
+        <li class="sidebar-item has-submenu {{ request()->routeIs('plantaciones.*') ? 'active' : '' }}">
+            <a href="#plantacionesSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                <i class="fas fa-seedling me-2"></i>
                 <span x-show="sidebarOpen">Plantaciones</span>
             </a>
+            <ul id="plantacionesSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('plantaciones.*') ? 'show' : '' }}" data-bs-parent="#sidebarMenu">
+                <li class="sidebar-item">
+                    <a href="{{ route('plantaciones.index') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Listar Plantaciones</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('plantaciones.import.form') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Importar</span>
+                    </a>
+                </li>
+            </ul>
         </li>
         
-        <li class="sidebar-item">
-            <a href="{{ route('visitas.index') }}" class="sidebar-link">
+        <li class="sidebar-item has-submenu {{ request()->routeIs('visitas.*') ? 'active' : '' }}">
+            <a href="#visitasSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
                 <i class="fas fa-clipboard-list me-2"></i>
                 <span x-show="sidebarOpen">Visitas</span>
             </a>
+            <ul id="visitasSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas.*') ? 'show' : '' }}" data-bs-parent="#sidebarMenu">
+                <li class="sidebar-item">
+                    <a href="{{ route('visitas.index') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Visita - Agronómico</span>
+                    </a>
+                    
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('visitas_social.indexSocial') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Visita - Social</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('visitas.import.form') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Importar <br>visita individual</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('visitas.full-import.form') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Importar <br> componente de visita</span>
+                    </a>
+                </li>
+            </ul>
         </li>
         <li class="sidebar-item">
             <a href="{{ route('planificaciones.calendario') }}" class="sidebar-link">

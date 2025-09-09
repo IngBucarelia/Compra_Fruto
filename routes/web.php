@@ -15,8 +15,13 @@ use App\Http\Controllers\LaboresCultivoController;
 use App\Http\Controllers\SanidadController;
 use App\Http\Controllers\SueloController;
 use App\Http\Controllers\EvaluacionCosechaCampoController;
+use App\Http\Controllers\FullVisitaImportController;
 use App\Http\Controllers\PolinizacionController;
 use App\Http\Controllers\VisitaController;
+use App\Http\Controllers\VisitaSocialController;
+use App\Http\Controllers\VisitaImportController;
+
+
 
 
 // Redirección por defecto al login
@@ -36,6 +41,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // CRUD de Plantaciones individuales
+    
+    Route::get('/plantaciones/import', [PlantacionController::class, 'importForm'])->name('plantaciones.import.form');
+    Route::post('/plantaciones/import', [PlantacionController::class, 'import'])->name('plantaciones.import.store');
+
     Route::get('/plantaciones', [PlantacionController::class, 'index'])->name('plantaciones.index');
     Route::get('/plantaciones/create', [PlantacionController::class, 'create'])->name('plantaciones.create');
     Route::post('/plantaciones', [PlantacionController::class, 'store'])->name('plantaciones.store');
@@ -48,13 +57,23 @@ Route::middleware('auth')->group(function () {
     Route::resource('proveedores.plantaciones', PlantacionController::class)->except(['index']);
     
       // CRUD de Proveedores
+      
+      Route::get('/proveedores/import', [ProveedorController::class, 'importForm'])->name('proveedores.import.form');
+    Route::post('/proveedores/import', [ProveedorController::class, 'import'])->name('proveedores.import.store');
     Route::resource('proveedores', ProveedorController::class)->parameters([
-        'proveedores' => 'proveedor' // fuerza a que lo llame proveedor
+        'proveedores' => 'proveedor' 
     ]);
+    
+    
+    
     // Plantaciones asociadas a un proveedor
     Route::get('/proveedores/{proveedor}/plantaciones', [ProveedorController::class, 'plantacionesIndex'])->name('proveedores.plantaciones.index');
 
     // rutas para visita 
+    Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
+    Route::get('/visitas/import', [VisitaController::class, 'importForm'])->name('visitas.import.form');
+    Route::post('/visitas/import', [VisitaController::class, 'import'])->name('visitas.import.store');
+
     Route::resource('visitas', App\Http\Controllers\VisitaController::class);
     Route::get('/api/plantaciones/{proveedor}', function ($proveedorId) {
         return \App\Models\Plantacion::where('id_proveedor', $proveedorId)->get();
@@ -140,15 +159,13 @@ Route::middleware('auth')->group(function () {
 
 
 
-    //rutas formulario offline 
-    // Ruta para redireccionar al modo offline
-   
+    //rutas importaciones excel 
 
-
-
-    // Ruta para sincronización
-
-   // --- Rutas para Sincronización Offline (dentro del grupo 'api') ---
+    Route::get('/visitas/import', [VisitaImportController::class, 'showForm'])->name('visitas.import.form');
+    Route::post('/visitas/import', [VisitaImportController::class, 'import'])->name('visitas.import');
+    Route::get('/visitas/full-import/form', [FullVisitaImportController::class, 'showForm'])->name('visitas.full-import.form');
+    Route::post('/visitas/full-import', [FullVisitaImportController::class, 'import'])->name('visitas.full-import');
+  
 
 
 // Página offline (SPA en Vue que maneja rutas internamente)
@@ -161,14 +178,39 @@ Route::get('/offline/{any?}', function () {
 
 
 
+// RUTAS PARA EL COMPONENETE SOCIAL 
+    Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
 
 
 
 
 
 
+// RUTAS PARA EL COMPONENTE AMBIENTAL 
+
+    Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
 
 
+
+
+
+    Route::prefix('visitas-social')->name('visitas_social.')->group(function () {
+    Route::get('/homeSocial', [VisitaSocialController::class, 'home'])->name('homeSocial');
+    Route::get('/Social', [VisitaSocialController::class, 'index'])->name('indexSocial');
+    Route::get('/createSocial', [VisitaSocialController::class, 'create'])->name('createSocial');
+    Route::post('/storeSocial', [VisitaSocialController::class, 'store'])->name('storeSocial');
+    Route::get('Social/{id}', [VisitaSocialController::class, 'show'])->name('showSocial');
+    Route::get('/{id}/editSocial', [VisitaSocialController::class, 'edit'])->name('editSocial');
+    Route::put('SocialUpdate/{id}', [VisitaSocialController::class, 'update'])->name('updateSocial');
+    Route::delete('SocialDestroy/{id}', [VisitaSocialController::class, 'destroy'])->name('destroySocial');
+
+    // Exportaciones
+    Route::get('/{id}/export-pdfSocial', [VisitaSocialController::class, 'exportarPDF'])->name('exportar_pdfSocial');
+    Route::get('/{id}/export-excelSocial', [VisitaSocialController::class, 'exportarExcel'])->name('exportar_excelSocial');
+
+    // Actualización de estado
+    Route::put('/{visita}/update-statusSocial', [VisitaSocialController::class, 'updateStatus'])->name('update_statusSocial');
+});
 
 
 

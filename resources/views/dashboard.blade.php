@@ -126,7 +126,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 <div class="container dashboard-container">
     <div class="dashboard-content">
         <div class="dashboard-header">
-            👋 Bienvenido, {{ auth()->user()->name }}
+            👋 Bienvenido 👋 <br> {{ auth()->user()->name }}
         </div>
 
         {{-- ✅ CAMBIO CLAVE: Usamos un row de Bootstrap para la cuadrícula --}}
@@ -136,23 +136,23 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             {{-- col-md-6: Ocupa la mitad del ancho en pantallas medianas y grandes (2 columnas) --}}
 
             <div class="col-12 col-md-6 mb-4"> {{-- mb-4 añade margen inferior entre filas --}}
-                <a href="{{ route('visitas.index') }}" class="dashboard-link">
+                <a href="{{ route('visitasHome') }}" class="dashboard-link">
                     <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Listado de Visitas</div><br>
-                        <img class="logo" src="{{ asset('images/visitas.jpeg') }}" style="border-radius: 30px" alt="Listado de Visitas"><br>
+                        <div class="dashboard-title">Componente Agronómico</div><br>
+                        <img class="logo" src="{{ asset('images/agronomico.webp') }}" style="border-radius: 30px" alt="Listado de Visitas"><br>
                         <!-- HTML !-->
-                    <button class="button-33" role="button">Ir a Visitas</button>
+                    <button class="button-33" role="button">Ir a Componente Agronómico</button>
                     </div>
                     
                 </a>
             </div>
 
             <div class="col-12 col-md-6 mb-4">
-                <a href="{{ route('proveedores.index') }}" class="dashboard-link">
+                <a href="{{ route('visitas_social.homeSocial') }}" class="dashboard-link">
                     <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Gestión de Proveedores</div><br>
-                        <img class="logo" src="{{ asset('images/proveedores.jpeg') }}" style="border-radius: 30px" alt="Listado de Proveedores">
-                        <br><button class="button-33" role="button">Ir a Proveedores</button>
+                        <div class="dashboard-title">Componente Social</div><br>
+                        <img class="logo" src="{{ asset('images/social.webp') }}" style="border-radius: 30px" alt="Listado de Proveedores">
+                        <br><button class="button-33" role="button">Ir a Componente Social</button>
                     </div>
                 </a>
             </div>
@@ -160,22 +160,27 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             <div class="col-12 col-md-6 mb-4">
                 <a href="{{ route('plantaciones.index') }}" class="dashboard-link"> {{-- ✅ ASUMO que tienes una ruta 'plantaciones.index' --}}
                     <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Listado de Plantaciones</div><br>
-                        <img class="logo" src="{{ asset('images/plantaciones.jpeg') }}" style="border-radius: 30px" alt="Listado de Plantaciones">
-                        <br><button class="button-33" role="button">Ir a Plantaciones</button>
+                        <div class="dashboard-title">Componente Ambiental</div><br>
+                        <img class="logo" src="{{ asset('images/ambiental.webp') }}" style="border-radius: 30px" alt="Listado de Plantaciones">
+                        <br><button class="button-33" role="button">Ir a Componente Ambiental</button>
                     </div>
                 </a>
             </div>
 
-            <div class="col-12 col-md-6 mb-4">
-                <a href="{{ route('planificaciones.calendario') }}" class="dashboard-link">
-                    <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Calendario de Visitas</div><br>
-                        <img class="logo" src="{{ asset('images/calendario.jpeg') }}" style="border-radius: 30px" alt="Calendario de Visitas">
-                        <br><button class="button-33" role="button">Ir a Calendario</button>
+            
+            
+            <div class="col-12 mt-4 d-md-none">
+                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="dashboard-link">
+                    <div class="dashboard-card p-4 text-center">
+                        <div class="dashboard-title">🚪 Cerrar Sesión</div>
+                        <p class="mt-2 mb-0">Cerrar la sesión actual</p>
                     </div>
                 </a>
             </div>
+            
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
         </div>
     </div>
 </div>

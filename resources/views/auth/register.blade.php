@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
-            background: url('/images/fondo1.jpg') no-repeat center center fixed;
+            background: url('/images/fondo1.webp') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
             display: flex;
@@ -83,7 +83,7 @@
 </head>
 <body>
     <div class="login-container">
-        <img src="/images/logo.png" alt="Logo Empresa" class="logo">
+        <img src="/images/logo.webp" alt="Logo Empresa" class="logo">
         
         <!-- Formulario de Registro -->
         <form method="POST" action="{{ route('register') }}">

@@ -11,6 +11,7 @@ class Area extends Model
 
     protected $fillable = [
         'visita_id',
+        'variedad',
         'material',
         'estado',
         'anio_siembra',

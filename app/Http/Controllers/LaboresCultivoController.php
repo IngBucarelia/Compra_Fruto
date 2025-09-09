@@ -51,7 +51,7 @@ class LaboresCultivoController extends Controller
             'labores.*.enmiendas' => 'nullable|integer|min:0|max:100',
             'labores.*.ubicacion_tusa_fibra' => 'nullable|integer|min:0|max:100',
             'labores.*.ubicacion_hoja' => 'nullable|integer|min:0|max:100',
-            'labores.*.lugar_ubicacion_hoja' => 'nullable|integer|min:0|max:100',
+            'labores.*.lugar_ubicacion_hoja' => 'nullable|string|min:0|max:100',
             'labores.*.plantas_nectariferas' => 'nullable|integer|min:0|max:100',
             'labores.*.cobertura' => 'nullable|integer|min:0|max:100',
             'labores.*.labor_cosecha' => 'nullable|integer|min:0|max:100',

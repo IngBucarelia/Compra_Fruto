@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use App\Models\Plantacion;
+use App\Imports\ProveedoresImport;
+use Maatwebsite\Excel\Facades\Excel;
+
+
+
 class ProveedorController extends Controller
 {
     public function index(Request $request)
@@ -22,7 +27,10 @@ class ProveedorController extends Controller
             return view('proveedores.index', compact('proveedores', 'buscar'));
         }
 
-
+    public function show(Proveedor $proveedor)
+    {
+        return view('proveedores.show', compact('proveedor'));
+    }
 
     public function create()
     {
@@ -72,4 +80,27 @@ class ProveedorController extends Controller
 
                 return view('proveedores.plantaciones', compact('proveedor', 'plantaciones'));
             }
+            
+            
+    public function importForm()
+    {
+        return view('proveedores.import');
+    }
+
+    /**
+     * Procesa la importación del archivo CSV.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|mimes:csv,txt|max:2048',
+        ]);
+
+        try {
+            Excel::import(new ProveedoresImport, $request->file('csv_file'));
+            return back()->with('status', 'Proveedores importados exitosamente.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Hubo un problema al importar el archivo. Revisa el formato.']);
+        }
+    }
 }

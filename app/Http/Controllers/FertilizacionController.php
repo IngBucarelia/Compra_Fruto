@@ -26,21 +26,18 @@ class FertilizacionController extends Controller
 
         public function store(Request $request)
         {
-            // ✅ PASO DE DEPURACIÓN 1: Descomenta esta línea para ver TODOS los datos que llegan.
-            // Si esta línea no se ejecuta, el problema está en el frontend o la ruta.
-            // dd($request->all());
-
             $data = $request->validate([
                 'visita_id' => 'required|exists:visitas,id',
-                'fecha_fertilizacion' => 'required|date', // Fecha general de la fertilización
-                'fertilizantes' => 'required|array|min:1', // Debe haber al menos un fertilizante
-                'fertilizantes.*.nombre' => 'required|string|max:255', // Nombre del fertilizante (urea, compost, etc.)
-                'fertilizantes.*.cantidad' => 'required|numeric|min:0', // Cantidad, ahora puede ser decimal
-                'fertilizantes.*.fecha_aplicacion' => 'required|date', // Nueva validación para la fecha por fertilizante
-                'fertilizantes.*.unidad_medida' => 'required|string|in:kg,litros,gramos,unidades', // Nueva validación para la unidad de medida
+                'fecha_fertilizacion' => 'required|date',
+                'fertilizantes' => 'required|array|min:1',
+                'fertilizantes.*.nombre' => 'required|string|max:255',
+                'fertilizantes.*.otro_fertilizante' => 'nullable|string|max:255|required_if:fertilizantes.*.nombre,otro',
+                'fertilizantes.*.cantidad' => 'required|numeric|min:0',
+                'fertilizantes.*.fecha_aplicacion' => 'required|date',
+                'fertilizantes.*.unidad_medida' => 'required|string|in:kg,litros,gramos,unidades',
             ], [
-                // Mensajes de error personalizados para claridad
                 'fertilizantes.*.nombre.required' => 'El nombre del fertilizante es obligatorio para cada entrada.',
+                'fertilizantes.*.otro_fertilizante.required_if' => 'Debe especificar el nombre del fertilizante cuando selecciona "Otro".',
                 'fertilizantes.*.cantidad.required' => 'La cantidad del fertilizante es obligatoria para cada entrada.',
                 'fertilizantes.*.cantidad.numeric' => 'La cantidad debe ser un número.',
                 'fertilizantes.*.cantidad.min' => 'La cantidad debe ser al menos :min.',
@@ -49,45 +46,50 @@ class FertilizacionController extends Controller
                 'fertilizantes.*.unidad_medida.required' => 'La unidad de medida es obligatoria para cada fertilizante.',
                 'fertilizantes.*.unidad_medida.in' => 'La unidad de medida seleccionada no es válida.',
             ]);
-
+        
             DB::beginTransaction();
             try {
                 $fertilizacion = Fertilizacion::create([
                     'visita_id' => $data['visita_id'],
-                    'fecha_fertilizacion' => $data['fecha_fertilizacion'], // Esta es la fecha general de la fertilización
+                    'fecha_fertilizacion' => $data['fecha_fertilizacion'],
                 ]);
-
+        
                 foreach ($data['fertilizantes'] as $fertil) {
-                    // ✅ PASO DE DEPURACIÓN 2: Descomenta esta línea para ver los datos de CADA fertilizante
-                    // justo antes de intentar crearlo. Si esta línea no se ejecuta, el problema es antes.
-                    // dd($fertil);
-
+                    // Determinar el nombre del fertilizante a guardar
+                    $nombreFertilizante = ($fertil['nombre'] === 'otro' && !empty($fertil['otro_fertilizante'])) 
+                        ? $fertil['otro_fertilizante'] 
+                        : $fertil['nombre'];
+        
                     $fertilizacion->fertilizantes()->create([
-                        'fertilizante' => $fertil['nombre'], // El campo en la BD es 'fertilizante', no 'nombre'
+                        'fertilizante' => $nombreFertilizante,
                         'cantidad' => $fertil['cantidad'],
-                        'fecha_aplicacion' => $fertil['fecha_aplicacion'], // Guardar la nueva fecha
-                        'unidad_medida' => $fertil['unidad_medida'],       // Guardar la nueva unidad
+                        'fecha_aplicacion' => $fertil['fecha_aplicacion'],
+                        'unidad_medida' => $fertil['unidad_medida'],
                     ]);
                 }
-
-                // Opcional: Actualizar el estado de la visita a 'en_ejecucion' si estaba pendiente
+        
+                // Actualizar estado de la visita si es necesario
                 $visita = Visita::find($data['visita_id']);
                 if ($visita && $visita->estado === 'pendiente') {
                     $visita->estado = 'en_ejecucion';
                     $visita->save();
                 }
-
+        
                 DB::commit();
-
+        
                 return redirect()->route('polinizaciones.create', ['visita_id' => $data['visita_id']])
                     ->with('success', '✅ Fertilización registrada exitosamente. Continúa con la polinización.');
-
+        
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error("Error al guardar fertilización: " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'request' => $request->all()]);
-                // ✅ PASO DE DEPURACIÓN 3: Descomenta esta línea para ver el mensaje de error EXACTO en el navegador.
-                // dd($e->getMessage());
-                return redirect()->back()->with('error', 'Ocurrió un error al guardar la fertilización: ' . $e->getMessage())->withInput();
+                Log::error("Error al guardar fertilización: " . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString(), 
+                    'request' => $request->all()
+                ]);
+                
+                return redirect()->back()
+                    ->with('error', 'Ocurrió un error al guardar la fertilización: ' . $e->getMessage())
+                    ->withInput();
             }
         }
 

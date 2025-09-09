@@ -1,8 +1,9 @@
 <template>
   <div class="offline-container">
     <h2 class="offline-title">🌱 Labores Cultivo - Registros Previos</h2>
-
+    <div class="row mb-4">
     <!-- Tarjeta: Áreas -->
+     
       <div class="col-md-6">
         <div class="card border-success">
           <div class="card-header bg-success text-white">
@@ -13,6 +14,7 @@
               <div v-for="(area, index) in areas" :key="area.id" class="mb-3 area-card">
                 <h5>Área #{{ index + 1 }}</h5>
                <ul class="list-group">
+                   <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
                   <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
                   <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
                   <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
@@ -94,21 +96,67 @@
           <div class="card-header bg-danger text-white">🦠 Sanidad</div>
           <div class="card-body" v-if="sanidad">
             <ul class="list-group list-group-flush">
-              <li class="list-group-item">Opsophanes: {{ sanidad.opsophanes }}%</li>
-              <li class="list-group-item">Pudrición Cogollo: {{ sanidad.pudricion_cogollo }}%</li>
-              <li class="list-group-item">Raspador: {{ sanidad.raspador }}%</li>
-              <li class="list-group-item">Palmarum: {{ sanidad.palmarum }}%</li>
-              <li class="list-group-item">Strategus: {{ sanidad.strategus }}%</li>
-              <li class="list-group-item">Leptoparsha: {{ sanidad.leptoparsa }}%</li>
-              <li class="list-group-item">Pestalotiopsis: {{ sanidad.pestalotiopsis }}%</li>
-              <li class="list-group-item">Pudrición Basal: {{ sanidad.pudricion_basal }}%</li>
-              <li class="list-group-item">Pudrición Estípite: {{ sanidad.pudricion_estipe }}%</li>
-              <li class="list-group-item">Otros: {{ sanidad.otros }}</li>
-              <li class="list-group-item">Observaciones: {{ sanidad.observaciones }}</li>
+              <!-- Enfermedades -->
+              <li v-if="sanidad.enfermedades && sanidad.enfermedades.length > 0" class="list-group-item">
+                <h6>Enfermedades:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(enf, eIndex) in sanidad.enfermedades" :key="eIndex" class="list-group-item">
+                    <strong>Nombre:</strong> {{ enf.nombre || '-' }},
+                    <strong>Estado (%):</strong> {{ enf.estado || '-' }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">No hay enfermedades registradas.</li>
+
+              <!-- Plagas -->
+              <li v-if="sanidad.plagas && sanidad.plagas.length > 0" class="list-group-item">
+                <h6>Plagas:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(pla, pIndex) in sanidad.plagas" :key="pIndex" class="list-group-item">
+                    <strong>Nombre:</strong> {{ pla.nombre || '-' }},
+                    <strong>Estado:</strong> {{ pla.estado || '-' }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">No hay plagas registradas.</li>
+
+              <!-- Censo y ciclos -->
+              <li v-if="sanidad.censo_enfermedades !== undefined" class="list-group-item">
+                <strong>Censo de enfermedades:</strong> {{ sanidad.censo_enfermedades ? 'Sí' : 'No' }}
+              </li>
+              <li v-if="sanidad.ciclos_lectura_enfermedades" class="list-group-item">
+                <strong>Ciclos lectura enfermedades:</strong> {{ sanidad.ciclos_lectura_enfermedades }}
+              </li>
+              <li v-if="sanidad.ciclos_lectura_plagas" class="list-group-item">
+                <strong>Ciclos lectura plagas:</strong> {{ sanidad.ciclos_lectura_plagas }}
+              </li>
+
+              <!-- Otros y observaciones -->
+              <li v-if="sanidad.otros" class="list-group-item">
+                <strong>Otros:</strong> {{ sanidad.otros }}
+              </li>
+              <li v-if="sanidad.observaciones" class="list-group-item">
+                <strong>Observaciones:</strong> {{ sanidad.observaciones }}
+              </li>
+
+              <!-- Trampas -->
+              <li v-if="sanidad.trampas && sanidad.trampas.length > 0" class="list-group-item">
+                <h6 class="mt-2">Trampas de Palmarum:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(trampa, index) in sanidad.trampas" :key="index" class="list-group-item">
+                    Ciclos: {{ trampa.ciclos || '-' }}, Machos: {{ trampa.machos }}, Hembras: {{ trampa.hembras }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">
+                No hay trampas registradas.
+              </li>
             </ul>
           </div>
-          <p v-else class="text-muted">Sin sanidad registrada.</p>
+          <p v-else class="text-muted card-body">Sin sanidad registrada.</p>
         </div>
+     
+
       <!-- Tarjeta: Suelo -->
       <div class="col-md-6" v-if="suelo">
         <div class="card border-warning">
@@ -125,8 +173,7 @@
           </div>
         </div>
       </div>
-    </div>
-
+      </div>
     <h2 class="offline-title">🚜 Registro de Labores de Cultivo (Modo Offline)</h2>
 
     <!-- Contenedor para formularios de labores -->
@@ -213,40 +260,41 @@
 
     <!-- Mostrar labores guardadas localmente -->
     <!-- Mostrar labores guardadas localmente -->
-<div v-if="laboresGuardadas.length > 0" class="mt-4">
-  <h4 class="offline-subtitle">📋 Labores guardadas localmente ({{ laboresGuardadas.length }})</h4>
-  
-  <div class="saved-labores-container">
-    <div 
-      v-for="(labor, index) in laboresGuardadas" 
-      :key="labor.local_id || index" 
-      class="saved-labor-card"
-    >
-      <div class="saved-labor-header">
-        <h5>Labor #{{ index + 1 }} - {{ ucfirst(labor.tipo_planta) }}</h5>
-        <small v-if="labor.created_at">
-          {{ formatDate(labor.created_at) }}
-        </small>
-      </div>
-      
-      <div class="saved-labor-details">
-        <div 
-          v-for="(label, key) in camposLabores" 
-          :key="key"
-          v-if="labor[key] !== null && labor[key] !== ''"
-        >
-          <span>{{ label }}:</span>
-          <strong>{{ labor[key] }}%</strong>
+  <div v-if="laboresGuardadas.length > 0" class="mt-4">
+    <h4 class="offline-subtitle">📋 Labores guardadas localmente ({{ laboresGuardadas.length }})</h4>
+    
+    <div class="saved-labores-container">
+      <div 
+        v-for="(labor, index) in laboresGuardadas" 
+        :key="labor.local_id || index" 
+        class="saved-labor-card"
+      >
+        <div class="saved-labor-header">
+          <h5>Labor #{{ index + 1 }} - {{ ucfirst(labor.tipo_planta) }}</h5>
+          <small v-if="labor.created_at">
+            {{ formatDate(labor.created_at) }}
+          </small>
         </div>
+        
+        <div class="saved-labor-details">
+          <div 
+            v-for="(label, key) in camposLabores" 
+            :key="key"
+            v-if="labor[key] !== null && labor[key] !== ''"
+          >
+            <span>{{ label }}:</span>
+            <strong>{{ labor[key] }}%</strong>
+          </div>
+        </div>
+        
+        <p v-if="labor.observaciones" class="saved-labor-observaciones">
+          <strong>Observaciones:</strong> {{ labor.observaciones }}
+        </p>
       </div>
-      
-      <p v-if="labor.observaciones" class="saved-labor-observaciones">
-        <strong>Observaciones:</strong> {{ labor.observaciones }}
-      </p>
     </div>
   </div>
 </div>
-  </div>
+ </div>
 </template>
 
 <script>
@@ -257,6 +305,22 @@ export default {
   components: { InfoCard },
   data() {
     return {
+      diseaseFieldMapInvertido: {
+      'opsophanes': 'Opsophanes',
+      'pudricion_cogollo': 'Pudrición del cogollo',
+      'raspador': 'Raspador',
+      'palmarum': 'Palmarum',
+      'strategus': 'Strategus',
+      'leptopharsa': 'Leptopharsa',
+      'pestalotiopsis': 'Pestalotiopsis',
+      'pudricion_basal': 'Pudrición basal',
+      'pudricion_estipe': 'Pudrición estipe',
+      'vaso_de_escoba': 'Vaso de escoba',
+      'lignina': 'Lignina',
+      'hojas_rojas': 'Hojas rojas',
+      'anillos': 'Anillos',
+      'corte_en_v': 'Corte en V'
+    },
      visitaId: null,
       areas: [], // Cambiar de area a areas (array)
       fertilizaciones: [],
@@ -328,7 +392,9 @@ export default {
         const poli = await getFormDataByVisita('polinizacion', this.visitaId);
         this.polinizaciones = Array.isArray(poli) ? poli : poli ? [poli] : [];
         
-        this.sanidad = await getFormDataByVisita('sanidad', this.visitaId);
+        // 🔥 AQUÍ ESTA LA SOLUCIÓN: Asegurar que sanidad nunca sea undefined
+        const sanidadData = await getFormDataByVisita('sanidad', this.visitaId);
+        this.sanidad = sanidadData || {}; // Objeto vacío si es null/undefined
       } catch (error) {
         console.error('Error cargando datos previos:', error);
         alert('Error al cargar datos previos');
@@ -451,89 +517,5 @@ export default {
 <style scoped>
 @import '../styles/offline.css';
 
-/* Estilos específicos para este componente */
-.labores-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.labor-form-card {
-  position: relative;
-  padding: 1.5rem;
-  border: 1px solid #d4edda;
-  border-radius: 0.5rem;
-  background-color: #f8fff8;
-  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
-}
-
-.remove-labor-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.labor-fields-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  margin: 1rem 0;
-}
-
-@media (min-width: 768px) {
-  .labor-fields-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 992px) {
-  .labor-fields-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-}
-
-.button-group .btn {
-  flex: 1 1 auto;
-  min-width: 150px;
-}
-
-.saved-labor-card {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #dee2e6;
-  border-radius: 0.25rem;
-  background-color: #f8f9fa;
-}
-
-.saved-labor-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.75rem;
-  margin: 0.75rem 0;
-}
-
-.offline-subtitle {
-  font-size: 1.25rem;
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #81a572;
-}
+/* Estilos adicionales específicos para este componente si los necesitas */
 </style>

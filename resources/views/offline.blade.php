@@ -13,7 +13,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    body { margin: 0; font-family: sans-serif;  background-image: url('/images/fondo.jpg'); }
+    body { margin: 0; font-family: sans-serif;  background-image: url('/images/fondo.webp'); }
     .sidebar { width: 250px; height: 100vh; position: fixed; top: 56px; left: 0; background-color: #343a40; overflow-y: auto; z-index: 1000; }
     .sidebar-menu { list-style: none; padding: 0; }
     .sidebar-item { padding: 0.75rem 1rem; }

@@ -10,6 +10,10 @@ use App\Exports\VisitaExport;
 use App\Models\Area;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log; 
+use App\Imports\VisitasImport;
+use Exception;
+use Illuminate\Support\Facades\Auth;
+use App\Imports\VisitasMultiSheetImport;
 
 
 
@@ -19,6 +23,13 @@ class VisitaController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function homeVisitas()
+    {
+        return view('visitas.home', [
+            'user' => Auth::user()
+        ]);
+    }
     public function index(Request $request)
         {
             $buscar = $request->input('buscar');
@@ -251,19 +262,14 @@ class VisitaController extends Controller
         // Implementar lógica similar para fertilización
     }
 
-    public function updateStatus(Request $request, Visita $visita)
+        public function updateStatus(Request $request, Visita $visita)
     {
-        // Valida que el campo 'estado' esté presente y sea una cadena
-        $request->validate([
-            'estado' => 'required|string|max:255',
-        ]);
-
         try {
-            // Actualiza el campo 'estado' de la visita
+            // Cambiar el estado siempre a "finalizado"
             $visita->estado = 'finalizado';
             $visita->save();
 
-            Log::info("Estado de la visita {$visita->id} actualizado a: {$request->input('estado')}");
+            Log::info("Estado de la visita {$visita->id} actualizado a: finalizado");
 
             return response()->json([
                 'message' => 'Estado de la visita actualizado exitosamente.',
@@ -278,6 +284,52 @@ class VisitaController extends Controller
             ], 500);
         }
     }
+
+    
+    
+   public function importForm()
+    {
+        return view('visitas.import');
+    }
+
+    /**
+     * Procesa la importación del archivo Excel.
+     * @param Request $request
+     */
+public function import(Request $request)
+{
+    $request->validate([
+        'excel_file' => 'mimes:xlsx,xls,csv|max:2048',
+    ]);
+
+    try {
+        if ($request->hasFile('excel_file')) {
+            $file = $request->file('excel_file');
+
+            // 1️⃣ Importamos la hoja Visitas y se crean los registros
+            Excel::import(new VisitasImport, $file, null, \Maatwebsite\Excel\Excel::XLSX);
+
+            // 2️⃣ Obtenemos la última visita creada (o la que necesites)
+            $visita = Visita::latest()->first();
+
+            if ($visita) {
+                // 3️⃣ Importamos las demás hojas pasando esa visita
+                Excel::import(new VisitasMultiSheetImport($visita), $file, null, \Maatwebsite\Excel\Excel::XLSX);
+
+                return back()->with('success', 'Archivo importado con éxito!');
+            } else {
+                return back()->with('error', 'No se creó ninguna visita desde la hoja principal.');
+            }
+        }
+
+        return back()->with('status', 'No se ha subido ningún archivo.');
+    } catch (Exception $e) {
+        Log::error('Error en importación de visitas: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        return back()->with('error', 'Hubo un problema al importar el archivo: ' . $e->getMessage());
+    }
+}
 
 
 

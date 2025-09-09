@@ -9,7 +9,6 @@
         border-radius: 8px; /* Añadido para consistencia */
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Añadido para consistencia */
         max-width: 800px; /* Limita el ancho en pantallas muy grandes */
-        margin-left: -35px !important; /* Centra el contenedor */
         margin-top: 25px; /* Margen superior para separación */
     }
 
@@ -332,132 +331,262 @@
         </div>
 
     </div>
-    <h3>🧪 Registro de Sanidad - {{ $visita->proveedor->proveedor_nombre }}</h3>
+    <h3 class="my-4 text-center">🧪 Registro de Sanidad - {{ $visita->proveedor->proveedor_nombre }}</h3>
 
-    {{-- Formulario SANIDAD --}}
-    <form id="sanidadForm" method="POST" action="{{ route('sanidades.store') }}">
-        @csrf
-        <input type="hidden" name="visita_id" value="{{ $visita->id }}">
+   {{-- Formulario SANIDAD --}}
+<form id="sanidadForm" method="POST" action="{{ route('sanidades.store') }}">
+    @csrf
+    <input type="hidden" name="visita_id" value="{{ $visita->id }}">
 
-        {{-- Hidden inputs para los campos de la base de datos --}}
-        <input type="hidden" name="opsophanes" id="opsophanes_hidden" value="{{ old('opsophanes', $visita->sanidades->first()->opsophanes ?? '') }}">
-        <input type="hidden" name="pudricion_cogollo" id="pudricion_cogollo_hidden" value="{{ old('pudricion_cogollo', $visita->sanidades->first()->pudricion_cogollo ?? '') }}">
-        <input type="hidden" name="raspador" id="raspador_hidden" value="{{ old('raspador', $visita->sanidades->first()->raspador ?? '') }}">
-        <input type="hidden" name="palmarum" id="palmarum_hidden" value="{{ old('palmarum', $visita->sanidades->first()->palmarum ?? '') }}">
-        <input type="hidden" name="strategus" id="strategus_hidden" value="{{ old('strategus', $visita->sanidades->first()->strategus ?? '') }}">
-        <input type="hidden" name="leptopharsa" id="leptopharsa_hidden" value="{{ old('leptopharsa', $visita->sanidades->first()->leptopharsa ?? '') }}">
-        <input type="hidden" name="pestalotiopsis" id="pestalotiopsis_hidden" value="{{ old('pestalotiopsis', $visita->sanidades->first()->pestalotiopsis ?? '') }}">
-        <input type="hidden" name="pudricion_basal" id="pudricion_basal_hidden" value="{{ old('pudricion_basal', $visita->sanidades->first()->pudricion_basal ?? '') }}">
-        <input type="hidden" name="pudricion_estipe" id="pudricion_estipe_hidden" value="{{ old('pudricion_estipe', $visita->sanidades->first()->pudricion_estipe ?? '') }}">
+    {{-- Hidden inputs para compatibilidad con los campos antiguos en la BD --}}
+    <input type="hidden" name="opsophanes" id="opsophanes_hidden" value="{{ old('opsophanes', $visita->sanidades->first()->opsophanes ?? '') }}">
+    <input type="hidden" name="pudricion_cogollo" id="pudricion_cogollo_hidden" value="{{ old('pudricion_cogollo', $visita->sanidades->first()->pudricion_cogollo ?? '') }}">
+    <input type="hidden" name="raspador" id="raspador_hidden" value="{{ old('raspador', $visita->sanidades->first()->raspador ?? '') }}">
+    <input type="hidden" name="palmarum" id="palmarum_hidden" value="{{ old('palmarum', $visita->sanidades->first()->palmarum ?? '') }}">
+    <input type="hidden" name="strategus" id="strategus_hidden" value="{{ old('strategus', $visita->sanidades->first()->strategus ?? '') }}">
+    <input type="hidden" name="leptopharsa" id="leptopharsa_hidden" value="{{ old('leptopharsa', $visita->sanidades->first()->leptopharsa ?? '') }}">
+    <input type="hidden" name="pestalotiopsis" id="pestalotiopsis_hidden" value="{{ old('pestalotiopsis', $visita->sanidades->first()->pestalotiopsis ?? '') }}">
+    <input type="hidden" name="pudricion_basal" id="pudricion_basal_hidden" value="{{ old('pudricion_basal', $visita->sanidades->first()->pudricion_basal ?? '') }}">
+    <input type="hidden" name="pudricion_estipe" id="pudricion_estipe_hidden" value="{{ old('pudricion_estipe', $visita->sanidades->first()->pudricion_estipe ?? '') }}">
 
-        <div id="enfermedades-container">
-            {{-- Los campos dinámicos se añadirán aquí mediante JavaScript --}}
+    {{-- Hidden legacy para PLAGA (retrocompatibilidad con store actual) --}}
+    <input type="hidden" name="plaga" id="plaga_hidden" value="{{ old('plaga', $visita->sanidades->first()->plaga ?? '') }}">
+    <input type="hidden" name="estado_plaga" id="estado_plaga_hidden" value="{{ old('estado_plaga', $visita->sanidades->first()->estado_plaga ?? '') }}">
+
+    {{-- Sección de Campos Dinámicos para Enfermedades y Plagas --}}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Enfermedades y Plagas</h5>
         </div>
-
-        <button type="button" class="btn btn-info mb-3" onclick="addEnfermedad()">+ Añadir enfermedad</button>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label>Otros (descripción):</label>
-                <input type="text" name="otros" class="form-control" value="{{ old('otros', $visita->sanidades->first()->otros ?? '') }}">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6 form-check">
+                    <input type="checkbox" class="form-check-input" id="censo_enfermedades_check" name="censo_enfermedades" value="1"
+                        {{ old('censo_enfermedades', $visita->sanidades->first()->censo_enfermedades ?? false) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="censo_enfermedades_check">¿Se realizó censo de enfermedades?</label>
+                </div>
             </div>
 
-            <div class="col-12 mb-3">
-                <label>Observaciones:</label>
-                <textarea name="observaciones" class="form-control" rows="3">{{ old('observaciones', $visita->sanidades->first()->observaciones ?? '') }}</textarea>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <label for="ciclos_lectura_enfermedades">Ciclos de Lectura (Enfermedades):</label>
+                    <input type="text" name="ciclos_lectura_enfermedades" id="ciclos_lectura_enfermedades" class="form-control"
+                        value="{{ old('ciclos_lectura_enfermedades', $visita->sanidades->first()->ciclos_lectura_enfermedades ?? '') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="ciclos_lectura_plagas">Ciclos de Lectura (Plagas):</label>
+                    <input type="text" name="ciclos_lectura_plagas" id="ciclos_lectura_plagas" class="form-control"
+                        value="{{ old('ciclos_lectura_plagas', $visita->sanidades->first()->ciclos_lectura_plagas ?? '') }}">
+                </div>
+            </div>
+
+            <hr>
+
+            {{-- Registro dinámico de Enfermedades --}}
+            <h6 class="mb-3">Registro de Enfermedades</h6>
+            <div id="enfermedades-container">
+                {{-- Aquí se añadirán filas dinámicas (select enfermedad + % ) --}}
+            </div>
+            <button type="button" class="btn btn-sm btn-info mb-3" onclick="addEnfermedad()">+ Añadir enfermedad</button>
+
+            <hr>
+
+            {{-- Registro dinámico de Plagas --}}
+            <h6 class="mb-3">Registro de Plagas</h6>
+            <div id="plagas-container">
+                {{-- Aquí se añadirán filas dinámicas (select plaga + estado) --}}
+            </div>
+            <button type="button" class="btn btn-sm btn-info mb-3" onclick="addPlaga()">+ Añadir plaga</button>
+        </div>
+    </div>
+
+    {{-- Sección de Trampas R. palmarum --}}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Registro de Trampas para R. palmarum</h5>
+        </div>
+        <div class="card-body">
+            <div id="trampas-container">
+                {{-- Los campos de trampas se añadirán aquí mediante JavaScript --}}
+            </div>
+            <button type="button" class="btn btn-sm btn-info" onclick="addTrampa()">+ Añadir Trampa</button>
+        </div>
+    </div>
+
+    {{-- Sección de Otros y Observaciones --}}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Otros y Observaciones</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Otros (descripción):</label>
+                    <input type="text" name="otros" class="form-control" value="{{ old('otros', $visita->sanidades->first()->otros ?? '') }}">
+                </div>
+                <div class="col-12 mb-3">
+                    <label>Observaciones:</label>
+                    <textarea name="observaciones" class="form-control" rows="3">{{ old('observaciones', $visita->sanidades->first()->observaciones ?? '') }}</textarea>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="button-group">
-            <button type="submit" class="btn btn-primary">💾 Guardar sanidad</button>
-            <a href="{{ route('suelos.create', ['visita_id' => $visita->id]) }}" class="btn btn-success">
-                ➡️ Continuar con Análisis de Suelo
-            </a>
-            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
-    <hr>
+    <div class="button-group text-center">
+        <button type="submit" class="btn btn-primary me-2">💾 Guardar sanidad</button>
+        <a href="{{ route('suelos.create', ['visita_id' => $visita->id]) }}" class="btn btn-success me-2">
+            ➡️ Continuar con Análisis de Suelo
+        </a>
+        <a href="{{ route('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
 
-    @if ($visita->sanidades->count())
-        <div class="container">
-            <h4 class="title">🦠 Sanidades registradas</h4>
-            <ul class="list-group">
-                @foreach ($visita->sanidades as $sanidad)
-                    <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap">
-                        <div>
-                            {{-- Mostrar los campos individuales de la BD --}}
-                            <strong>Opsophanes:</strong> {{ $sanidad->opsophanes ?? '-' }}% <br>
-                            <strong>P. Cogollo:</strong> {{ $sanidad->pudricion_cogollo ?? '-' }}% <br>
-                            <strong>Raspador:</strong> {{ $sanidad->raspador ?? '-' }}% <br>
-                            <strong>Palmarum:</strong> {{ $sanidad->palmarum ?? '-' }}% <br>
-                            <strong>Strategus:</strong> {{ $sanidad->strategus ?? '-' }}% <br>
-                            <strong>Leptopharsa:</strong> {{ $sanidad->leptopharsa ?? '-' }}% <br>
-                            <strong>Pestalotiopsis:</strong> {{ $sanidad->pestalotiopsis ?? '-' }}% <br>
-                            <strong>P. Basal:</strong> {{ $sanidad->pudricion_basal ?? '-' }}% <br>
-                            <strong>P. Estipe:</strong> {{ $sanidad->pudricion_estipe ?? '-' }}% <br>
-                            
-                            @if ($sanidad->otros)
-                                <strong>Otros (descripción):</strong> {{ $sanidad->otros }}<br>
-                            @endif
-                            @if ($sanidad->observaciones)
-                                <strong>Observaciones:</strong> {{ $sanidad->observaciones }}
-                            @endif
-                        </div>
-                        <div class="d-flex flex-column align-items-end mt-2 mt-md-0">
-                            <a href="{{ route('sanidades.edit', $sanidad->id) }}" class="btn btn-sm btn-warning mb-2">✏️ Editar Registro</a>
-                            <form method="POST" action="{{ route('sanidades.destroy', $sanidad->id) }}" onsubmit="return confirm('¿Deseas eliminar esta sanidad?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger">🗑️ Eliminar</button>
-                            </form>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
-    @else
-        <p class="text-muted text-center mt-4">No se han registrado sanidades aún.</p>
-    @endif
+<hr class="my-5">
+
+{{-- Sección para mostrar Sanidades registradas --}}
+@if ($visita->sanidades->count())
+    <div class="container mt-5">
+        <h4 class="title text-center">🦠 Sanidades registradas</h4>
+        <ul class="list-group">
+            @foreach ($visita->sanidades as $sanidad)
+                <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap">
+                    <div>
+                        {{-- Datos generales --}}
+                        <strong>Censo de enfermedades:</strong> {{ $sanidad->censo_enfermedades ? 'Sí' : 'No' }}<br>
+                        <strong>Ciclos de lectura (Enfermedades):</strong> {{ $sanidad->ciclos_lectura_enfermedades ?? '-' }}<br>
+                        <strong>Ciclos de lectura (Plagas):</strong> {{ $sanidad->ciclos_lectura_plagas ?? '-' }}<br>
+
+                        {{-- Enfermedades (nuevas relaciones) --}}
+                        @if ($sanidad->enfermedades && $sanidad->enfermedades->count())
+                            <h6 class="mt-2 mb-1">Enfermedades:</h6>
+                            <ul class="mb-2" style="list-style: none; padding-left: 0;">
+                                @foreach ($sanidad->enfermedades as $enf)
+                                    <li><strong>{{ $enf->nombre_enfermedad }}:</strong> {{ $enf->estado ?? '-' }}%</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        {{-- Enfermedades (legacy) --}}
+                        @php
+                            $legacyEnfermedades = [
+                                'opsophanes' => 'Opsophanes',
+                                'pudricion_cogollo' => 'Pudrición del cogollo',
+                                'raspador' => 'Raspador',
+                                'palmarum' => 'Palmarum',
+                                'strategus' => 'Strategus',
+                                'leptopharsa' => 'Leptopharsa',
+                                'pestalotiopsis' => 'Pestalotiopsis',
+                                'pudricion_basal' => 'Pudrición basal',
+                                'pudricion_estipe' => 'Pudrición estipe',
+                            ];
+                        @endphp
+                        @if (collect($legacyEnfermedades)->some(fn($_, $key) => $sanidad->$key))
+                            <h6 class="mt-2 mb-1">Enfermedades (legacy):</h6>
+                            <ul class="mb-2" style="list-style: none; padding-left: 0;">
+                                @foreach ($legacyEnfermedades as $field => $label)
+                                    @if ($sanidad->$field)
+                                        <li><strong>{{ $label }}</strong> {{ $sanidad->$field }}%</li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        {{-- Plagas (nuevas relaciones) --}}
+                        @if ($sanidad->plagas && $sanidad->plagas->count())
+                            <h6 class="mt-2 mb-1">Plagas:</h6>
+                            <ul class="mb-2" style="list-style: none; padding-left: 0;">
+                                @foreach ($sanidad->plagas as $pla)
+                                    <li><strong>{{ $pla->nombre_plaga }}: </strong> :  estado -    {{ $pla->estado ?? '-' }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        {{-- Plagas (legacy) --}}
+                        @if ($sanidad->plaga)
+                            <h6 class="mt-2 mb-1">Plaga (legacy):</h6>
+                            <p>{{ $sanidad->plaga }} @if($sanidad->estado_plaga) - ({{ $sanidad->estado_plaga }}) @endif</p>
+                        @endif
+
+                        {{-- Trampas --}}
+                        @if ($sanidad->trampas && $sanidad->trampas->count())
+                            <h6 class="mt-2 mb-1">Trampas R. palmarum:</h6>
+                            <ul style="list-style: none; padding-left: 0;">
+                                @foreach($sanidad->trampas as $trampa)
+                                    <li>
+                                        <strong>Ciclos:</strong> {{ $trampa->ciclos ?? '-' }},
+                                        <strong>Machos:</strong> {{ $trampa->machos_capturados ?? '-' }},
+                                        <strong>Hembras:</strong> {{ $trampa->hembras_capturadas ?? '-' }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        {{-- Otros / observaciones --}}
+                        @if ($sanidad->otros)
+                            <strong>Otros (descripción):</strong> {{ $sanidad->otros }}<br>
+                        @endif
+                        @if ($sanidad->observaciones)
+                            <strong>Observaciones:</strong> {{ $sanidad->observaciones }}
+                        @endif
+                    </div>
+
+                    {{-- Acciones --}}
+                    <div class="d-flex flex-column align-items-end mt-2 mt-md-0">
+                        <a href="{{ route('sanidades.edit', $sanidad->id) }}" class="btn btn-sm btn-warning mb-2">✏️ Editar Registro</a>
+                        <form method="POST" action="{{ route('sanidades.destroy', $sanidad->id) }}" onsubmit="return confirm('¿Deseas eliminar esta sanidad?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">🗑️ Eliminar</button>
+                        </form>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+@else
+    <p class="text-muted text-center mt-4">No se han registrado sanidades aún.</p>
+@endif
+
 
 </div>
 
 <script>
-    // Mapeo de nombres de enfermedades a los nombres de los campos hidden
+    // --- Mapeo (legacy) para los campos de enfermedades que antes estaban fijos en la tabla sanidades.
+    // Se mantienen hidden inputs con estos nombres para compatibilidad.
     const diseaseFieldMap = {
         'Opsophanes': 'opsophanes',
         'Pudrición del cogollo': 'pudricion_cogollo',
         'Raspador': 'raspador',
         'Palmarum': 'palmarum',
         'Strategus': 'strategus',
-        'Leptopharsa': 'leptopharsa', // Asegúrate de que este nombre coincida con tu columna real
+        'Leptopharsa': 'leptopharsa',
         'Pestalotiopsis': 'pestalotiopsis',
         'Pudrición basal': 'pudricion_basal',
         'Pudrición estipe': 'pudricion_estipe',
     };
 
-    // Array para mantener el estado de los campos dinámicos en el frontend
+    // Arrays locales que representan filas dinámicas en el formulario
     let dynamicDiseases = [];
-    let currentEnfermedadIndex = 0; // Para asignar IDs únicos a los elementos dinámicos
+    let currentEnfermedadIndex = 0;
 
-    /**
-     * Resetea todos los campos hidden de enfermedades a null.
-     */
+    let dynamicPlagas = [];
+    let currentPlagaIndex = 0;
+
+    // --- Funciones para mantener los hidden inputs legacy sincronizados ---
     function resetHiddenDiseaseInputs() {
         for (const key in diseaseFieldMap) {
             const fieldName = diseaseFieldMap[key];
             const hiddenInput = document.getElementById(`${fieldName}_hidden`);
             if (hiddenInput) {
-                hiddenInput.value = ''; // O null, dependiendo de cómo lo maneje Laravel para nullable
+                hiddenInput.value = '';
             }
         }
     }
 
-    /**
-     * Actualiza los valores de los campos hidden basándose en los datos de dynamicDiseases.
-     */
     function updateHiddenDiseaseInputs() {
-        resetHiddenDiseaseInputs(); // Primero, resetea todos
-
+        // Limpia y vuelve a escribir según las enfermedades dinámicas seleccionadas.
+        // Si hay varias entradas con la misma enfermedad, la última sobrescribirá.
+        resetHiddenDiseaseInputs();
         dynamicDiseases.forEach(entry => {
             const fieldName = diseaseFieldMap[entry.name];
             if (fieldName) {
@@ -469,69 +598,78 @@
         });
     }
 
-    /**
-     * Añade un nuevo grupo de campos para una enfermedad.
-     * @param {string} defaultName Nombre predeterminado de la enfermedad (para precarga).
-     * @param {number} defaultPercentage Porcentaje predeterminado (para precarga).
-     */
-    function addEnfermedad(defaultName = '', defaultPercentage = '') {
-        const container = document.getElementById('enfermedades-container');
-        const group = document.createElement('div');
-        group.classList.add('enfermedad-group', 'mb-3');
-        group.setAttribute('data-index', currentEnfermedadIndex); // Para identificar el grupo
+    function updateHiddenPlagaInputs() {
+        // Rellena los hidden legacy 'plaga' y 'estado_plaga' con la primera plaga dinámica (retrocompatibilidad).
+        const hiddenPlaga = document.getElementById('plaga_hidden');
+        const hiddenEstado = document.getElementById('estado_plaga_hidden');
+        if (!hiddenPlaga || !hiddenEstado) return;
 
-        const uniqueId = `enfermedad_${currentEnfermedadIndex}`;
-
-        group.innerHTML = `
-            <button type="button" class="remove-enfermedad-btn" onclick="removeEnfermedad(this)">✖️</button>
-            <div class="mb-2">
-                <label for="${uniqueId}_nombre">Enfermedad:</label>
-                <select name="dynamic_enfermedad_nombre_${currentEnfermedadIndex}" id="${uniqueId}_nombre" class="form-control" required onchange="handleDiseaseChange(this)">
-                    <option value="">Seleccione enfermedad</option>
-                    <option value="Opsophanes">Opsophanes</option>
-                    <option value="Pudrición del cogollo">Pudrición del cogollo</option>
-                    <option value="Raspador">Raspador</option>
-                    <option value="Palmarum">Palmarum</option>
-                    <option value="Strategus">Strategus</option>
-                    <option value="Leptopharsa">Leptopharsa</option>
-                    <option value="Pestalotiopsis">Pestalotiopsis</option>
-                    <option value="Pudrición basal">Pudrición basal</option>
-                    <option value="Pudrición estipe">Pudrición estipe</option>
-                </select>
-            </div>
-            <div class="mb-0">
-                <label for="${uniqueId}_porcentaje">Porcentaje de afectación (%):</label>
-                <input type="number" name="dynamic_enfermedad_porcentaje_${currentEnfermedadIndex}" id="${uniqueId}_porcentaje" class="form-control" min="0" max="100" oninput="handlePercentageChange(this)">
-            </div>
-        `;
-        container.appendChild(group);
-
-        // Preseleccionar valores si se proporcionan (para old input o edición)
-        const selectElement = group.querySelector(`#${uniqueId}_nombre`);
-        const percentageInput = group.querySelector(`#${uniqueId}_porcentaje`);
-
-        if (defaultName) {
-            selectElement.value = defaultName;
+        if (dynamicPlagas.length > 0) {
+            hiddenPlaga.value = dynamicPlagas[0].name || '';
+            hiddenEstado.value = dynamicPlagas[0].estado || '';
+        } else {
+            hiddenPlaga.value = '';
+            hiddenEstado.value = '';
         }
-        if (defaultPercentage !== '') {
-            percentageInput.value = defaultPercentage;
-        }
-
-        // Añadir al array de estado dinámico
-        dynamicDiseases.push({
-            id: currentEnfermedadIndex,
-            name: defaultName,
-            percentage: defaultPercentage
-        });
-
-        currentEnfermedadIndex++;
-        updateHiddenDiseaseInputs(); // Actualizar los campos hidden al añadir
     }
 
-    /**
-     * Maneja el cambio en el select de enfermedad.
-     * @param {HTMLSelectElement} selectElement El elemento select que cambió.
-     */
+    // --- Enfermedades dinámicas (UI) ---
+    function addEnfermedad(defaultName = '', defaultPercentage = '') {
+    const container = document.getElementById('enfermedades-container');
+    const group = document.createElement('div');
+    group.classList.add('enfermedad-group', 'mb-3');
+    group.setAttribute('data-index', currentEnfermedadIndex);
+
+    const uniqueId = `enfermedad_${currentEnfermedadIndex}`;
+
+    group.innerHTML = `
+        <div class="row gx-2 align-items-end">
+            <div class="col-md-5 mb-2">
+                <label for="${uniqueId}_nombre" class="form-label">Enfermedad:</label>
+                <select name="enfermedades[${currentEnfermedadIndex}][nombre]" 
+                        id="${uniqueId}_nombre" 
+                        class="form-control" 
+                        onchange="handleDiseaseChange(this)" required>
+                    <option value="">Seleccione enfermedad</option>
+                    ${Object.keys(diseaseFieldMap).map(opt => 
+                        `<option value="${opt}">${opt}</option>`).join('')}
+                </select>
+            </div>
+            <div class="col-md-5 mb-2">
+                <label for="${uniqueId}_porcentaje" class="form-label">Afectación (%):</label>
+                <input type="number" 
+                       name="enfermedades[${currentEnfermedadIndex}][estado]" 
+                       id="${uniqueId}_porcentaje" 
+                       class="form-control" 
+                       min="0" max="100" 
+                       value="${defaultPercentage}" 
+                       onchange="handlePercentageChange(this)">
+            </div>
+            <div class="col-md-2 mb-2 d-grid">
+                <button type="button" class="btn btn-danger" onclick="removeEnfermedad(this)">✖️</button>
+            </div>
+        </div>
+    `;
+    container.appendChild(group);
+
+    // Agregar al array local
+    dynamicDiseases.push({
+        id: currentEnfermedadIndex,
+        name: defaultName || '',
+        percentage: defaultPercentage || ''
+    });
+
+    // Setear valores iniciales
+    if (defaultName) {
+        group.querySelector(`#${uniqueId}_nombre`).value = defaultName;
+    }
+
+    currentEnfermedadIndex++;
+    updateHiddenDiseaseInputs();
+}
+
+
+
     function handleDiseaseChange(selectElement) {
         const index = parseInt(selectElement.closest('.enfermedad-group').getAttribute('data-index'));
         const newName = selectElement.value;
@@ -542,10 +680,6 @@
         }
     }
 
-    /**
-     * Maneja el cambio en el input de porcentaje.
-     * @param {HTMLInputElement} inputElement El elemento input que cambió.
-     */
     function handlePercentageChange(inputElement) {
         const index = parseInt(inputElement.closest('.enfermedad-group').getAttribute('data-index'));
         const newPercentage = inputElement.value;
@@ -556,67 +690,234 @@
         }
     }
 
-    /**
-     * Elimina un grupo de campos de enfermedad.
-     * @param {HTMLButtonElement} button El botón "X" que fue clickeado.
-     */
     function removeEnfermedad(button) {
         const group = button.closest('.enfermedad-group');
         const indexToRemove = parseInt(group.getAttribute('data-index'));
 
         dynamicDiseases = dynamicDiseases.filter(entry => entry.id !== indexToRemove);
         group.remove();
-        updateHiddenDiseaseInputs(); // Actualizar los campos hidden al eliminar
+        updateHiddenDiseaseInputs();
 
-        // Si no quedan campos dinámicos, añadir uno vacío por defecto
         if (dynamicDiseases.length === 0) {
             addEnfermedad();
         }
     }
 
-    // Lógica para precargar datos si hay errores de validación (old input)
+    // --- Plagas dinámicas (UI) ---
+    function addPlaga(defaultName = '', defaultEstado = '') {
+        const container = document.getElementById('plagas-container');
+        const group = document.createElement('div');
+        group.classList.add('plaga-group', 'mb-3');
+        group.setAttribute('data-index', currentPlagaIndex);
+
+        const uniqueId = `plaga_${currentPlagaIndex}`;
+
+        // Opciones de plagas (las mismas que tenías)
+        group.innerHTML = `
+            <div class="row gx-2 align-items-end">
+                <div class="col-md-5 mb-2">
+                    <label for="${uniqueId}_nombre" class="form-label">Plaga:</label>
+                    <select name="plagas[${currentPlagaIndex}][nombre]" id="${uniqueId}_nombre" class="form-control" onchange="handlePlagaChange(this)">
+                        <option value="">Seleccione plaga</option>
+                        <option value="Leptopharsa gibbicarina">Leptopharsa gibbicarina</option>
+                        <option value="Stenoma cecropia">Stenoma cecropia</option>
+                        <option value="Leucothyreus femaratus">Leucothyreus femaratus</option>
+                        <option value="Brassolis sophorae">Brassolis sophorae</option>
+                        <option value="Euprosterna eleasa">Euprosterna eleasa</option>
+                        <option value="Sibine fusca">Sibine fusca</option>
+                        <option value="Opsiphanes cassina">Opsiphanes cassina</option>
+                        <option value="Automeris liberia">Automeris liberia</option>
+                        <option value="Dirphia gragatus">Dirphia gragatus</option>
+                        <option value="Cephaloleia vagelineata">Cephaloleia vagelineata</option>
+                        <option value="Demotispa neivai">Demotispa neivai</option>
+                        <option value="Loxotoma elegans">Loxotoma elegans</option>
+                        <option value="Hispoleptis subfasciata">Hispoleptis subfasciata</option>
+                        <option value="Haplaxius crudus">Haplaxius crudus</option>
+                        <option value="Rhynchophorus palmarum">Rhynchophorus palmarum</option>
+                        <option value="Strategus aloeus">Strategus aloeus</option>
+                        <option value="Sagalassa valida">Sagalassa valida</option>
+                    </select>
+                </div>
+                <div class="col-md-5 mb-2">
+                    <label for="${uniqueId}_estado" class="form-label">Estado:</label>
+                    <select name="plagas[${currentPlagaIndex}][estado]" id="${uniqueId}_estado" class="form-control" onchange="handlePlagaEstadoChange(this)">
+                        <option value="">Seleccione</option>
+                        <option value="Larva">Larva</option>
+                        <option value="Ninfa">Ninfa</option>
+                        <option value="Adulto">Adulto</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2 d-grid">
+                    <button type="button" class="btn btn-danger" onclick="removePlaga(this)">✖️</button>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(group);
+
+        // Asignar valores por defecto (si existen)
+        const selectName = group.querySelector(`#${uniqueId}_nombre`);
+        const selectEstado = group.querySelector(`#${uniqueId}_estado`);
+        if (defaultName) selectName.value = defaultName;
+        if (defaultEstado) selectEstado.value = defaultEstado;
+
+        // Añadir al arreglo local y actualizar hidden legacy 'plaga'/'estado_plaga'
+        dynamicPlagas.push({
+            id: currentPlagaIndex,
+            name: defaultName || '',
+            estado: defaultEstado || ''
+        });
+
+        currentPlagaIndex++;
+        updateHiddenPlagaInputs();
+    }
+
+    function handlePlagaChange(selectElement) {
+        const index = parseInt(selectElement.closest('.plaga-group').getAttribute('data-index'));
+        const newName = selectElement.value;
+        const entry = dynamicPlagas.find(p => p.id === index);
+        if (entry) {
+            entry.name = newName;
+            updateHiddenPlagaInputs();
+        }
+    }
+
+    function handlePlagaEstadoChange(selectElement) {
+        const index = parseInt(selectElement.closest('.plaga-group').getAttribute('data-index'));
+        const newEstado = selectElement.value;
+        const entry = dynamicPlagas.find(p => p.id === index);
+        if (entry) {
+            entry.estado = newEstado;
+            updateHiddenPlagaInputs();
+        }
+    }
+
+    function removePlaga(button) {
+        const group = button.closest('.plaga-group');
+        const indexToRemove = parseInt(group.getAttribute('data-index'));
+
+        dynamicPlagas = dynamicPlagas.filter(entry => entry.id !== indexToRemove);
+        group.remove();
+        updateHiddenPlagaInputs();
+
+        if (dynamicPlagas.length === 0) {
+            addPlaga();
+        }
+    }
+
+    // --- Trampas R. palmarum (mantengo como antes) ---
+    let currentTrampaIndex = 0;
+
+    function addTrampa() {
+        const container = document.getElementById('trampas-container');
+        const group = document.createElement('div');
+        group.classList.add('trampa-group', 'mb-3', 'p-3', 'border', 'rounded', 'bg-light');
+        const uniqueId = `trampa_${currentTrampaIndex}`;
+
+        group.innerHTML = `
+            <div class="d-flex justify-content-end mb-2">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeTrampa(this)">✖️ Eliminar</button>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="${uniqueId}_ciclos" class="form-label">Ciclos:</label>
+                    <input type="text" name="trampas[${currentTrampaIndex}][ciclos]" id="${uniqueId}_ciclos" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="${uniqueId}_machos" class="form-label">Machos Capturados:</label>
+                    <input type="number" name="trampas[${currentTrampaIndex}][machos]" id="${uniqueId}_machos" class="form-control" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="${uniqueId}_hembras" class="form-label">Hembras Capturadas:</label>
+                    <input type="number" name="trampas[${currentTrampaIndex}][hembras]" id="${uniqueId}_hembras" class="form-control" min="0">
+                </div>
+            </div>
+        `;
+        container.appendChild(group);
+        currentTrampaIndex++;
+    }
+
+    function removeTrampa(button) {
+        const group = button.closest('.trampa-group');
+        group.remove();
+    }
+
+    // --- Carga inicial de datos (precarga si existe una sanidad previa) ---
     document.addEventListener('DOMContentLoaded', function() {
-        const oldSanidadData = @json(old()); // Obtener todos los old input
-        const oldEnfermedades = oldSanidadData.enfermedades_registradas || []; // Asumiendo que Laravel aún enviaría esto si el campo existiera en el request
+        // existingSanidad viene del servidor (puede ser null)
+        const existingSanidad = @json($visita->sanidades->first());
 
-        const existingSanidad = @json($visita->sanidades->first()); // Asumiendo que solo hay una sanidad por visita, o la primera
+        // Cargar Enfermedades legacy (a partir de campos fijos en la sanidad)
+        const containerEnfermedades = document.getElementById('enfermedades-container');
+        containerEnfermedades.innerHTML = '';
+        dynamicDiseases = [];
 
-        // Priorizar old input sobre datos existentes si hay errores de validación
-        let dataToLoad = [];
-        if (oldEnfermedades.length > 0) {
-            // Si hay old input de enfermedades_registradas, usarlos
-            // Necesitamos mapear de nuevo a la estructura de hidden inputs
-            for (const key in diseaseFieldMap) {
-                const fieldName = diseaseFieldMap[key];
-                const percentage = oldSanidadData[fieldName]; // Obtener el valor del campo hidden
-                if (percentage !== '' && percentage !== null) { // Solo si tiene un valor
-                    dataToLoad.push({ name: key, percentage: percentage });
-                }
-            }
-        } else if (existingSanidad) {
-            // Si no hay old input, cargar desde la base de datos
+        if (existingSanidad) {
             for (const key in diseaseFieldMap) {
                 const fieldName = diseaseFieldMap[key];
                 const percentage = existingSanidad[fieldName];
-                if (percentage !== '' && percentage !== null) {
-                    dataToLoad.push({ name: key, percentage: percentage });
+                if (percentage !== '' && percentage !== null && percentage !== undefined) {
+                    // Añade la fila y setea el select al nombre (key) y porcentaje
+                    addEnfermedad(key, percentage);
                 }
             }
         }
 
-        // Limpiar el contenedor antes de añadir los elementos precargados
-        const container = document.getElementById('enfermedades-container');
-        container.innerHTML = '';
-        dynamicDiseases = []; // Resetear el array de estado
-
-        if (dataToLoad.length > 0) {
-            dataToLoad.forEach(entry => {
-                addEnfermedad(entry.name, entry.percentage);
-            });
-        } else {
-            // Si no hay datos para precargar, añadir un grupo vacío por defecto
+        // Si no hay enfermedades precargadas, añadir una fila vacía
+        if (dynamicDiseases.length === 0) {
             addEnfermedad();
         }
+
+        // Cargar Plagas (legacy) si hay valores en los campos plaga / estado_plaga
+        const containerPlagas = document.getElementById('plagas-container');
+        containerPlagas.innerHTML = '';
+        dynamicPlagas = [];
+
+        if (existingSanidad && (existingSanidad.plaga || existingSanidad.estado_plaga)) {
+            addPlaga(existingSanidad.plaga || '', existingSanidad.estado_plaga || '');
+        } else {
+            // Por defecto una fila vacía
+            addPlaga();
+        }
+
+        // Cargar trampas si existieran (mantengo tu código)
+        const trampasData = @json($visita->sanidades->first()->trampas ?? []);
+        const containerTrampas = document.getElementById('trampas-container');
+        containerTrampas.innerHTML = '';
+
+        if (Array.isArray(trampasData) && trampasData.length > 0) {
+            trampasData.forEach(trampa => {
+                const group = document.createElement('div');
+                group.classList.add('trampa-group', 'mb-3', 'p-3', 'border', 'rounded', 'bg-light');
+                const uniqueId = `trampa_${currentTrampaIndex}`;
+
+                group.innerHTML = `
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeTrampa(this)">✖️ Eliminar</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="${uniqueId}_ciclos" class="form-label">Ciclos:</label>
+                            <input type="text" name="trampas[${currentTrampaIndex}][ciclos]" id="${uniqueId}_ciclos" class="form-control" value="${trampa.ciclos ?? ''}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="${uniqueId}_machos" class="form-label">Machos Capturados:</label>
+                            <input type="number" name="trampas[${currentTrampaIndex}][machos]" id="${uniqueId}_machos" class="form-control" min="0" value="${trampa.machos_capturados ?? ''}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="${uniqueId}_hembras" class="form-label">Hembras Capturadas:</label>
+                            <input type="number" name="trampas[${currentTrampaIndex}][hembras]" id="${uniqueId}_hembras" class="form-control" min="0" value="${trampa.hembras_capturadas ?? ''}">
+                        </div>
+                    </div>
+                `;
+                containerTrampas.appendChild(group);
+                currentTrampaIndex++;
+            });
+        }
+
+        // Asegurar que los hidden legacy estén sincronizados al primer render
+        updateHiddenDiseaseInputs();
+        updateHiddenPlagaInputs();
     });
 </script>
 @endsection

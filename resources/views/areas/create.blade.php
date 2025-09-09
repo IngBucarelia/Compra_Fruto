@@ -186,6 +186,7 @@
             <strong>Áreas ya registradas:</strong>
             @foreach ($visita->areas as $area) {{-- ✅ Iterar sobre $visita->areas --}}
                 <ul class="mb-0 mt-3 border-top pt-3">
+                    <li><strong>Variedad:</strong> {{ $area->Variedad }}</li>
                     <li><strong>Material:</strong> {{ $area->material }}</li>
                     <li><strong>Estado:</strong> {{ $area->estado }}</li>
                     <li><strong>Año de siembra:</strong> {{ $area->anio_siembra }}</li>
@@ -250,13 +251,34 @@
         template.innerHTML = `
             <h4>Nueva Área #${areaIndex + 1}</h4>
             ${areaIndex > 0 ? '<button type="button" class="remove-area-btn" onclick="removeAreaForm(this)">✖️</button>' : ''}
-
+            
+            <div class="mb-3">
+                <label for="Variedad_${areaIndex}">Variedad:</label>
+                <select name="areas[${areaIndex}][variedad]" id="variedad_${areaIndex}" class="form-control" required>
+                    <option value="">Seleccione</option>
+                    <option value="guinense">Guineense</option>
+                    <option value="hibrido">Híbrido</option>
+                </select>
+            </div> 
+            
             <div class="mb-3">
                 <label for="material_${areaIndex}">Material:</label>
                 <select name="areas[${areaIndex}][material]" id="material_${areaIndex}" class="form-control" required>
                     <option value="">Seleccione</option>
-                    <option value="guinense">Guinense</option>
-                    <option value="hibrido">Híbrido</option>
+                    <option value="cuari x lame">cuari x lame</option>
+                    <option value="cuari x lame – fortuna">cuari x lame – fortuna</option>
+                    <option value="manicore">manicore</option>
+                    <option value="taisha">taisha</option>
+                    <option value="amazon">amazon</option>
+                    <option value="unipalma">unipalma</option>
+                    <option value="deli x lame">deli x lame</option>
+                    <option value="deli x yangambi">deli x yangambi</option>
+                    <option value="kigoma">kigoma</option>
+                    <option value=" # s"> # s</option>
+                    <option value="# pc"># pc</option>
+                    <option value="# c"># c</option>
+                    <option value="paraiso">paraiso</option>
+                    <option value="otro">otro</option>
                 </select>
             </div>
 
@@ -270,9 +292,15 @@
 
             <div class="mb-3">
                 <label for="anio_siembra_${areaIndex}">Año de siembra:</label>
-                <input type="date" name="areas[${areaIndex}][anio_siembra]" id="anio_siembra_${areaIndex}" class="form-control" required>
+                <input type="number" 
+                       name="areas[${areaIndex}][anio_siembra]" 
+                       id="anio_siembra_${areaIndex}" 
+                       class="form-control" 
+                       placeholder="ej. 2025" 
+                       min="1900" 
+                       max="{{ date('Y') }}" 
+                       required>
             </div>
-
             <div class="mb-3">
                 <label for="area_m2_${areaIndex}">Área (m²):</label>
                 <input type="number" name="areas[${areaIndex}][area]" id="area_m2_${areaIndex}" class="form-control" required min="0">
@@ -323,10 +351,7 @@
             </div>
 
             <div id="ordenPlantisFields_${areaIndex}" style="display: none;">
-                <div class="mb-3">
-                    <label for="orden_plantis_numero_${areaIndex}">Orden Plantis Número:</label>
-                    <input type="number" name="areas[${areaIndex}][orden_plantis_numero]" id="orden_plantis_numero_${areaIndex}" class="form-control" min="0">
-                </div>
+               
                 <div class="mb-3">
                     <label for="numero_plantas_orden_plantis_${areaIndex}">Número de Plantas (Orden Plantis):</label>
                     <input type="number" name="areas[${areaIndex}][numero_plantas_orden_plantis]" id="numero_plantas_orden_plantis_${areaIndex}" class="form-control" min="0">

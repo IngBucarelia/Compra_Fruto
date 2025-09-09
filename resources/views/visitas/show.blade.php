@@ -44,15 +44,18 @@
                         <div class="card-body text-center">
                             <h5>Modo Offline</h5>
                             <p>Trabaja sin conexión a internet</p>
-                           <a href="{{ url('/offline/area?visita_id=' . $visita->id) }}" class="btn btn-dark">
-                            📴 Continuar sin conexión
+                           <a href="{{ url('/offline/area?visita_id=' . $visita->id) }}" 
+                               class="btn btn-dark" 
+                               target="_blank" 
+                               rel="noopener noreferrer">
+                                Continuar sin conexión
                             </a>
 
 
 
                         </div>
                     </div>
-        <h2 class="mb-4">Detalle de Visita</h2>
+        <h2 class="mb-4">Detalle ded Visita</h2>
 
         <div class="card">
             <div class="card-body"> 

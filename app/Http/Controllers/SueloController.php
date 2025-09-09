@@ -34,7 +34,7 @@ class SueloController extends Controller
         $data = $request->validate([
             'visita_id' => 'required|integer',
             'analisis_foliar' => 'required|string|in:si,no',
-            'alanisis_suelo' => 'required|string|in:si,no', // Asegúrate de que el nombre de la columna sea 'alanisis_suelo'
+            'analisis_suelo' => 'required|string|in:si,no', // Asegúrate de que el nombre de la columna sea 'analisis_suelo'
             'tipo_suelo' => 'required|string',
         ]);
 
@@ -78,7 +78,7 @@ class SueloController extends Controller
     {
         $data = $request->validate([
             'analisis_foliar' => 'required|in:si,no',
-            'alanisis_suelo' => 'required|in:si,no',
+            'analisis_suelo' => 'required|in:si,no',
             'tipo_suelo' => 'required|string|max:100',
         ]);
 

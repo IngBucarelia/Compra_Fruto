@@ -25,7 +25,8 @@ Route::post('/offline-sync/suelos', [SueloController::class, 'syncOffline']);
 Route::post('/offline-sync/labores', [LaboresCultivoController::class, 'syncOffline']);
 Route::post('/offline-sync/evaluacion', [EvaluacionCosechaCampoController::class, 'syncOffline']);
 Route::post('/offline-sync/cierre-visitas', [CierreVisitaController::class, 'syncOffline']);
-Route::put('/visitas/update-status', [VisitaController::class, 'updateStatus']);
+Route::put('/visitas/{visita}/update-status', [VisitaController::class, 'updateStatus'])
+    ->name('visitas.updateStatus');
 
 
  

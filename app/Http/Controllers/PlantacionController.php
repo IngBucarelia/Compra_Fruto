@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Plantacion;
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\PlantacionesImport;
+
 
 class PlantacionController extends Controller
 {
@@ -88,5 +91,27 @@ class PlantacionController extends Controller
         $plantacion->delete();
 
         return redirect()->route('plantaciones.index')->with('success', 'Plantación eliminada.');
+    }
+    
+    public function importForm()
+    {
+        return view('plantaciones.import');
+    }
+
+    /**
+     * Procesa la importación del archivo CSV.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|mimes:csv,txt|max:2048',
+        ]);
+
+        try {
+            Excel::import(new PlantacionesImport, $request->file('csv_file'));
+            return back()->with('status', 'Plantaciones importadas exitosamente.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Hubo un problema al importar el archivo. Revisa el formato y el ID de proveedor.']);
+        }
     }
 }

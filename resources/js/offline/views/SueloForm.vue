@@ -1,6 +1,6 @@
 <template>
-  <div class="offline-container" >
-    <h2 class="offline-title" >🌱 Suelo - Registros Previos </h2>
+  <div class="offline-container">
+    <h2 class="offline-title">🌱 Suelo - Registros Previos </h2>
 
     <div class="row mb-4">
       <!-- Tarjeta: Áreas -->
@@ -9,11 +9,12 @@
           <div class="card-header bg-success text-white">
             📍 Áreas Registradas
           </div>
-          <div class="card-body">
+          <div class="card-body"> 
             <div v-if="areasInfo.length > 0">
               <div v-for="(area, index) in areasInfo" :key="area.id" class="mb-3 area-card">
                 <h5>Área #{{ index + 1 }}</h5>
                 <ul class="list-group">
+                  <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
                   <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
                   <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
                   <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
@@ -87,7 +88,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="text-muted">No hay polinizaciones registradas.</p>   
+      <p v-else class="text-muted">No hay polinizaciones registradas.</p>    
 
       <!-- Sanidad -->
       <div class="col-md-6">
@@ -95,23 +96,67 @@
           <div class="card-header bg-danger text-white">🦠 Sanidad</div>
           <div class="card-body" v-if="sanidad">
             <ul class="list-group list-group-flush">
-              <li class="list-group-item">Opsophanes: {{ sanidad.opsophanes }}%</li>
-              <li class="list-group-item">Pudrición Cogollo: {{ sanidad.pudricion_cogollo }}%</li>
-              <li class="list-group-item">Raspador: {{ sanidad.raspador }}%</li>
-              <li class="list-group-item">Palmarum: {{ sanidad.palmarum }}%</li>
-              <li class="list-group-item">Strategus: {{ sanidad.strategus }}%</li>
-              <li class="list-group-item">Leptoparsha: {{ sanidad.leptoparsa }}%</li>
-              <li class="list-group-item">Pestalotiopsis: {{ sanidad.pestalotiopsis }}%</li>
-              <li class="list-group-item">Pudrición Basal: {{ sanidad.pudricion_basal }}%</li>
-              <li class="list-group-item">Pudrición Estípite: {{ sanidad.pudricion_estipe }}%</li>
-              <li class="list-group-item">Otros: {{ sanidad.otros }}</li>
-              <li class="list-group-item">Observaciones: {{ sanidad.observaciones }}</li>
+              <!-- Enfermedades -->
+              <li v-if="sanidad.enfermedades && sanidad.enfermedades.length > 0" class="list-group-item">
+                <h6>Enfermedades:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(enf, eIndex) in sanidad.enfermedades" :key="eIndex" class="list-group-item">
+                    <strong>Nombre:</strong> {{ enf.nombre || '-' }},
+                    <strong>Estado (%):</strong> {{ enf.estado || '-' }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">No hay enfermedades registradas.</li>
+
+              <!-- Plagas -->
+              <li v-if="sanidad.plagas && sanidad.plagas.length > 0" class="list-group-item">
+                <h6>Plagas:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(pla, pIndex) in sanidad.plagas" :key="pIndex" class="list-group-item">
+                    <strong>Nombre:</strong> {{ pla.nombre || '-' }},
+                    <strong>Estado:</strong> {{ pla.estado || '-' }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">No hay plagas registradas.</li>
+
+              <!-- Censo y ciclos -->
+              <li v-if="sanidad.censo_enfermedades !== undefined" class="list-group-item">
+                <strong>Censo de enfermedades:</strong> {{ sanidad.censo_enfermedades ? 'Sí' : 'No' }}
+              </li>
+              <li v-if="sanidad.ciclos_lectura_enfermedades" class="list-group-item">
+                <strong>Ciclos lectura enfermedades:</strong> {{ sanidad.ciclos_lectura_enfermedades }}
+              </li>
+              <li v-if="sanidad.ciclos_lectura_plagas" class="list-group-item">
+                <strong>Ciclos lectura plagas:</strong> {{ sanidad.ciclos_lectura_plagas }}
+              </li>
+
+              <!-- Otros y observaciones -->
+              <li v-if="sanidad.otros" class="list-group-item">
+                <strong>Otros:</strong> {{ sanidad.otros }}
+              </li>
+              <li v-if="sanidad.observaciones" class="list-group-item">
+                <strong>Observaciones:</strong> {{ sanidad.observaciones }}
+              </li>
+
+              <!-- Trampas -->
+              <li v-if="sanidad.trampas && sanidad.trampas.length > 0" class="list-group-item">
+                <h6 class="mt-2">Trampas de Palmarum:</h6>
+                <ul class="list-group list-group-flush">
+                  <li v-for="(trampa, index) in sanidad.trampas" :key="index" class="list-group-item">
+                    Ciclos: {{ trampa.ciclos || '-' }}, Machos: {{ trampa.machos }}, Hembras: {{ trampa.hembras }}
+                  </li>
+                </ul>
+              </li>
+              <li v-else class="list-group-item text-muted">
+                No hay trampas registradas.
+              </li>
             </ul>
           </div>
-          <p v-else class="text-muted">Sin sanidad registrada.</p>
+          <p v-else class="text-muted card-body">Sin sanidad registrada.</p>
         </div>
       </div>
-    </div>
+</div>
     <h2>🧪 Registro de Análisis de Suelo (Modo Offline)</h2>
 
     <!-- Formulario suelo -->
@@ -143,13 +188,14 @@
           <option value="arcilloso">Arcilloso</option>
           <option value="franco">Franco</option>
           <option value="franco arcilloso">Franco arcilloso</option>
+          <option value="franco arenoso">Franco arenoso</option>
           <option value="otro">Otro</option>
         </select>
       </div>
 
       <button type="submit" class="btn btn-primary">💾 Guardar Suelo</button>
     </form>
-     <button type="button" class="btn btn-success" @click="irALaboresCultivo">
+    <button type="button" class="btn btn-success" @click="irALaboresCultivo">
       ➡️ Ir a Labores de Cultivo
     </button>
     <button v-if="canSync" @click="sincronizar" class="btn btn-success mt-3">🔄 Sincronizar</button>
@@ -190,6 +236,7 @@ export default {
     const poli = await getFormDataByVisita('polinizacion', this.visitaId);
     this.polinizaciones = Array.isArray(poli) ? poli : poli ? [poli] : [];
     
+    // 👉 Cargar sanidad (ya con los nuevos campos)
     this.sanidad = await getFormDataByVisita('sanidad', this.visitaId);
 
     // Eventos para detectar cambios en la conexión
@@ -255,6 +302,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 @import '../styles/offline.css';
 

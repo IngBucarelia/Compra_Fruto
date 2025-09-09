@@ -33,7 +33,7 @@
                 :key="area.local_id"
                 class="area-info-card mb-3"
               >
-                <h5>Área #{{ index + 1 }} - Material: {{ area.material }}</h5>
+                <h5>Área #{{ index + 1 }} - Material: {{ area.material }}- Variedad: {{ area.variedad }}</h5>
                 <ul>
                   <li><strong>Estado:</strong> {{ area.estado }}</li>
                   <li><strong>Año siembra:</strong> {{ area.anio_siembra }}</li>
@@ -122,16 +122,26 @@
           <label>Fecha de aplicación:</label>
           <input type="date" v-model="item.fecha_aplicacion" class="form-control" required />
         </div>
-        <div class="form-group mb-2">
-          <label>Fertilizante:</label>
-          <select v-model="item.nombre" class="form-control" required>
-            <option value="">Seleccione fertilizante</option>
-            <option value="urea">Urea</option>
-            <option value="compost">Compost</option>
-            <option value="npk">NPK</option>
-            <option value="otro">Otro</option>
-          </select>
-        </div>
+          <div class="form-group mb-2">
+            <label>Fertilizante:</label>
+            <select v-model="item.nombre" class="form-control" @change="toggleOtroFertilizante(index)" required>
+              <option value="">Seleccione fertilizante</option>
+              <option value="urea">Urea</option>
+              <option value="compost">Compost</option>
+              <option value="npk">NPK</option>
+              <option value="otro">Otro</option>
+            </select>
+            <div v-if="item.nombre === 'otro'" class="mt-2">
+              <label>Especifique el fertilizante:</label>
+              <input 
+                type="text" 
+                v-model="item.otro_fertilizante" 
+                class="form-control" 
+                placeholder="Nombre del fertilizante"
+                required
+              >
+            </div>
+          </div>
         <div class="form-group mb-2">
           <label>Cantidad:</label>
           <input
@@ -145,15 +155,26 @@
           />
         </div>
         <div class="form-group mb-0">
-          <label>Unidad de Medida:</label>
-          <select v-model="item.unidad_medida" class="form-control" required>
-            <option value="">Seleccione unidad</option>
-            <option value="kg">Kilogramos (kg)</option>
-            <option value="litros">Litros</option>
-            <option value="gramos">Gramos</option>
-            <option value="unidades">Unidades</option>
-          </select>
-        </div>
+            <label>Unidad de Medida:</label>
+            <select v-model="item.unidad_medida" class="form-control" required>
+              <option value="">Seleccione unidad</option>
+              <option value="kg">Kilogramos (kg)</option>
+              <option value="g">Gramos (g)</option>
+              <option value="ton">Toneladas (ton)</option>
+              <option value="lb">Libras (lb)</option>
+              <option value="litros">Litros (L)</option>
+              <option value="ml">Mililitros (ml)</option>
+              <option value="unidades">Unidades</option>
+              <option value="sacos">Sacos</option>
+              <option value="bul">Bultos</option>
+              <option value="hecl">Hectolitro (hl)</option>
+              <option value="gal">Galones</option>
+              <option value="bols">Bolsas</option>
+              <option value="dos">Dosis</option>
+              <option value="ha">Por hectárea (ha)</option>
+              <option value="mz">Por manzana (mz)</option>
+            </select>
+          </div>
       </div>
 
       <button type="button" @click="agregarFertilizante" class="btn btn-info mt-3 mb-3">
@@ -229,6 +250,7 @@ export default {
             local_id: uuidv4(), // ID único para cada fertilizante individual
             fecha_aplicacion: '',
             nombre: '',
+            otro_fertilizante: '', // Nuevo campo para el nombre personalizado
             cantidad: '',
             unidad_medida: '',
           },
@@ -285,6 +307,13 @@ export default {
         unidad_medida: '',
       });
     },
+    
+    toggleOtroFertilizante(index) {
+        // Resetear el campo "otro_fertilizante" si cambian de selección
+        if (this.fertilizacion.fertilizantes[index].nombre !== 'otro') {
+          this.fertilizacion.fertilizantes[index].otro_fertilizante = '';
+        }
+      },
     removeFertilizante(index) {
       this.fertilizacion.fertilizantes.splice(index, 1);
       // Opcional: Si eliminas el último, añade uno nuevo para que el formulario no quede vacío
@@ -293,6 +322,19 @@ export default {
       }
     },
     async guardar() {
+        for (const item of this.fertilizacion.fertilizantes) {
+          if (item.nombre === 'otro' && !item.otro_fertilizante) {
+            alert('Por favor, especifique el nombre del fertilizante cuando selecciona "Otro"');
+            return;
+          }
+          
+      if (item.nombre === 'otro') {
+            item.nombre_final = item.otro_fertilizante;
+          } else {
+            item.nombre_final = item.nombre;
+          }
+        }
+      
       if (!this.visitaId) {
         alert('Error: No se ha encontrado el ID de la visita.');
         return;
@@ -335,6 +377,7 @@ export default {
           local_id: uuidv4(),
           fecha_aplicacion: '',
           nombre: '',
+          otro_fertilizante: '',
           cantidad: '',
           unidad_medida: '',
         }],
