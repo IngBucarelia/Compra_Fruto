@@ -35,4 +35,33 @@ class VisitaSocial extends Model
     {
         return $this->belongsTo(Plantacion::class);
     }
+
+    public function datosPersonales()
+    {
+        return $this->hasOne(DatosPersonalesSocial::class);
+    }
+    public function miembros()
+    {
+        return $this->hasMany(MiembroHogar::class, 'visita_social_id');
+    }
+
+    public function predio()
+    {
+        return $this->hasOne(DatoPredioSocial::class, 'visita_social_id');
+    }
+
+    public function fuerzaLaboral()
+    {
+        return $this->hasMany(FuerzaLaboral::class, 'visita_social_id');
+    }
+
+    public function organizacionSocial()
+    {
+        return $this->hasOne(OrganizacionSocial::class, 'visita_id');
+    }
+    public function cierreVisitaSocial()
+    {
+        return $this->hasOne(CierreVisitaSocial::class, 'visita_social_id');
+    }
+
 }

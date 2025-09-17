@@ -120,7 +120,26 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
         .dashboard-card {
             margin-bottom: 15px; /* Espacio entre tarjetas en móvil */
         }
+
+         .container {
+        margin-left: -70px;
+        width: 125%;
+    
+
     }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+
+        .card{
+        width: 100%;
+    }
+    }
+
 </style>
 
 <div class="container dashboard-container">
@@ -147,25 +166,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
                 </a>
             </div>
 
-            <div class="col-12 col-md-6 mb-4">
-                <a href="{{ route('proveedores.index') }}" class="dashboard-link">
-                    <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Gestión de Proveedores</div><br>
-                        <img class="logo" src="{{ asset('images/proveedores.webp') }}" style="border-radius: 30px" alt="Listado de Proveedores">
-                        <br><button class="button-33" role="button">Ir a Proveedores</button>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-12 col-md-6 mb-4">
-                <a href="{{ route('plantaciones.index') }}" class="dashboard-link"> {{-- ✅ ASUMO que tienes una ruta 'plantaciones.index' --}}
-                    <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Listado de Plantaciones</div><br>
-                        <img class="logo" src="{{ asset('images/plantaciones.webp') }}" style="border-radius: 30px" alt="Listado de Plantaciones">
-                        <br><button class="button-33" role="button">Ir a Plantaciones</button>
-                    </div>
-                </a>
-            </div>
+            
 
             <div class="col-12 col-md-6 mb-4">
                 <a href="{{ route('planificaciones.calendario') }}" class="dashboard-link">

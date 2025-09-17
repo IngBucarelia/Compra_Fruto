@@ -13,14 +13,21 @@ class VisitaImportController extends Controller
         return view('visitas.import');
     }
 
+
+
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls'
-        ]);
-
-        Excel::import(new VisitasImport, $request->file('file'));
-
-        return back()->with('success', 'Visitas importadas correctamente.');
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls'
+            ]);
+    
+            Excel::import(new VisitasImport, $request->file('file'));
+    
+            return redirect()->back()->with('success', '✅ Archivo cargado correctamente.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Error al procesar el archivo: ' . $e->getMessage());
+        }
     }
+
 }

@@ -9,7 +9,7 @@
     
 </style>
 <div class="container" >
-    <h2>Registrar Visita</h2>
+    <h2>Registrar Visita - Componente Agronómico</h2>
 
     @if($errors->any())
         <div class="alert alert-danger">

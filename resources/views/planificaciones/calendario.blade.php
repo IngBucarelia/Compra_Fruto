@@ -1,185 +1,203 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" >
-    <div class="row">
+<div class="container-fluid py-4">
+    <!-- Header con Estadísticas -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
-                <h2 class="title">Calendario de Planificaciones</h2>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('planificaciones.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-list"></i> <span class="d-none d-md-inline">Listado</span>
-                    </a>
-                    <a href="{{ route('planificaciones.create') }}" class="btn btn-success">
-                        <i class="fas fa-plus"></i> <span class="d-none d-md-inline">Nueva</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Modal -->
-            <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="eventoModalLabel">Detalle de visita</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="card bg-gradient-success shadow-lg border-0">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="text-white mb-1">
+                                <i class="fas fa-calendar-alt me-2"></i>Calendario de Planificaciones
+                            </h2>
+                            <p class="text-white opacity-8 mb-0">
+                                Visualización y gestión de todas las visitas programadas
+                            </p>
                         </div>
-                        <div class="modal-body">
-                            <p><strong>Tipo:</strong> <span id="modalTipo"></span></p>
-                            <p><strong>Fecha:</strong> <span id="modalFecha"></span></p>
-                            <p><strong>Estado:</strong> <span id="modalEstado"></span></p>
-                            <div class="d-grid gap-2">
-                                <a id="modalVerBtn" href="#" class="btn btn-primary mt-2">
-                                    <i class="fas fa-eye"></i> Ver planificación
-                                </a>
+                        <div class="col-md-4 text-end">
+                            <div class="bg-white rounded-pill px-3 py-1 d-inline-block">
+                                <span class="text-success fw-bold fs-5" id="total-eventos">0</span>
+                                <span class="text-dark">Eventos</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Calendario -->
-            <div class="card">
-                <div class="card-body p-0">
-                    <div id="calendar" style="min-height: 70vh;"></div>
+    <!-- Cards de Acción Rápida -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <span class="text-xs font-weight-bold text-primary text-uppercase">Nueva Visita</span>
+                    <a href="{{ route('planificaciones.create') }}" class="btn btn-primary btn-circle">
+                        <i class="fas fa-plus"></i>
+                    </a>
                 </div>
             </div>
         </div>
-    </div><button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <span class="text-xs font-weight-bold text-info text-uppercase">Lista Completa</span>
+                    <a href="{{ route('planificaciones.index') }}" class="btn btn-info btn-circle">
+                        <i class="fas fa-list"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <span class="text-xs font-weight-bold text-warning text-uppercase">Vista Semanal</span>
+                    <button class="btn btn-warning btn-circle" onclick="changeView('timeGridWeek')">
+                        <i class="fas fa-calendar-week"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Rápidos -->
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-filter me-2"></i>Filtrar por Estado
+            </h6>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-success active" data-status="all">Todos</button>
+                <button type="button" class="btn btn-outline-warning" data-status="pendiente">Pendientes</button>
+                <button type="button" class="btn btn-outline-info" data-status="completada">Completadas</button>
+                <button type="button" class="btn btn-outline-danger" data-status="cancelada">Canceladas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendario -->
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-calendar me-2"></i>Vista de Calendario
+            </h6>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-success" id="prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="btn btn-sm btn-outline-success" id="today-btn">Hoy</button>
+                <button class="btn btn-sm btn-outline-success" id="next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="eventoModalLabel"><i class="fas fa-calendar-check me-2"></i>Detalle de Visita</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Tipo:</strong> <span id="modalTipo"></span></p>
+                    <p><strong>Fecha:</strong> <span id="modalFecha"></span></p>
+                    <p><strong>Estado:</strong> <span id="modalEstado"></span></p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a id="modalVerBtn" href="#" class="btn btn-success"><i class="fas fa-eye me-2"></i> Ver Detalles</a>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i> Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- FullCalendar CSS -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
-<!-- Font Awesome para iconos -->
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<!-- Bootstrap Bundle JS (incluye Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+/* mismos estilos que el calendario social */
+.bg-gradient-success { background: linear-gradient(45deg, #1cc88a, #13855c) !important; }
+.btn-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.fc-day-today { background-color: rgba(28,200,138,0.1) !important; }
+.event-pendiente { background-color: #f6c23e; color: #000; }
+.event-completada { background-color: #1cc88a; color: #fff; }
+.event-cancelada { background-color: #e74a3b; color: #fff; }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,listWeek'
-        },
-        views: {
-            dayGridMonth: {
-                titleFormat: { year: 'numeric', month: 'long' }
+    let calendar;
+    let allEvents = [];
+
+    function initCalendar() {
+        const calendarEl = document.getElementById('calendar');
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'es',
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+            buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' },
+            events: { url: '/api/planificaciones', method: 'GET' },
+            eventDidMount: function(info) {
+                const estado = info.event.extendedProps.estado || 'pendiente';
+                info.el.classList.add(`event-${estado}`);
             },
-            timeGridWeek: {
-                titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+            eventClick: function(info) {
+                fetch(`/api/planificacion/${info.event.id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('modalTipo').textContent = data.tipo_visita;
+                        document.getElementById('modalFecha').textContent = data.fecha;
+                        document.getElementById('modalEstado').textContent = data.estado;
+                        document.getElementById('modalVerBtn').href = `/planificaciones/${data.id}`;
+                        new bootstrap.Modal(document.getElementById('eventoModal')).show();
+                    });
             },
-            listWeek: {
-                titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }
+            eventsSet: function(events) {
+                allEvents = events;
+                updateEventCount(allEvents.length);
             }
-        },
-        buttonText: {
-            today: 'Hoy',
-            month: 'Mes',
-            week: 'Semana',
-            list: 'Lista'
-        },
-        events: '/api/planificaciones',
-        eventColor: '#198754',
-        eventDisplay: 'block',
-        eventTimeFormat: {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        },
-        eventDidMount: function(info) {
-            // Ajustar el tamaño de los eventos en móvil
-            if (window.innerWidth < 768) {
-                info.el.style.fontSize = '0.8em';
-                info.el.style.padding = '2px';
-            }
-        },
-        eventClick: function(info) {
-            fetch(`/api/planificacion/${info.event.id}`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('modalTipo').textContent = data.tipo_visita;
-                    document.getElementById('modalFecha').textContent = data.fecha;
-                    document.getElementById('modalEstado').textContent = data.estado;
-                    document.getElementById('modalVerBtn').href = `/planificaciones/${data.id}`;
-                    new bootstrap.Modal(document.getElementById('eventoModal')).show();
-                });
-        }
+        });
+
+        calendar.render();
+
+        document.getElementById('prev-btn').addEventListener('click', () => calendar.prev());
+        document.getElementById('next-btn').addEventListener('click', () => calendar.next());
+        document.getElementById('today-btn').addEventListener('click', () => calendar.today());
+    }
+
+    // Filtros
+    document.querySelectorAll('[data-status]').forEach(button => {
+        button.addEventListener('click', function() {
+            const status = this.getAttribute('data-status');
+            document.querySelectorAll('[data-status]').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            let filteredEvents = status === 'all' ? allEvents : allEvents.filter(e => (e.extendedProps.estado || 'pendiente') === status);
+            calendar.removeAllEvents();
+            filteredEvents.forEach(ev => calendar.addEvent(ev));
+            updateEventCount(filteredEvents.length);
+        });
     });
 
-    calendar.render();
+    function updateEventCount(count) { document.getElementById('total-eventos').textContent = count; }
 
-    // Ajustar calendario al cambiar tamaño de pantalla
-    window.addEventListener('resize', function() {
-        calendar.updateSize();
-    });
+    initCalendar();
 });
 </script>
-
-<style>
-
-    .container{
-        background-color: rgba(129, 165, 114, 0.929);
-        padding: 20px;
-    }
-
-    .title{
-    text-align: center; 
-    font-family: Arial Black; 
-    font-weight: bold; 
-    font-size: 30px; 
-    color: #fdffe5; 
-    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-    }
-
-/* Estilos responsivos */
-@media (max-width: 767.98px) {
-    #calendar .fc-header-toolbar {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    #calendar .fc-toolbar-title {
-        font-size: 1.2rem;
-        margin: 0.5rem 0;
-    }
-    #calendar .fc-button {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-    }
-    .fc-daygrid-event {
-        white-space: normal !important;
-        line-height: 1.2 !important;
-    }
-    .container {
-        margin-left: -35px;
-        width: 110%;
-    
-
-    }
-
-        .dashboard-content {
-            max-width: 100%;
-        }
-        .dashboard-card {
-            margin-bottom: 15px;
-        }
-}
-
-/* Mejoras generales */
-.fc-event {
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.fc-event:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-</style>
 @endsection

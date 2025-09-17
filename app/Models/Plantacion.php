@@ -26,4 +26,9 @@ class Plantacion extends Model
         return $this->hasMany(\App\Models\Visita::class, 'plantacion_id');
     }
 
+    public function visitasSociales()
+    {
+        return $this->hasMany(VisitaSocial::class, 'plantacion_id');
+    }
+
 }

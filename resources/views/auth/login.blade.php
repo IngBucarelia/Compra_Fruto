@@ -125,9 +125,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             <button style="border-radius: 30px;" type="submit" class="btn-login">Ingresar</button>
         </form>
 
-        <div class="footer-links">
-            <a href="{{ route('register') }}">¿No tienes cuenta? Regístrate</a>
-        </div>
+       
     </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>

@@ -109,17 +109,53 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 }
 
     /* Media query para pantallas pequeñas (móviles) */
-    @media (max-width: 767.98px) { /* Bootstrap's 'sm' breakpoint is 576px, 'md' is 768px */
-        .dashboard-container {
-            margin-left: 0; /* Eliminar margen negativo en móvil */
-            width: 100%;
-            padding: 15px;
-            margin-left: -30px
- /* Ajustar padding para pantallas pequeñas */
+   @media (max-width: 968px) {
+
+         .container.offline-form-container {
+        background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
+    }
+        .button-group-top {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+         .container.offline-form-container {
+        padding: 15px;
+            margin-top: 15px;
+            border-radius: 0;
+            box-shadow: none;
+            width: 123%;
+            max-width: none;
+            margin-left: -60px !important;
+    }
+
+    .title{
+    text-align: center;
+    font-family: Arial Black;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fdffe5;
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    margin-bottom: 25px;
+}
+
+ .container {
+        margin-left: -70px;
+        width: 125%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
         }
         .dashboard-card {
-            margin-bottom: 15px; /* Espacio entre tarjetas en móvil */
+            margin-bottom: 15px;
         }
+
+        .card{
+        width: 100%;
+    }
     }
 </style>
 
@@ -158,7 +194,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             </div>
 
             <div class="col-12 col-md-6 mb-4">
-                <a href="{{ route('plantaciones.index') }}" class="dashboard-link"> {{-- ✅ ASUMO que tienes una ruta 'plantaciones.index' --}}
+                <a href="{{ route('visitas_social.homeSocial') }}" class="dashboard-link"> {{-- ✅ ASUMO que tienes una ruta 'plantaciones.index' --}}
                     <div class="dashboard-card p-4">
                         <div class="dashboard-title">Componente Ambiental</div><br>
                         <img class="logo" src="{{ asset('images/ambiental.webp') }}" style="border-radius: 30px" alt="Listado de Plantaciones">

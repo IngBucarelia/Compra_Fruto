@@ -17,11 +17,39 @@
     color: #fdffe5; 
     text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 968px) {
 
-        .container {
-        margin-left: -35px;
-        width: 110%;
+         .container.offline-form-container {
+        background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
+    }
+        .button-group-top {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+         .container.offline-form-container {
+        padding: 15px;
+            margin-top: 15px;
+            border-radius: 0;
+            box-shadow: none;
+            width: 123%;
+            max-width: none;
+            margin-left: -60px !important;
+    }
+
+    .title{
+    text-align: center;
+    font-family: Arial Black;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fdffe5;
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    margin-bottom: 25px;
+}
+
+ .container {
+        margin-left: -70px;
+        width: 125%;
     
 
     }
@@ -32,6 +60,11 @@
         .dashboard-card {
             margin-bottom: 15px;
         }
+
+        .card{
+        width: 100%;
+    }
+    
     }
 </style>
 <div class="container" >

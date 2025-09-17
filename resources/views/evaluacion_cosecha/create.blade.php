@@ -97,43 +97,54 @@
     margin-top: 30px;
 }
 
-/* Media Queries para Responsividad (móviles) */
-@media (max-width: 767.98px) {
-    .container {
+@media (max-width: 968px) {
+
+         .container.offline-form-container {
+        background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
+    }
+        .button-group-top {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+         .container.offline-form-container {
         padding: 15px;
-        margin-top: 15px;
-        border-radius: 0;
-        box-shadow: none;
-        width: 100%;
-        max-width: none;
-        margin-left: 0;
+            margin-top: 15px;
+            border-radius: 0;
+            box-shadow: none;
+            width: 123%;
+            max-width: none;
+            margin-left: -60px !important;
     }
-    .title {
-        font-size: 1.8em;
-        margin-bottom: 20px;
-    }
-    .form-control {
-        padding: 10px;
-        font-size: 0.95em;
-    }
-    .btn {
-        width: 100%;
-        padding: 12px 15px;
-        font-size: 1em;
-    }
-    .button-group {
-        flex-direction: column;
-        gap: 10px;
-    }
+
+    .title{
+    text-align: center;
+    font-family: Arial Black;
+    font-weight: bold;
+    font-size: 30px;
+    color: #fdffe5;
+    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+    margin-bottom: 25px;
 }
-/* Media Query para pantallas medianas y grandes (desktop/tablet) */
-@media (min-width: 768px) {
-    .button-group {
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 20px;
+
+ .container {
+        margin-left: -70px;
+        width: 125%;
+    
+
     }
-}
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+
+        .card{
+        width: 100%;
+    }
+    }
 </style>
 <div class="container" >
 

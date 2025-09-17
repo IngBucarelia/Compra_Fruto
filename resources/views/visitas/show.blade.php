@@ -20,8 +20,8 @@
     @media (max-width: 768px) {
 
         .container {
-        margin-left: -35px;
-        width: 110%;
+        margin-left: -70px;
+        width: 125%;
     
 
     }
@@ -70,7 +70,7 @@
         </div>
         @if(session('info'))
         <div class="alert alert-warning">
-            {{ session('info') }}
+            {{ session('info') }} 
         </div>
     @endif
     <!-- Botón dinámico según el estado de la visita -->

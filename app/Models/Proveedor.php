@@ -14,4 +14,9 @@ class Proveedor extends Model
     {
         return $this->hasMany(Plantacion::class, 'id_proveedor');
     }
+    public function datosPersonalesSociales()
+    {
+        return $this->hasMany(DatosPersonalesSocial::class);
+    }
+
 }

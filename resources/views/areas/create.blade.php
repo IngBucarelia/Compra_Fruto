@@ -46,9 +46,9 @@
             margin-top: 15px;
             border-radius: 0;
             box-shadow: none;
-            width: 100%;
+            width: 123%;
             max-width: none;
-            margin-left: -35px !important;
+            margin-left: -60px !important;
     }
 
     .title{
@@ -60,6 +60,24 @@
     text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
     margin-bottom: 25px;
 }
+
+ .container {
+        margin-left: -70px;
+        width: 125%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+
+        .card{
+        width: 100%;
+    }
     }
 
     .title{

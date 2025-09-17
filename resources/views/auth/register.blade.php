@@ -1,17 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Mismo estilo que login (puedes reutilizar el CSS) -->
+    <meta charset="UTF-8">
+    <title>Registro de Usuario</title>
     <style>
-        /* Copia todo el CSS del login aquí */
-        .input-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #AFE1AF;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-         body {
+        body {
             margin: 0;
             padding: 0;
             font-family: 'Poppins', sans-serif;
@@ -22,62 +15,93 @@
             justify-content: center;
             align-items: center;
         }
+
         .login-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 2rem;
+            background: rgba(20, 92, 20, 0.523);
+            padding: 2.5rem;
             border-radius: 15px;
-            width: 400px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 420px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
             text-align: center;
-            margin-top: 140px;
+            margin-top: 380px;
+            animation: fadeIn 0.8s ease-in-out;
         }
+
         .logo {
-            width: 120px;
+            width: 320px;
             margin-bottom: 1.5rem;
         }
+
         .input-group {
             margin-bottom: 1.5rem;
             text-align: left;
         }
+
         .input-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: #097969; /* Cadmio Verde */
+            color: #caf4ee;
             font-weight: 600;
         }
-        .input-group input {
+
+        .input-group input,
+        .input-group select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #AFE1AF; /* Celadón */
+            border: 2px solid #AFE1AF;
             border-radius: 8px;
             font-size: 16px;
-            transition: border 0.3s;
+            transition: all 0.3s;
         }
-        .input-group input:focus {
-            border-color: #097969; /* Cadmio Verde */
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #097969;
             outline: none;
+            box-shadow: 0 0 8px rgba(9, 121, 105, 0.3);
         }
+
         .btn-login {
             width: 100%;
             padding: 12px;
-            background: #097969; /* Cadmio Verde */
+            background: #097969;
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
+
         .btn-login:hover {
-            background: #075e4d; /* Verde más oscuro */
+            background: #075e4d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
-        .footer-links {
-            margin-top: 1.5rem;
-            font-size: 14px;
+
+        .btn-back {
+            width: 100%;
+            padding: 12px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
-        .footer-links a {
-            color: #5F9EA0; /* Cadete Azul */
-            text-decoration: none;
+
+        .btn-back:hover {
+            background: #d6d6d6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -128,9 +152,10 @@
             <button type="submit" class="btn-login">Registrarse</button>
         </form>
 
-        <div class="footer-links">
-            <a href="{{ route('login') }}">¿Ya tienes cuenta? Inicia Sesión</a>
-        </div>
+        <!-- Botón Atrás -->
+        <button type="button" class="btn-back" onclick="history.back()">
+            ← Atrás
+        </button>
     </div>
 </body>
 </html>

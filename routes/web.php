@@ -10,17 +10,22 @@ use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\PlanificacionController;
 use App\Http\Controllers\AreaOfflineController;
 use App\Http\Controllers\CierreVisitaController;
+use App\Http\Controllers\DatoPredioSocialController;
+use App\Http\Controllers\DatosPersonalesSocialController;
 use App\Http\Controllers\FertilizacionController;
 use App\Http\Controllers\LaboresCultivoController;
 use App\Http\Controllers\SanidadController;
 use App\Http\Controllers\SueloController;
 use App\Http\Controllers\EvaluacionCosechaCampoController;
+use App\Http\Controllers\FuerzaLaboralController;
 use App\Http\Controllers\FullVisitaImportController;
+use App\Http\Controllers\PlanificacionSocialController;
 use App\Http\Controllers\PolinizacionController;
 use App\Http\Controllers\VisitaController;
 use App\Http\Controllers\VisitaSocialController;
 use App\Http\Controllers\VisitaImportController;
-
+use App\Models\Plantacion;
+use App\Http\Controllers\MiembroHogarController;
 
 
 
@@ -181,19 +186,6 @@ Route::get('/offline/{any?}', function () {
 // RUTAS PARA EL COMPONENETE SOCIAL 
     Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
 
-
-
-
-
-
-// RUTAS PARA EL COMPONENTE AMBIENTAL 
-
-    Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
-
-
-
-
-
     Route::prefix('visitas-social')->name('visitas_social.')->group(function () {
     Route::get('/homeSocial', [VisitaSocialController::class, 'home'])->name('homeSocial');
     Route::get('/Social', [VisitaSocialController::class, 'index'])->name('indexSocial');
@@ -204,13 +196,128 @@ Route::get('/offline/{any?}', function () {
     Route::put('SocialUpdate/{id}', [VisitaSocialController::class, 'update'])->name('updateSocial');
     Route::delete('SocialDestroy/{id}', [VisitaSocialController::class, 'destroy'])->name('destroySocial');
 
+        Route::get('/visitas-social/{id}/detalleSocial', [App\Http\Controllers\VisitaSocialController::class, 'detalle'])->name('detalleSocial');
+
+
     // Exportaciones
     Route::get('/{id}/export-pdfSocial', [VisitaSocialController::class, 'exportarPDF'])->name('exportar_pdfSocial');
     Route::get('/{id}/export-excelSocial', [VisitaSocialController::class, 'exportarExcel'])->name('exportar_excelSocial');
+       
+
+   
+
+    // API para calendario
+    Route::get('/api/planificaciones-sociales', [PlanificacionSocialController::class, 'apiPlanificacionesSociales']);
+
+    // API para obtener plantaciones por proveedor
+    Route::get('/api/plantaciones-por-proveedor/{proveedorId}', function ($proveedorId) {
+        return Plantacion::where('id_proveedor', $proveedorId)->get();
+    });
 
     // Actualización de estado
     Route::put('/{visita}/update-statusSocial', [VisitaSocialController::class, 'updateStatus'])->name('update_statusSocial');
+
+    
 });
+
+ Route::get('/visitas-social/{id}/exportar-pdf', [VisitaSocialController::class, 'exportarPDF'])
+    ->name('visitas_social.exportar.pdf');
+
+ // Rutas para planificación social
+    Route::prefix('planificaciones-social')->name('planificaciones_social.')->group(function () {
+    Route::get('/', [PlanificacionSocialController::class, 'index'])->name('index');
+    Route::get('/create', [PlanificacionSocialController::class, 'create'])->name('create');
+    Route::post('/', [PlanificacionSocialController::class, 'store'])->name('store');
+
+    // 🔹 Primero rutas fijas
+    Route::get('/calendario', [PlanificacionSocialController::class, 'calendario'])->name('calendario');
+    Route::get('/eventos', [PlanificacionSocialController::class, 'eventos'])->name('eventos');
+
+    // 🔹 Después las que tienen parámetros dinámicos
+    Route::get('/{planificacionSocial}', [PlanificacionSocialController::class, 'show'])->name('show');
+    Route::get('/{planificacionSocial}/edit', [PlanificacionSocialController::class, 'edit'])->name('edit');
+    Route::put('/{planificacionSocial}', [PlanificacionSocialController::class, 'update'])->name('update');
+    Route::delete('/{planificacionSocial}', [PlanificacionSocialController::class, 'destroy'])->name('destroy');
+});
+
+
+
+
+
+    // API para obtener plantaciones por proveedor (AGREGAR ESTA RUTA)
+    Route::get('/api/plantaciones-por-proveedor/{proveedorId}', function ($proveedorId) {
+        $plantaciones = Plantacion::where('id_proveedor', $proveedorId)->get();
+        
+        return response()->json($plantaciones);
+    });
+
+    // Zona de visita social - datos personales 
+    Route::prefix('visitas-social/{visita}')->name('datos_personales_sociales.')->group(function () {
+    Route::get('/datos-personales/create', [DatosPersonalesSocialController::class, 'create'])->name('create');
+    Route::post('/datos-personales', [DatosPersonalesSocialController::class, 'store'])->name('store');
+    Route::get('edit/datos-personales', [DatosPersonalesSocialController::class, 'edit'])->name('edit');
+    Route::put('update/datos-personales', [DatosPersonalesSocialController::class, 'update'])->name('update');
+    Route::get('/datos-personales/{id}', [DatosPersonalesSocialController::class, 'show'])->name('show');
+
+    });
+    Route::post('/visitas_social/{id}/iniciar', [App\Http\Controllers\VisitaSocialController::class, 'iniciarVisita'])
+    ->name('visitas_social.iniciar');
+    
+
+
+    //Zona de Visita Social -  miembros del hogar 
+
+
+Route::prefix('visitas-sociales/{visitaId}')->group(function () {
+    Route::get('/miembros-hogar', [MiembroHogarController::class, 'index'])->name('miembros_hogar.index');
+    Route::get('/miembros-hogar/create', [MiembroHogarController::class, 'create'])->name('miembros_hogar.create');
+    Route::post('/miembros-hogar', [MiembroHogarController::class, 'store'])->name('miembros_hogar.store');
+    Route::get('/miembros-hogar/{id}/edit', [MiembroHogarController::class, 'edit'])->name('miembros_hogar.edit');
+    Route::put('/miembros-hogar/{id}', [MiembroHogarController::class, 'update'])->name('miembros_hogar.update');
+    Route::delete('/miembros-hogar/{id}', [MiembroHogarController::class, 'destroy'])->name('miembros_hogar.destroy');
+});
+Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSocialController::class, 'redirigirSeccion'])
+    ->name('redireccion_seccion_social');
+
+
+    //Zona de Visita Social - Predio informacion 
+
+    Route::prefix('visitas-sociales/{visitaId}/datos-predio')->group(function () {
+    Route::get('/', [DatoPredioSocialController::class, 'index'])->name('datos_predio_social.index');
+    Route::get('/{plantacionId}/create', [DatoPredioSocialController::class, 'create'])->name('datos_predio_social.create');
+    Route::post('/{plantacionId}', [DatoPredioSocialController::class, 'store'])->name('datos_predio_social.store');
+    Route::get('/{id}/edit', [DatoPredioSocialController::class, 'edit'])->name('datos_predio_social.edit');
+    Route::put('/{id}', [DatoPredioSocialController::class, 'update'])->name('datos_predio_social.update');
+    Route::delete('/{id}', [DatoPredioSocialController::class, 'destroy'])->name('datos_predio_social.destroy');
+});
+
+    // Zona de Visita Social -  Fuerza laboral
+
+    Route::prefix('visitas-social/{visita}')->name('fuerza_laboral.')->group(function () {
+    Route::get('/fuerza-laboral', [FuerzaLaboralController::class, 'index'])->name('index');
+    Route::get('/fuerza-laboral/create', [FuerzaLaboralController::class, 'create'])->name('create');
+    Route::post('/fuerza-laboral', [FuerzaLaboralController::class, 'store'])->name('store');
+    Route::get('/fuerza-laboral/{id}/edit', [FuerzaLaboralController::class, 'edit'])->name('edit');
+    Route::put('/fuerza-laboral/{id}', [FuerzaLaboralController::class, 'update'])->name('update');
+    Route::get('/fuerza-laboral/{id}', [FuerzaLaboralController::class, 'show'])->name('show');
+});
+
+    // Zona de Visita Social - Organización Social
+    Route::prefix('visitas_social/{visita_id}/organizacion_social')->group(function () {
+    Route::get('/', [App\Http\Controllers\OrganizacionSocialController::class, 'index'])->name('organizacion_social.index');
+    Route::get('/create', [App\Http\Controllers\OrganizacionSocialController::class, 'create'])->name('organizacion_social.create');
+    Route::post('/', [App\Http\Controllers\OrganizacionSocialController::class, 'store'])->name('organizacion_social.store');
+    Route::get('/{id}', [App\Http\Controllers\OrganizacionSocialController::class, 'show'])->name('organizacion_social.show');
+    Route::get('/{id}/edit', [App\Http\Controllers\OrganizacionSocialController::class, 'edit'])->name('organizacion_social.edit');
+    Route::put('/{id}', [App\Http\Controllers\OrganizacionSocialController::class, 'update'])->name('organizacion_social.update');
+});
+
+    // Cierre de visitas sociales
+    Route::get('cierre-visitas-social/create/{visita_social_id}', [App\Http\Controllers\CierreVisitaSocialController::class, 'create'])
+        ->name('cierre-visitas-social.create');
+
+    Route::post('cierre-visitas-social/store', [App\Http\Controllers\CierreVisitaSocialController::class, 'store'])
+        ->name('cierre-visitas-social.store');
 
 
 

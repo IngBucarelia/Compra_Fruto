@@ -54,12 +54,25 @@
             </a>
         </li>
         
+        <li class="sidebar-item has-submenu 
+    {{ request()->routeIs('proveedores.*') || request()->routeIs('plantaciones.*') ? 'active' : '' }}">
+    
+    <a href="#zonaAdmonSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+        <i class="fas fa-cogs me-2"></i>
+        <span x-show="sidebarOpen">Zona Admon</span>
+    </a>
+
+    <ul id="zonaAdmonSubmenu" class="sidebar-submenu collapse 
+        {{ request()->routeIs('proveedores.*') || request()->routeIs('plantaciones.*') ? 'show' : '' }}" 
+        data-bs-parent="#sidebarMenu">
+        
+        {{-- Submenú Proveedores --}}
         <li class="sidebar-item has-submenu {{ request()->routeIs('proveedores.*') ? 'active' : '' }}">
             <a href="#proveedoresSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
                 <i class="fas fa-truck me-2"></i>
                 <span x-show="sidebarOpen">Proveedores</span>
             </a>
-            <ul id="proveedoresSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('proveedores.*') ? 'show' : '' }}" data-bs-parent="#sidebarMenu">
+            <ul id="proveedoresSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('proveedores.*') ? 'show' : '' }}">
                 <li class="sidebar-item">
                     <a href="{{ route('proveedores.index') }}" class="sidebar-link">
                         <span x-show="sidebarOpen">Listar Proveedores</span>
@@ -67,66 +80,142 @@
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('proveedores.import.form') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar</span>
+                        <span x-show="sidebarOpen">Importar Proveedores</span>
                     </a>
                 </li>
             </ul>
         </li>
+
+        {{-- Submenú Plantaciones --}}
         <li class="sidebar-item has-submenu {{ request()->routeIs('plantaciones.*') ? 'active' : '' }}">
             <a href="#plantacionesSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
                 <i class="fas fa-seedling me-2"></i>
                 <span x-show="sidebarOpen">Plantaciones</span>
             </a>
-            <ul id="plantacionesSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('plantaciones.*') ? 'show' : '' }}" data-bs-parent="#sidebarMenu">
+            <ul id="plantacionesSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('plantaciones.*') ? 'show' : '' }}">
                 <li class="sidebar-item">
                     <a href="{{ route('plantaciones.index') }}" class="sidebar-link">
                         <span x-show="sidebarOpen">Listar Plantaciones</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="{{ route('plantaciones.import.form') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar</span>
+                    <a href="{{ route('plantaciones.create') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Importar Plantaciones</span>
                     </a>
                 </li>
             </ul>
         </li>
-        
-        <li class="sidebar-item has-submenu {{ request()->routeIs('visitas.*') ? 'active' : '' }}">
-            <a href="#visitasSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
-                <i class="fas fa-clipboard-list me-2"></i>
-                <span x-show="sidebarOpen">Visitas</span>
+
+        {{-- Submenú Plantaciones --}}
+        <li class="sidebar-item has-submenu {{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
+            <a href="#usuariosSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                <i class="fas fa-user me-2"></i>
+                <span x-show="sidebarOpen">Usuarios</span>
             </a>
-            <ul id="visitasSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas.*') ? 'show' : '' }}" data-bs-parent="#sidebarMenu">
+            <ul id="usuariosSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('usuarios.*') ? 'show' : '' }}">
                 <li class="sidebar-item">
-                    <a href="{{ route('visitas.index') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Visita - Agronómico</span>
-                    </a>
-                    
+                    <a href="{{ route('register') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Agregar Usuario</span>
                     </a>
                 </li>
+                
+            </ul>
+        </li>
+
+    </ul>
+</li>
+
+        
+        
+        <li class="sidebar-item has-submenu 
+    {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'active' : '' }}">
+    
+    <a href="#visitasSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+        <i class="fas fa-clipboard-list me-2"></i>
+        <span x-show="sidebarOpen">Visitas</span>
+    </a>
+
+    <ul id="visitasSubmenu" class="sidebar-submenu collapse 
+        {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'show' : '' }}" 
+        data-bs-parent="#sidebarMenu">
+
+        {{-- Submenú Visita Agronómica --}}
+        <li class="sidebar-item has-submenu {{ request()->routeIs('visitas.*') ? 'active' : '' }}">
+            <a href="#visitaAgroSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                <i class="fas fa-seedling me-2"></i>
+                <span x-show="sidebarOpen">Visita - Agronómica</span>
+            </a>
+            <ul id="visitaAgroSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas.*') ? 'show' : '' }}">
                 <li class="sidebar-item">
-                    <a href="{{ route('visitas_social.indexSocial') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Visita - Social</span>
+                    <a href="{{ route('visitasHome') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Home Visitas</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('visitas.import.form') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar <br>visita individual</span>
+                        <span x-show="sidebarOpen">Importar Individual</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('visitas.full-import.form') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar <br> componente de visita</span>
+                        <span x-show="sidebarOpen">Importar Componente</span>
                     </a>
                 </li>
             </ul>
         </li>
+
+        {{-- Submenú Visita Social --}}
+        <li class="sidebar-item has-submenu {{ request()->routeIs('visitas_social.*') ? 'active' : '' }}">
+            <a href="#visitaSocialSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                <i class="fas fa-users me-2"></i>
+                <span x-show="sidebarOpen">Visita - Social</span>
+            </a>
+            <ul id="visitaSocialSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas_social.*') ? 'show' : '' }}">
+                <li class="sidebar-item">
+                    <a href="{{ route('visitas_social.homeSocial') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Home Social</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span x-show="sidebarOpen">Importar (próximamente)</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+    </ul>
+</li>
+
+        <li class="sidebar-item has-submenu 
+    {{ request()->routeIs('planificaciones.*') || request()->routeIs('planificaciones_social.*') ? 'active' : '' }}">
+    
+    <a href="#planificacionSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+        <i class="fas fa-calendar-alt me-2"></i>
+        <span x-show="sidebarOpen">Planificación</span>
+    </a>
+
+    <ul id="planificacionSubmenu" class="sidebar-submenu collapse 
+        {{ request()->routeIs('planificaciones.*') || request()->routeIs('planificaciones_social.*') ? 'show' : '' }}" 
+        data-bs-parent="#sidebarMenu">
+
+        {{-- Planificación Agronómica --}}
         <li class="sidebar-item">
             <a href="{{ route('planificaciones.calendario') }}" class="sidebar-link">
-                <i class="fas fa-calendar-alt me-2"></i>
-                <span x-show="sidebarOpen">Calendario <br>Visitas</span>
+                <span x-show="sidebarOpen">Agronómica</span>
             </a>
         </li>
+
+        {{-- Planificación Social --}}
+        <li class="sidebar-item">
+            <a href="{{ route('planificaciones_social.index') }}" class="sidebar-link">
+                <span x-show="sidebarOpen">Social</span>
+            </a>
+        </li>
+
+    </ul>
+</li>
+
         
     </ul>
 
