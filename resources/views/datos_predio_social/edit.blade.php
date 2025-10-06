@@ -91,4 +91,23 @@
         </div>
     </div>
 </div>
+
+<!-- En tu formulario de edición, después del select multiple -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Obtener los valores guardados (deberías pasarlos desde el controlador)
+    const valoresGuardados = @json($dato->infraestructura_vial ? json_decode($dato->infraestructura_vial) : []);
+    
+    // Preseleccionar las opciones en el select multiple
+    const selectVial = document.querySelector('select[name="infraestructura_vial"]');
+    
+    if (selectVial && valoresGuardados.length > 0) {
+        Array.from(selectVial.options).forEach(option => {
+            if (valoresGuardados.includes(option.value)) {
+                option.selected = true;
+            }
+        });
+    }
+});
+</script>
 @endsection

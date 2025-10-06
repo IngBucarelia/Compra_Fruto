@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
         return \App\Models\Plantacion::where('id_proveedor', $proveedorId)->get();
     });
     Route::get('/visitas/{id}/detalle', [App\Http\Controllers\VisitaController::class, 'detalle'])->name('visitas.detalle');
-
+    // Ruta para iniciar visita
 
     // rutas de planificacion 
     Route::resource('planificaciones', PlanificacionController::class);
@@ -93,6 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/planificacion/{id}', function ($id) {
             return \App\Models\Planificacion::findOrFail($id);
         });
+    // Asegúrate de que las rutas estén así:
+    Route::get('/planificaciones/{planificacion}/edit', [PlanificacionController::class, 'edit'])->name('planificaciones.edit');
+    Route::put('/planificaciones/{planificacion}', [PlanificacionController::class, 'update'])->name('planificaciones.update');
 
     // rutas de area
     Route::resource('areas', AreaController::class)->middleware('auth');
@@ -172,11 +175,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/visitas/full-import', [FullVisitaImportController::class, 'import'])->name('visitas.full-import');
   
 
-
+ 
 // Página offline (SPA en Vue que maneja rutas internamente)
 Route::get('/offline/{any?}', function () {
     return response()->view('offline');
 })->where('any', '.*');
+
+// Ruta para iniciar visita agronómica
+Route::put('/visitas/{visita}/iniciar-agronomica', [VisitaController::class, 'iniciarAgronomica'])->name('visitas.iniciar_agronomica');
+
+// Ruta para redirección de secciones agronómicas
+Route::get('/visitas/{visita}/redireccion-seccion-agronomica', [VisitaController::class, 'redireccionSeccionAgronomica'])->name('redireccion_seccion_agronomica');
 
 
 
@@ -204,7 +213,7 @@ Route::get('/offline/{any?}', function () {
     Route::get('/{id}/export-excelSocial', [VisitaSocialController::class, 'exportarExcel'])->name('exportar_excelSocial');
        
 
-   
+
 
     // API para calendario
     Route::get('/api/planificaciones-sociales', [PlanificacionSocialController::class, 'apiPlanificacionesSociales']);
@@ -219,6 +228,12 @@ Route::get('/offline/{any?}', function () {
 
     
 });
+
+    Route::put('/visitas/{visita}/iniciar', [VisitaSocialController::class, 'iniciar'])->name('visitas.iniciar');
+
+
+Route::get('/visitas-social/{id}/edit', [VisitaSocialController::class, 'edit'])->name('visitas_social.edit');
+Route::put('/visitas-social/{id}', [VisitaSocialController::class, 'update'])->name('visitas_social.update');
 
  Route::get('/visitas-social/{id}/exportar-pdf', [VisitaSocialController::class, 'exportarPDF'])
     ->name('visitas_social.exportar.pdf');
@@ -240,6 +255,10 @@ Route::get('/offline/{any?}', function () {
     Route::delete('/{planificacionSocial}', [PlanificacionSocialController::class, 'destroy'])->name('destroy');
 });
 
+// edit planificacion social 
+    Route::get('/planificaciones-social/{id}/edit', [PlanificacionSocialController::class, 'edit'])->name('planificaciones_social.edit');
+    Route::put('/planificaciones-social/{id}', [PlanificacionSocialController::class, 'update'])->name('planificaciones_social.update');
+
 
 
 
@@ -260,7 +279,7 @@ Route::get('/offline/{any?}', function () {
     Route::get('/datos-personales/{id}', [DatosPersonalesSocialController::class, 'show'])->name('show');
 
     });
-    Route::post('/visitas_social/{id}/iniciar', [App\Http\Controllers\VisitaSocialController::class, 'iniciarVisita'])
+    Route::put('/visitas_social/{id}/iniciar', [App\Http\Controllers\VisitaSocialController::class, 'iniciarVisita'])
     ->name('visitas_social.iniciar');
     
 
@@ -300,6 +319,7 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
     Route::get('/fuerza-laboral/{id}/edit', [FuerzaLaboralController::class, 'edit'])->name('edit');
     Route::put('/fuerza-laboral/{id}', [FuerzaLaboralController::class, 'update'])->name('update');
     Route::get('/fuerza-laboral/{id}', [FuerzaLaboralController::class, 'show'])->name('show');
+     Route::delete('/{fuerza}', [FuerzaLaboralController::class, 'destroy'])->name('destroy');
 });
 
     // Zona de Visita Social - Organización Social
@@ -314,10 +334,14 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
 
     // Cierre de visitas sociales
     Route::get('cierre-visitas-social/create/{visita_social_id}', [App\Http\Controllers\CierreVisitaSocialController::class, 'create'])
-        ->name('cierre-visitas-social.create');
+        ->name('cierre-visitas-social.create'); 
 
     Route::post('cierre-visitas-social/store', [App\Http\Controllers\CierreVisitaSocialController::class, 'store'])
         ->name('cierre-visitas-social.store');
+
+    // actualizar estado social 
+
+    Route::put('/visitas-social/{visitaId}/update-status', [VisitaSocialController::class, 'updateStatus']);
 
 
 

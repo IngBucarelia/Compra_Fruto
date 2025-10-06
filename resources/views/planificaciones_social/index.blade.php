@@ -4,12 +4,28 @@
 <div class="container-fluid py-4">
     <!-- Header con Estadísticas -->
     <div class="row mb-4">
-        <div class="col-12">
+        <div class="col-12"> 
             <div class="card  shadow-lg border-0" style="background-color: #206227a5">
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h2 class="text-white mb-1">
+                                {{-- En la parte superior de tu vista index --}}
+                            @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            @endif
+
+                            @if(session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            @endif
                                 <i class="fas fa-calendar-alt me-2"></i>Planificaciones de Visitas Sociales
                             </h2>
                             <p class="text-white opacity-8 mb-0">
@@ -193,7 +209,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2">
-                                        <a href="{{ route('planificaciones_social.show', $planificacion->id) }}" 
+                                        <a href="{{ route('visitas_social.showSocial', $planificacion->id) }}" 
                                            class="btn btn-sm btn-info btn-circle"
                                            data-bs-toggle="tooltip" title="Ver detalles">
                                             <i class="fas fa-eye"></i>

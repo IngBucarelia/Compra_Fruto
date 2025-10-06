@@ -133,7 +133,7 @@
 .members-wrap {
     max-width: 135%;
     border-radius: 5px;
-    margin-left: -60px;
+    margin-left: 60px;
 }
 .members-card {
      max-width: 125%;

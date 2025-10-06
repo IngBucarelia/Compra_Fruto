@@ -18,6 +18,7 @@ class VisitaSocial extends Model
         'tipo_visita',
         'recibio_visita',
         'estado',
+        'planificacion_id',
     ];
 
     // Relaciones
@@ -62,6 +63,11 @@ class VisitaSocial extends Model
     public function cierreVisitaSocial()
     {
         return $this->hasOne(CierreVisitaSocial::class, 'visita_social_id');
+    }
+
+    public function planificacion()
+    {
+        return $this->belongsTo(PlanificacionSocial::class, 'planificacion_id');
     }
 
 }

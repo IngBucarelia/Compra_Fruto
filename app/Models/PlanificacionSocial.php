@@ -38,4 +38,10 @@ class PlanificacionSocial extends Model
     {
         return $this->belongsTo(VisitaSocial::class);
     }
+    public function visita()
+{
+    return $this->hasOne(VisitaSocial::class, 'planificacion_id');
+}
+
+    
 }

@@ -14,9 +14,7 @@ use App\Imports\VisitasImport;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Imports\VisitasMultiSheetImport;
-
-
-
+use Illuminate\Support\Facades\DB;
 
 class VisitaController extends Controller
 {
@@ -58,42 +56,66 @@ class VisitaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-        {
+   public function store(Request $request)
+    {
+        try {
             $data = $request->validate([
                 'fecha' => 'required|date',
                 'tecnico_campo' => 'required|exists:users,id',
                 'proveedor_id' => 'required|exists:proveedores,id',
                 'plantacion_id' => 'required|exists:plantaciones,id',
-                'ubicacion' => 'required|string',
-                'tipo_visita' => 'required',
-                'recibio_visita' => 'required|string',
+                'tipo_visita' => 'required|string',
             ]);
 
-            $visita = Visita::create([
+            DB::beginTransaction();
+
+            // Crear la planificación
+            $planificacion = Planificacion::create([
                 ...$data,
                 'estado' => 'pendiente'
             ]);
 
-            if ($request->input('es_planificada') == 1) {
-                $planificacion = Planificacion::create([
-                    'fecha' => $data['fecha'],
-                    'tecnico_campo' => $data['tecnico_campo'],
-                    'proveedor_id' => $data['proveedor_id'],
-                    'plantacion_id' => $data['plantacion_id'],
-                    'tipo_visita' => $data['tipo_visita'],
-                    'estado' => 'pendiente',
-                    'visita_id' => $visita->id
-                ]);
+            // Obtener datos de la plantación para la ubicación
+            $plantacion = \App\Models\Plantacion::find($data['plantacion_id']);
+            $ubicacion = $plantacion->vereda . ', ' . $plantacion->municipio;
 
-                $visita->update(['planificacion_id' => $planificacion->id]);
-            }
+            // Crear la visita asociada
+            $visita = Visita::create([
+                'fecha' => $data['fecha'],
+                'tecnico_campo' => $data['tecnico_campo'],
+                'proveedor_id' => $data['proveedor_id'],
+                'plantacion_id' => $data['plantacion_id'],
+                'tipo_visita' => $data['tipo_visita'],
+                'ubicacion' => $ubicacion,
+                'recibio_visita' => 'SIN REGISTRAR',
+                'estado' => 'pendiente',
+                'planificacion_id' => $planificacion->id
+            ]);
 
+            // Actualizar la planificación con el ID de la visita
+            $planificacion->update(['visita_id' => $visita->id]);
 
+            DB::commit();
 
-            return redirect()->route('visitas.index')->with('success', 'Visita y planificación creadas y vinculadas.');
+            return redirect()->route('planificaciones.create')
+                ->with('success', 'Planificación agronómica y visita creadas y vinculadas correctamente.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('error', 'Error de validación: Por favor verifica los datos ingresados.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al crear planificación agronómica: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al crear la planificación: ' . $e->getMessage());
         }
-
+    }
 
 
 
@@ -112,36 +134,61 @@ class VisitaController extends Controller
      * Show the form for editing the specified resource.
      */
    public function edit($id)
-        {
-            $visita = \App\Models\Visita::with(['plantacion'])->findOrFail($id);
+    {
+        try {
+            $visita = \App\Models\Visita::with(['proveedor', 'plantacion', 'tecnico'])->findOrFail($id);
             $proveedores = \App\Models\Proveedor::all();
-            $plantaciones = \App\Models\Plantacion::where('id_proveedor', $visita->proveedor_id)->get();
             $tecnicos = \App\Models\User::where('rol', 2)->get();
 
-            return view('visitas.edit', compact('visita', 'proveedores', 'plantaciones', 'tecnicos'));
+            return view('visitas.edit', compact('visita', 'proveedores', 'tecnicos'));
+            
+        } catch (\Exception $e) {
+            return redirect()->route('visitas.index')
+                ->with('error', 'No se pudo cargar la visita para editar: ' . $e->getMessage());
         }
+    }
 
-
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
-        {
-            $request->validate([
+    {
+        try {
+            $data = $request->validate([
                 'fecha' => 'required|date',
-                'ubicacion' => 'required|string',
                 'tecnico_campo' => 'required|exists:users,id',
-                'tipo_visita' => 'required|string',
                 'proveedor_id' => 'required|exists:proveedores,id',
-                'recibio_visita' => 'required|string',
+                'plantacion_id' => 'required|exists:plantaciones,id',
+                'ubicacion' => 'required|string|max:255',
+                'tipo_visita' => 'required|string',
+                'recibio_visita' => 'required|string|max:255',
             ]);
 
-            $visita = \App\Models\Visita::findOrFail($id);
-            $visita->update($request->all());
+            DB::beginTransaction();
 
-            return redirect()->route('visitas.index')->with('success', 'Visita actualizada correctamente.');
+            $visita = \App\Models\Visita::findOrFail($id);
+            $visita->update($data);
+
+            DB::commit();
+
+            return redirect()->route('visitas.index')
+                ->with('success', 'Visita agronómica actualizada exitosamente.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('error', 'Error de validación: Por favor verifica los datos ingresados.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al actualizar visita agronómica: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al actualizar la visita: ' . $e->getMessage());
         }
+    }
+
+
 
     public function destroy($id)
         {
@@ -150,6 +197,8 @@ class VisitaController extends Controller
 
             return redirect()->route('visitas.index')->with('success', 'Visita eliminada.');
         }
+
+        
 
    public function detalle($id)
     {
@@ -331,7 +380,55 @@ public function import(Request $request)
     }
 }
 
+public function iniciarAgronomica(Visita $visita)
+{
+    try {
+        // Actualizar estado de la visita
+        $visita->update([
+            'estado' => 'en_ejecucion',
+            'fecha_inicio' => now() // Si tienes este campo
+        ]);
 
+        // Redirigir a la primera sección (Área)
+        return redirect()->route('redireccion_seccion_agronomica', [
+            'visita' => $visita->id,
+            'seccion' => 'area'
+        ])->with('success', '¡Visita agronómica iniciada correctamente!');
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Error al iniciar la visita agronómica: ' . $e->getMessage());
+    }
+}
+
+public function redireccionSeccionAgronomica(Visita $visita, Request $request)
+{
+    $seccion = $request->input('seccion');
+
+    // Si la visita está pendiente y se intenta acceder a cualquier sección, iniciarla primero
+    if ($visita->estado === 'pendiente' && $seccion !== 'inicio') {
+        $visita->update(['estado' => 'en_ejecucion']);
+    }
+
+    switch ($seccion) {
+        case 'area':
+            return redirect()->route('areas.create', ['visita_id' => $visita->id]);
+        case 'fertilizacion':
+            return redirect()->route('fertilizaciones.create', ['visita_id' => $visita->id]);
+        case 'polinizacion':
+            return redirect()->route('polinizaciones.create', ['visita_id' => $visita->id]);
+        case 'sanidad':
+            return redirect()->route('sanidades.create', ['visita_id' => $visita->id]);
+        case 'suelo':
+            return redirect()->route('suelos.create', ['visita_id' => $visita->id]);
+        case 'labores_cultivo':
+            return redirect()->route('labores_cultivo.create', ['visita_id' => $visita->id]);
+        case 'evaluacion_cosecha':
+            return redirect()->route('evaluacion.create', ['visita_id' => $visita->id]);
+        case 'inicio':
+        default:
+            return redirect()->route('visitas.show', $visita->id);
+    }
+}
 
 
 }

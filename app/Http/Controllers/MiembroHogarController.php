@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DatosPersonalesSocial;
 use App\Models\MiembroHogar;
 use App\Models\VisitaSocial;
 use Illuminate\Http\Request;
@@ -12,8 +13,9 @@ class MiembroHogarController extends Controller
     {
         $visita = VisitaSocial::findOrFail($visitaId);
         $miembros = MiembroHogar::where('visita_social_id', $visitaId)->get();
+        $datosPersonales = DatosPersonalesSocial::where('visita_social_id', $visitaId)->first();
 
-        return view('miembros_hogar.show', compact('visita', 'miembros'));
+        return view('miembros_hogar.show', compact('visita', 'miembros', 'datosPersonales'));
     }
 
     public function create($visitaId)
@@ -47,7 +49,7 @@ class MiembroHogarController extends Controller
             'participa_labores' => $request->participa_labores,
         ]);
 
-        return redirect()->route('datos_predio_social.index', $visitaId)
+        return redirect()->route('miembros_hogar.index', $visitaId)
                          ->with('success', 'Miembro agregado correctamente');
     }
 

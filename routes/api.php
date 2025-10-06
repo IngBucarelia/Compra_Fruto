@@ -11,7 +11,7 @@ use App\Http\Controllers\SueloController;
 use App\Http\Controllers\LaboresCultivoController;
 use App\Http\Controllers\EvaluacionCosechaCampoController;
 use App\Http\Controllers\CierreVisitaController;
-
+use App\Http\Controllers\SocialSyncController;
 
 // Tu ruta principal de sincronización que tu JS está llamando
 Route::post('/offline/sync', [VisitaController::class, 'syncOfflineData']);
@@ -25,8 +25,16 @@ Route::post('/offline-sync/suelos', [SueloController::class, 'syncOffline']);
 Route::post('/offline-sync/labores', [LaboresCultivoController::class, 'syncOffline']);
 Route::post('/offline-sync/evaluacion', [EvaluacionCosechaCampoController::class, 'syncOffline']);
 Route::post('/offline-sync/cierre-visitas', [CierreVisitaController::class, 'syncOffline']);
-Route::put('/visitas/{visita}/update-status', [VisitaController::class, 'updateStatus'])
-    ->name('visitas.updateStatus');
+Route::put('/visitas/{visita}/update-status', [VisitaController::class, 'updateStatus'])->name('visitas.updateStatus');
 
+// Rutas para datos sociales
+   Route::prefix('offline-sync')->group(function () {
+    Route::post('/datos-personales-social', [SocialSyncController::class, 'syncDatosPersonales']);
+    Route::post('/miembros-hogar-social', [SocialSyncController::class, 'syncMiembrosHogar']);
+    Route::post('/datos-predio-social', [SocialSyncController::class, 'syncDatosPredio']);
+    Route::post('/fuerza-laboral-social', [SocialSyncController::class, 'syncFuerzaLaboral']);
+    Route::post('/organizacion-social', [SocialSyncController::class, 'syncOrganizacion']);
+    Route::post('/cierre-visita-social', [SocialSyncController::class, 'syncCierreVisita']);
+});
 
  

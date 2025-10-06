@@ -34,7 +34,7 @@ class FertilizacionController extends Controller
                 'fertilizantes.*.otro_fertilizante' => 'nullable|string|max:255|required_if:fertilizantes.*.nombre,otro',
                 'fertilizantes.*.cantidad' => 'required|numeric|min:0',
                 'fertilizantes.*.fecha_aplicacion' => 'required|date',
-                'fertilizantes.*.unidad_medida' => 'required|string|in:kg,litros,gramos,unidades',
+                'fertilizantes.*.unidad_medida' => 'required|string',
             ], [
                 'fertilizantes.*.nombre.required' => 'El nombre del fertilizante es obligatorio para cada entrada.',
                 'fertilizantes.*.otro_fertilizante.required_if' => 'Debe especificar el nombre del fertilizante cuando selecciona "Otro".',

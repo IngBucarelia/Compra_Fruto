@@ -6,21 +6,22 @@
         <div class="col-lg-8 col-md-10">
             <!-- Card Container -->
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient-primary text-white py-3">
+                <div class="card-header bg-gradient-warning text-white py-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0" style="color: #054a30">
-                            <i class="fas fa-calendar-plus me-2"></i>
-                            Crear Nueva Planificación Social
+                        <h4 class="mb-0 text-white">
+                            <i class="fas fa-edit me-2"></i>
+                            Editar Planificación Social
                         </h4>
-                        <div class="badge bg-white text-primary p-2">
-                            <i class="fas fa-users me-1"></i> Visita Social
+                        <div class="badge bg-white text-warning p-2">
+                            <i class="fas fa-users me-1"></i> ID: {{ $planificacion->id }}
                         </div>
                     </div>
                 </div>
                 
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ route('planificaciones_social.store') }}" id="planificacionForm">
+                    <form method="POST" action="{{ route('planificaciones_social.update', $planificacion->id) }}" id="planificacionForm">
                         @csrf
+                        @method('PUT')
 
                         <div class="row">
                             <!-- Columna Izquierda -->
@@ -31,7 +32,7 @@
                                         <i class="fas fa-calendar-day me-2"></i>Fecha de Visita
                                     </label>
                                     <input type="date" name="fecha" class="form-control form-control-lg" required 
-                                           value="{{ old('fecha', now()->format('Y-m-d')) }}"
+                                           value="{{ old('fecha', $planificacion->fecha) }}" {{-- CORRECCIÓN AQUÍ --}}
                                            style="border-left: 4px solid #4e73df;">
                                 </div>
 
@@ -44,7 +45,8 @@
                                             style="border-left: 4px solid #36b9cc;">
                                         <option value="">Seleccione un técnico</option>
                                         @foreach($tecnicos as $tecnico)
-                                            <option value="{{ $tecnico->id }}" {{ old('tecnico_campo') == $tecnico->id ? 'selected' : '' }}>
+                                            <option value="{{ $tecnico->id }}" 
+                                                {{ old('tecnico_campo', $planificacion->tecnico_campo) == $tecnico->id ? 'selected' : '' }}>
                                                 👨‍💼 {{ $tecnico->name }}
                                             </option>
                                         @endforeach
@@ -60,7 +62,8 @@
                                             style="border-left: 4px solid #1cc88a;">
                                         <option value="">Seleccione un proveedor</option>
                                         @foreach($proveedores as $proveedor)
-                                            <option value="{{ $proveedor->id }}" {{ old('proveedor_id') == $proveedor->id ? 'selected' : '' }}>
+                                            <option value="{{ $proveedor->id }}" 
+                                                {{ old('proveedor_id', $planificacion->proveedor_id) == $proveedor->id ? 'selected' : '' }}>
                                                 🏢 {{ $proveedor->proveedor_nombre }}
                                             </option>
                                         @endforeach
@@ -77,7 +80,7 @@
                                     </label>
                                     <select name="plantacion_id" class="form-select form-select-lg" required id="plantacion_id"
                                             style="border-left: 4px solid #f6c23e;">
-                                        <option value="">Seleccione un proveedor primero</option>
+                                        <option value="">Cargando plantaciones...</option>
                                     </select>
                                     <div class="form-text">
                                         <i class="fas fa-info-circle me-1"></i>
@@ -93,27 +96,37 @@
                                     <select name="tipo_visita" class="form-select form-select-lg" required
                                             style="border-left: 4px solid #e74a3b;">
                                         <option value="">Seleccione el tipo de visita</option>
-                                        <option value="seguimiento" {{ old('tipo_visita') == 'seguimiento' ? 'selected' : '' }}>
+                                        <option value="seguimiento" {{ old('tipo_visita', $planificacion->tipo_visita) == 'seguimiento' ? 'selected' : '' }}>
                                             📋 Seguimiento
                                         </option>
-                                        <option value="evaluacion" {{ old('tipo_visita') == 'evaluacion' ? 'selected' : '' }}>
+                                        <option value="evaluacion" {{ old('tipo_visita', $planificacion->tipo_visita) == 'evaluacion' ? 'selected' : '' }}>
                                             📊 Evaluación
                                         </option>
-                                        <option value="capacitacion" {{ old('tipo_visita') == 'capacitacion' ? 'selected' : '' }}>
+                                        <option value="capacitacion" {{ old('tipo_visita', $planificacion->tipo_visita) == 'capacitacion' ? 'selected' : '' }}>
                                             🎓 Capacitación
                                         </option>
                                     </select>
                                 </div>
 
-                                <!-- Información Adicional -->
-                                <div class="alert alert-info mt-4">
+                                <!-- Información del Estado -->
+                                <div class="alert alert-warning mt-4">
                                     <div class="d-flex">
-                                        <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+                                        <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
                                         <div>
-                                            <h6 class="alert-heading mb-2">Información Importante</h6>
+                                            <h6 class="alert-heading mb-2">Información de Estado</h6>
+                                            <p class="mb-1 small">
+                                                <strong>Estado actual:</strong> 
+                                                <span class="badge bg-{{ $planificacion->estado == 'pendiente' ? 'warning' : 'success' }}">
+                                                    {{ strtoupper($planificacion->estado) }}
+                                                </span>
+                                            </p>
                                             <p class="mb-0 small">
-                                                Al guardar la planificación, se creará automáticamente 
-                                                una visita social asociada con estado "pendiente".
+                                                <strong>Visita asociada:</strong> 
+                                                @if($planificacion->visita_social_id)
+                                                    <span class="badge bg-success">✅ Vinculada</span>
+                                                @else
+                                                    <span class="badge bg-secondary">❌ Sin vincular</span>
+                                                @endif
                                             </p>
                                         </div>
                                     </div>
@@ -128,8 +141,8 @@
                                     <a href="{{ route('planificaciones_social.index') }}" class="btn btn-outline-secondary btn-lg">
                                         <i class="fas fa-times me-2"></i>Cancelar
                                     </a>
-                                    <button type="submit" class="btn btn-primary btn-lg px-4">
-                                        <i class="fas fa-save me-2"></i>Guardar Planificación
+                                    <button type="submit" class="btn btn-warning btn-lg px-4">
+                                        <i class="fas fa-save me-2"></i>Actualizar Planificación
                                     </button>
                                 </div>
                             </div>
@@ -142,7 +155,6 @@
 </div>
 
 <style>
-/* Tus estilos actuales se mantienen igual */
 .card {
     border-radius: 15px;
     overflow: hidden;
@@ -159,8 +171,8 @@
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 0 0.3rem rgba(78, 115, 223, 0.15);
+    border-color: #f6c23e;
+    box-shadow: 0 0 0 0.3rem rgba(246, 194, 62, 0.15);
     transform: translateY(-2px);
 }
 
@@ -179,15 +191,17 @@
     padding: 12px 30px;
 }
 
-.btn-primary {
-    background: linear-gradient(45deg, #4e73df, #224abe);
+.btn-warning {
+    background: linear-gradient(45deg, #f6c23e, #dda20a);
     border: none;
+    color: white;
 }
 
-.btn-primary:hover {
-    background: linear-gradient(45deg, #224abe, #4e73df);
+.btn-warning:hover {
+    background: linear-gradient(45deg, #dda20a, #f6c23e);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
+    box-shadow: 0 4px 15px rgba(246, 194, 62, 0.4);
+    color: white;
 }
 
 .alert {
@@ -211,71 +225,80 @@
 }
 </style>
 
+<!-- Incluir SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-document.getElementById('proveedor_id').addEventListener('change', function() {
-    const proveedorId = this.value;
+document.addEventListener('DOMContentLoaded', function() {
+    const proveedorSelect = document.getElementById('proveedor_id');
     const plantacionSelect = document.getElementById('plantacion_id');
-    
-    if (proveedorId) {
-        plantacionSelect.innerHTML = '<option value="" class="loading">🔄 Cargando plantaciones...</option>';
-        plantacionSelect.disabled = true;
-        
-        fetch(`/api/plantaciones-por-proveedor/${proveedorId}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Error en la respuesta');
-                return response.json();
-            })
-            .then(data => {
-                plantacionSelect.disabled = false;
-                if (data.length > 0) {
-                    plantacionSelect.innerHTML = '<option value="">🌱 Seleccione una plantación</option>';
-                    data.forEach(plantacion => {
-                        plantacionSelect.innerHTML += `<option value="${plantacion.id}">${plantacion.nombre}</option>`;
-                    });
-                } else {
-                    plantacionSelect.innerHTML = '<option value="">❌ No hay plantaciones</option>';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                plantacionSelect.innerHTML = '<option value="">⚠️ Error al cargar</option>';
-                plantacionSelect.disabled = false;
-            });
-    } else {
-        plantacionSelect.innerHTML = '<option value="">📋 Seleccione proveedor</option>';
-        plantacionSelect.disabled = true;
-    }
-});
+    const planificacionPlantacionId = {{ $planificacion->plantacion_id }};
+    const planificacionProveedorId = {{ $planificacion->proveedor_id }};
 
-// Cargar plantaciones al editar
-document.addEventListener('DOMContentLoaded', function() {
-    const proveedorId = document.getElementById('proveedor_id').value;
-    if (proveedorId) {
-        document.getElementById('proveedor_id').dispatchEvent(new Event('change'));
+    // Función para cargar plantaciones
+    function cargarPlantaciones(proveedorId, plantacionSeleccionadaId = null) {
+        if (proveedorId) {
+            plantacionSelect.innerHTML = '<option value="" class="loading">🔄 Cargando plantaciones...</option>';
+            plantacionSelect.disabled = true;
+            
+            fetch(`/api/plantaciones-por-proveedor/${proveedorId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la respuesta');
+                    return response.json();
+                })
+                .then(data => {
+                    plantacionSelect.disabled = false;
+                    if (data.length > 0) {
+                        plantacionSelect.innerHTML = '<option value="">🌱 Seleccione una plantación</option>';
+                        data.forEach(plantacion => {
+                            const selected = plantacionSeleccionadaId && plantacion.id == plantacionSeleccionadaId ? 'selected' : '';
+                            plantacionSelect.innerHTML += 
+                                `<option value="${plantacion.id}" ${selected}>
+                                    ${plantacion.nombre}
+                                </option>`;
+                        });
+                    } else {
+                        plantacionSelect.innerHTML = '<option value="">❌ No hay plantaciones</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    plantacionSelect.innerHTML = '<option value="">⚠️ Error al cargar</option>';
+                    plantacionSelect.disabled = false;
+                });
+        } else {
+            plantacionSelect.innerHTML = '<option value="">📋 Seleccione proveedor</option>';
+            plantacionSelect.disabled = true;
+        }
     }
-});
 
-// Mostrar mensajes de sesión cuando la página cargue
-document.addEventListener('DOMContentLoaded', function() {
-    // Mensaje de éxito
+    // Cargar plantaciones al cambiar proveedor
+    proveedorSelect.addEventListener('change', function() {
+        cargarPlantaciones(this.value);
+    });
+
+    // Cargar plantaciones al iniciar la página
+    if (planificacionProveedorId) {
+        cargarPlantaciones(planificacionProveedorId, planificacionPlantacionId);
+    }
+
+    // Sistema de Alertas y Validaciones
     @if(session('success'))
         Swal.fire({
             icon: 'success',
             title: '¡Éxito!',
             text: '{{ session('success') }}',
-            confirmButtonColor: '#4e73df',
+            confirmButtonColor: '#f6c23e',
             confirmButtonText: 'Aceptar',
             timer: 4000,
             timerProgressBar: true
         }).then((result) => {
-            // Redirigir al listado después de aceptar o cuando se acabe el timer
             if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
                 window.location.href = "{{ route('planificaciones_social.index') }}";
             }
         });
     @endif
 
-    // Mensaje de error
     @if(session('error'))
         Swal.fire({
             icon: 'error',
@@ -286,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     @endif
 
-    // Mostrar errores de validación
     @if($errors->any())
         Swal.fire({
             icon: 'warning',
@@ -307,34 +329,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'warning',
                 title: 'Plantación requerida',
                 text: 'Por favor seleccione una plantación válida',
-                confirmButtonColor: '#4e73df'
+                confirmButtonColor: '#f6c23e'
             });
             return;
         }
 
-        // Mostrar confirmación antes de enviar (opcional)
+        // Mostrar confirmación antes de actualizar
         e.preventDefault();
         
         Swal.fire({
-            title: '¿Crear planificación?',
-            text: "¿Estás seguro de que deseas crear esta planificación social?",
+            title: '¿Actualizar planificación?',
+            text: "¿Estás seguro de que deseas actualizar esta planificación social?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#4e73df',
+            confirmButtonColor: '#f6c23e',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, crear',
+            confirmButtonText: 'Sí, actualizar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Enviar el formulario normalmente
+                // Enviar el formulario
                 this.submit();
             }
         });
     });
 });
 </script>
-
-<!-- Incluir SweetAlert2 para mejores alertas -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 @endsection

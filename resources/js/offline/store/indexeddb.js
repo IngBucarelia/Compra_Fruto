@@ -3,11 +3,22 @@ export async function openDB() {
     const request = indexedDB.open('visitas-db', 1)
 
     request.onupgradeneeded = function (event) {
-      const db = event.target.result
+      const db = event.target.result;
+      
+      // Store principal para todos los formularios
       if (!db.objectStoreNames.contains('submissions')) {
-        db.createObjectStore('submissions', { keyPath: 'id', autoIncrement: true })
+        db.createObjectStore('submissions', { keyPath: 'id', autoIncrement: true });
       }
-    }
+      
+      // Opcional: crear índices para búsquedas más eficientes
+      const store = event.target.transaction.objectStore('submissions');
+      if (!store.indexNames.contains('formName')) {
+        store.createIndex('formName', 'formName', { unique: false });
+      }
+      if (!store.indexNames.contains('visita_id')) {
+        store.createIndex('visita_id', 'formData.visita_id', { unique: false });
+      }
+    };
 
     request.onsuccess = function (event) {
       resolve(event.target.result)
@@ -131,6 +142,60 @@ export async function clearAllStores() {
     request.onerror = (event) => {
       reject(event.target.error);
     };
+  });
+}
+
+// aca comienza el social offline 
+
+// Agrega esta función a tu indexeddb.js
+export async function deleteDataFromStore(formName, visitaId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('submissions', 'readwrite');
+    const store = tx.objectStore('submissions');
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const results = request.result || [];
+      const itemToDelete = results.find(item => 
+        item.formName === formName && item.formData.visita_id == visitaId
+      );
+      
+      if (itemToDelete) {
+        store.delete(itemToDelete.id);
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    };
+
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Agregar esta función a tu indexeddb.js si es necesario
+export async function eliminarRegistrosPorVisita(formName, visitaId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('submissions', 'readwrite');
+    const store = tx.objectStore('submissions');
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const results = request.result || [];
+      let eliminados = 0;
+      
+      results.forEach(item => {
+        if (item.formName === formName && item.formData.visita_id == visitaId) {
+          store.delete(item.id);
+          eliminados++;
+        }
+      });
+      
+      resolve(eliminados);
+    };
+
+    request.onerror = () => reject(request.error);
   });
 }
 

@@ -2,18 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DatoPredioSocial;
+use App\Models\DatosPersonalesSocial;
+use App\Models\FuerzaLaboral;
+use App\Models\MiembroHogar;
 use App\Models\OrganizacionSocial;
 use App\Models\VisitaSocial;
 use Illuminate\Http\Request;
 
 class OrganizacionSocialController extends Controller
 {
-    public function index($visita_id)
+    public function index($visita)
     {
-        $visita = VisitaSocial::findOrFail($visita_id);
-        $organizaciones = OrganizacionSocial::where('visita_id', $visita_id)->get();
+        $visita = VisitaSocial::findOrFail($visita);
+        
+        // ✅ CORREGIDO: Cambiado a plural y mantener get()
+$organizaciones = OrganizacionSocial::where('visita_id', $visita->id)->first();
+        
+        $datosPersonales = DatosPersonalesSocial::where('visita_social_id', $visita->id)->first();
+        $miembros = MiembroHogar::where('visita_social_id', $visita->id)->get();
+        $datosPredio = DatoPredioSocial::where('visita_social_id', $visita->id)->get();
+        $fuerzaLaboral = FuerzaLaboral::where('visita_social_id', $visita->id)->get();
 
-        return view('organizacion_social.index', compact('visita', 'organizaciones'));
+        return view('organizacion_social.index', compact(
+            'visita', 
+            'organizaciones', // ✅ Cambiado a plural
+            'datosPersonales',
+            'miembros',
+            'datosPredio',
+            'fuerzaLaboral'
+        ));
     }
 
     public function create($visita_id)
@@ -46,7 +64,20 @@ class OrganizacionSocialController extends Controller
         $visita = VisitaSocial::findOrFail($visita_id);
         $organizacion = OrganizacionSocial::findOrFail($id);
 
-        return view('organizacion_social.show', compact('visita', 'organizacion'));
+        // ✅ También agregar los otros datos para los acordeones
+        $datosPersonales = DatosPersonalesSocial::where('visita_social_id', $visita->id)->first();
+        $miembros = MiembroHogar::where('visita_social_id', $visita->id)->get();
+        $datosPredio = DatoPredioSocial::where('visita_social_id', $visita->id)->get();
+        $fuerzaLaboral = FuerzaLaboral::where('visita_social_id', $visita->id)->get();
+
+        return view('organizacion_social.show', compact(
+            'visita', 
+            'organizacion',
+            'datosPersonales',
+            'miembros',
+            'datosPredio',
+            'fuerzaLaboral'
+        ));
     }
 
     public function edit($visita_id, $id)

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DatoPredioSocial;
+use App\Models\DatosPersonalesSocial;
 use App\Models\FuerzaLaboral;
+use App\Models\MiembroHogar;
 use App\Models\VisitaSocial;
 use Illuminate\Http\Request;
 
@@ -11,9 +14,18 @@ class FuerzaLaboralController extends Controller
     public function index($visita)
     {
         $visita = VisitaSocial::findOrFail($visita);
-        $fuerzas = FuerzaLaboral::where('visita_social_id', $visita->id)->get();
+        $fuerzas = FuerzaLaboral::where('visita_social_id', $visita->id)->get(); // Cambié a $fuerzas (plural)
+        $datosPersonales = DatosPersonalesSocial::where('visita_social_id', $visita->id)->first();
+        $miembros = MiembroHogar::where('visita_social_id', $visita->id)->get();
+        $datosPredio = DatoPredioSocial::where('visita_social_id', $visita->id)->get();
 
-        return view('fuerza_laboral.index', compact('visita', 'fuerzas'));
+        return view('fuerza_laboral.index', compact(
+            'visita', 
+            'fuerzas', // Cambié a plural
+            'datosPersonales',
+            'miembros',
+            'datosPredio'
+        ));
     }
 
     public function create($visita)
@@ -88,4 +100,15 @@ class FuerzaLaboralController extends Controller
 
         return view('fuerza_laboral.show', compact('visita', 'fuerza'));
     }
+
+    public function destroy($visita, $id)
+    {
+        $fuerza = FuerzaLaboral::findOrFail($id);
+        $fuerza->delete();
+
+        return redirect()->route('fuerza_laboral.index', $visita)
+            ->with('success', 'Registro de fuerza laboral eliminado correctamente.');
+    }
+
+
 }

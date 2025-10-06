@@ -75,8 +75,8 @@
     /* Media Queries para Responsividad */
     @media (max-width: 767.98px) {
         .container {
-            margin-left: -35px !important;
-            width: 100%;
+            margin-left: -75px !important;
+            width: 130%;
             padding: 15px;
             border-radius: 0;
             box-shadow: none;

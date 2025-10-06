@@ -6,26 +6,26 @@
         
         <div class="members-header" style="background-color: #e8d5dce0; max-width: 900px;">
             {{-- Botón dinámico según estado --}}
-    @if ($visita->estado !== 'finalizada')
-        <form action="{{ route('redireccion_seccion_social', $visita->id) }}" method="GET" class="mt-4">
-            <label for="seccion" class="form-label fw-bold text-success">📋 Ir a sección:</label>
-            <div class="input-group">
-                <select id="seccion" name="seccion" class="form-select" required>
-                    <option value="">Seleccione una sección</option>
-                    @if ($visita->estado === 'pendiente' || $visita->estado === 'en_ejecucion')
-                        <option value="inicio"> Pagina de Inicio de Visita</option>
-                        <option value="datos_personales">👤 Datos Personales</option>
-                        <option value="miembros">👨‍👩‍👧‍👦 Miembros del Hogar</option>
-                        <option value="predio">🏡 Datos del Predio</option>
-                        <option value="fuerza_laboral">🧑‍🌾 Fuerza Laboral</option>
-                        <option value="organizacion_social">👥 Organización Social</option>
-                    @endif
-                </select>
-                <button type="submit" class="btn btn-success">Ir</button>
-            </div>
-        </form>
-    @endif
-            <h2 class="members-title">👨‍👩‍👧‍👦 Miembros dele Hogar</h2>
+            @if ($visita->estado !== 'finalizada')
+                <form action="{{ route('redireccion_seccion_social', $visita->id) }}" method="GET" class="mt-4">
+                    <label for="seccion" class="form-label fw-bold text-success">📋 Ir a sección:</label>
+                    <div class="input-group">
+                        <select id="seccion" name="seccion" class="form-select" required>
+                            <option value="">Seleccione una sección</option>
+                            @if ($visita->estado === 'pendiente' || $visita->estado === 'en_ejecucion')
+                                <option value="inicio"> Pagina de Inicio de Visita</option>
+                                <option value="datos_personales">👤 Datos Personales</option>
+                                <option value="miembros">👨‍👩‍👧‍👦 Miembros del Hogar</option>
+                                <option value="predio">🏡 Datos del Predio</option>
+                                <option value="fuerza_laboral">🧑‍🌾 Fuerza Laboral</option>
+                                <option value="organizacion_social">👥 Organización Social</option>
+                            @endif
+                        </select>
+                        <button type="submit" class="btn btn-success">Ir</button>
+                    </div>
+                </form>
+            @endif
+            <h2 class="members-title">👨‍👩‍👧‍👦 Miembros del Hogar</h2>
 
             <div class="members-actions">
                 <a href="{{ route('miembros_hogar.create', $visita->id) }}" class="btn btn-primary">
@@ -36,6 +36,51 @@
                 </a>
             </div>
         </div>
+
+        {{-- ✅ NUEVO: Acordeón con Datos Personales --}}
+        @if($datosPersonales)
+        <div class="accordion-container mb-4">
+            <div class="accordion-card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <h3 class="accordion-title">
+                        👤 Datos Personales del Productor
+                        <span class="accordion-icon">▼</span>
+                    </h3>
+                </div>
+                <div class="accordion-content">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>📞 Teléfono:</strong> {{ $datosPersonales->telefono ?? 'No especificado' }}</p>
+                            <p><strong>🚻 Sexo:</strong> {{ $datosPersonales->sexo ?? 'No especificado' }}</p>
+                            <p><strong>📚 Nivel de Estudio:</strong> {{ $datosPersonales->nivel_estudio ?? 'No especificado' }}</p>
+                            <p><strong>🎂 Fecha Nacimiento:</strong> {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>🌴 Años en Palmicultura:</strong> {{ $datosPersonales->anios_palmicultura ?? '0' }} años</p>
+                            <p><strong>🏥 Régimen Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
+                            <p><strong>🏠 Reside en Predio:</strong> {{ $datosPersonales->reside_predio ? 'Sí' : 'No' }}</p>
+                            <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
+                        </div>
+                    </div>
+                    @if($datosPersonales->rnp || $datosPersonales->fedepalma)
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <p><strong>📄 Registros:</strong></p>
+                            <ul>
+                                @if($datosPersonales->rnp)
+                                    <li>RNP: {{ $datosPersonales->rnp }}</li>
+                                @endif
+                                @if($datosPersonales->fedepalma)
+                                    <li>Fedepalma: {{ $datosPersonales->fedepalma }}</li>
+                                @endif
+                            </ul>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
 
         <div class="table-wrapper">
             <table class="members-table" role="table" aria-label="Miembros del hogar">
@@ -128,6 +173,59 @@
     color: #19692b; /* verde oscuro */
     font-weight: 700;
     margin: 0;
+}
+
+/* ✅ NUEVO: Estilos para el acordeón */
+.accordion-container {
+    margin-bottom: 20px;
+}
+
+.accordion-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.accordion-header {
+    background: #198754;
+    color: white;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.accordion-header:hover {
+    background: #146c43;
+}
+
+.accordion-title {
+    margin: 0;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.accordion-icon {
+    transition: transform 0.3s ease;
+}
+
+.accordion-content {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background: white;
+}
+
+.accordion-content.active {
+    padding: 16px;
+    max-height: 500px;
+}
+
+.accordion-icon.rotated {
+    transform: rotate(180deg);
 }
 
 /* Botones */
@@ -259,8 +357,18 @@
 }
 </style>
 
-<!-- Confirmación simple al eliminar -->
+<!-- Script para el acordeón y confirmación de eliminación -->
 <script>
+// ✅ NUEVO: Función para el acordeón
+function toggleAccordion(header) {
+    const content = header.nextElementSibling;
+    const icon = header.querySelector('.accordion-icon');
+    
+    content.classList.toggle('active');
+    icon.classList.toggle('rotated');
+}
+
+// Confirmación simple al eliminar
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.delete-member').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
@@ -269,6 +377,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+    
+    // ✅ Abrir acordeón automáticamente si hay datos
+    const accordionContent = document.querySelector('.accordion-content');
+    if (accordionContent) {
+        setTimeout(() => {
+            accordionContent.classList.add('active');
+            const icon = document.querySelector('.accordion-icon');
+            if (icon) icon.classList.add('rotated');
+        }, 300);
+    }
 });
 </script>
 @endsection

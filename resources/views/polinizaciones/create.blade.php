@@ -23,7 +23,8 @@
     @media (max-width: 968px) {
 
          .container.offline-form-container {
-        background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
+        background-color: rgba(129, 165, 114, 0.929); 
+        width: 123%;/* Color de fondo específico para este formulario */
     }
         .button-group-top {
             flex-direction: row;

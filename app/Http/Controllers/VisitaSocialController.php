@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DatoPredioSocial;
 use App\Models\DatosPersonalesSocial;
+use App\Models\PlanificacionSocial;
 use App\Models\VisitaSocial;
 use App\Models\Proveedor;
 use App\Models\Plantacion;
@@ -11,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -47,6 +49,31 @@ class VisitaSocialController extends Controller
 
         return view('visitas_social.index', compact('visitas', 'buscar'));
     }
+   public function iniciar(VisitaSocial $visita)
+{
+    try {
+        // Validar que la visita esté pendiente
+        if ($visita->estado !== 'pendiente') {
+            return redirect()->back()->with('error', 'La visita no puede ser iniciada en su estado actual');
+        }
+
+        // Actualizar estado de la visita
+        $visita->update([
+            'estado' => 'en_ejecucion',
+            'fecha_inicio' => now()
+        ]);
+
+        // Redirigir CORRECTAMENTE a la primera sección
+        return redirect()->route('redireccion_seccion_social', [
+            'id' => $visita->id,  // Cambiar 'visita' por 'id'
+            'seccion' => 'datos_personales'
+        ])->with('success', '¡Visita social iniciada correctamente!');
+
+    } catch (\Exception $e) {
+        Log::error("Error iniciando visita social {$visita->id}: " . $e->getMessage());
+        return redirect()->back()->with('error', 'Error al iniciar la visita: ' . $e->getMessage());
+    }
+}
 
     public function create()
     {
@@ -73,62 +100,114 @@ class VisitaSocialController extends Controller
     }
 
 
-public function show($id)
+        public function show($id)
+        {
+            // Traer la visita con relaciones que puedas usar en la vista
+            $visita = VisitaSocial::with([
+            'proveedor',
+            'tecnico',
+            'plantacion',
+            'datosPersonales',
+            'miembros',
+            'predio',             
+            'fuerzaLaboral',
+            'organizacionSocial'
+        ])->findOrFail($id);
+
+
+            // Otras visitas sociales sobre la misma plantación (excepto la actual)
+            $otrasVisitasSociales = collect();
+            if ($visita->plantacion && $visita->plantacion->id) {
+                $otrasVisitasSociales = VisitaSocial::where('plantacion_id', $visita->plantacion->id)
+                    ->where('id', '!=', $visita->id)
+                    ->orderBy('fecha', 'desc')
+                    ->get();
+            }
+
+            // Pasa todo a la vista
+            return view('visitas_social.show', compact('visita', 'otrasVisitasSociales'));
+        }
+
+
+            // PlanificacionSocialController.php
+
+   
+
+        // VisitaSocialController.php
+
+public function edit($id)
 {
-    // Traer la visita con relaciones que puedas usar en la vista
-    $visita = VisitaSocial::with([
-    'proveedor',
-    'tecnico',
-    'plantacion',
-    'datosPersonales',
-    'miembros',
-    'predio',             
-    'fuerzaLaboral',
-    'organizacionSocial'
-])->findOrFail($id);
-
-
-    // Otras visitas sociales sobre la misma plantación (excepto la actual)
-    $otrasVisitasSociales = collect();
-    if ($visita->plantacion && $visita->plantacion->id) {
-        $otrasVisitasSociales = VisitaSocial::where('plantacion_id', $visita->plantacion->id)
-            ->where('id', '!=', $visita->id)
-            ->orderBy('fecha', 'desc')
-            ->get();
+    try {
+        // Cambiar PlanificacionSocial por VisitaSocial
+        $visita = VisitaSocial::with(['proveedor', 'plantacion', 'tecnico'])->findOrFail($id);
+        
+        $proveedores = Proveedor::all();
+        $tecnicos = User::where('rol', 2)->get(); // Usando rol = 2 como en create
+        
+        return view('visitas_social.edit', compact('visita', 'proveedores', 'tecnicos'));
+        
+    } catch (\Exception $e) {
+        return redirect()->route('visitas_social.indexSocial')
+            ->with('error', 'No se pudo cargar la visita para editar: ' . $e->getMessage());
     }
-
-    // Pasa todo a la vista
-    return view('visitas_social.show', compact('visita', 'otrasVisitasSociales'));
 }
 
-
-    public function edit($id)
-    {
+public function update(Request $request, $id)
+{
+    try {
+        // Cambiar PlanificacionSocial por VisitaSocial
         $visita = VisitaSocial::findOrFail($id);
-        $proveedores = Proveedor::all();
-        $plantaciones = Plantacion::where('id_proveedor', $visita->proveedor_id)->get();
-        $tecnicos = User::where('rol', 2)->get();
 
-        return view('visitas_social.edit', compact('visita', 'proveedores', 'plantaciones', 'tecnicos'));
-    }
-
-    public function update(Request $request, $id)
-    {
         $data = $request->validate([
             'fecha' => 'required|date',
-            'ubicacion' => 'required|string',
             'tecnico_campo' => 'required|exists:users,id',
-            'tipo_visita' => 'required|string',
             'proveedor_id' => 'required|exists:proveedores,id',
-            'recibio_visita' => 'required|string',
+            'plantacion_id' => 'required|exists:plantaciones,id',
+            'ubicacion' => 'required|string|max:255',
+            'tipo_visita' => 'required|string',
+            'recibio_visita' => 'required|string|max:255',
         ]);
 
-        $visita = VisitaSocial::findOrFail($id);
+        DB::beginTransaction();
+
+        // Actualizar la visita social
         $visita->update($data);
 
-        return redirect()->route('visitas_social.indexSocial')->with('success', 'Visita Social actualizada.');
-    }
+        // Si existe una planificación asociada, actualizarla también (si aplica)
+        if ($visita->planificacion_id) {
+            $planificacion = PlanificacionSocial::find($visita->planificacion_id);
+            if ($planificacion) {
+                $planificacion->update([
+                    'fecha' => $data['fecha'],
+                    'tecnico_campo' => $data['tecnico_campo'],
+                    'proveedor_id' => $data['proveedor_id'],
+                    'plantacion_id' => $data['plantacion_id'],
+                    'tipo_visita' => $data['tipo_visita']
+                ]);
+            }
+        }
 
+        DB::commit();
+
+        return redirect()->route('visitas_social.indexSocial')
+            ->with('success', 'Visita social actualizada exitosamente.');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->withErrors($e->validator)
+            ->withInput()
+            ->with('error', 'Error de validación: Por favor verifica los datos ingresados.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al actualizar visita social: ' . $e->getMessage());
+        
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Error al actualizar la visita: ' . $e->getMessage());
+    }
+}
     public function destroy($id)
     {
         $visita = VisitaSocial::findOrFail($id);

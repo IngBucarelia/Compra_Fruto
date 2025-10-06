@@ -24,7 +24,7 @@ class Planificacion extends Model
 
     public function tecnico()
     {
-        return $this->belongsTo(User::class, 'tecnico_campo');
+        return $this->belongsTo(User::class, 'tecnico_campo'); 
     }
    public function visitas()
     {
