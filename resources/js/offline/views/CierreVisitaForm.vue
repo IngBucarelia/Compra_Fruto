@@ -35,7 +35,7 @@
 
     <!-- Resumen Completo de Todos los Datos -->
     <div class="resumen-completo-cards mb-4">
-      <h5 class="text-center mb-3 text-success">
+      <h5 class="text-center mb-3" style="color: whitesmoke;">
         <i class="fas fa-clipboard-check me-2"></i>Resumen Completo de la Visita Social
       </h5>
       <div class="row">
@@ -182,16 +182,23 @@
         <form @submit.prevent="guardarDatos">
           <div class="row">
             <!-- Fecha de Cierre -->
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
-                <i class="fas fa-calendar-alt me-2"></i>Fecha de Cierre *
-              </label>
-              <input type="date" v-model="formData.fecha_cierre" class="form-control" required>
-            </div>
+           <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
+              <i class="fas fa-calendar-alt me-2"></i>Fecha de Cierre *
+            </label>
+            <input 
+              type="date" 
+              v-model="formData.fecha_cierre" 
+              class="form-control" 
+              required 
+              readonly
+            >
+          </div>
+
 
             <!-- Estado de la Visita -->
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-clipboard-check me-2"></i>Estado de la Visita *
               </label>
               <select v-model="formData.estado_visita" class="form-select" required>
@@ -206,7 +213,7 @@
 
           <!-- Observaciones Finales -->
           <div class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold " style="color: whitesmoke;">
               <i class="fas fa-sticky-note me-2"></i>Observaciones Finales
             </label>
             <textarea v-model="formData.observaciones_finales" class="form-control" 
@@ -216,7 +223,7 @@
 
           <!-- Recomendaciones -->
           <div class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;" >
               <i class="fas fa-lightbulb me-2"></i>Recomendaciones
             </label>
             <textarea v-model="formData.recomendaciones" class="form-control" 
@@ -234,7 +241,7 @@
             <div class="firma-card mb-4">
               <div class="card">
                 <div class="card-header bg-light">
-                  <h6 class="mb-0 text-success">
+                  <h6 class="mb-0" style="color: whitesmoke;">
                     <i class="fas fa-user-tie me-2"></i>Firma del Responsable *
                   </h6>
                 </div>
@@ -293,7 +300,7 @@
 
           <!-- CAPTURA DE IMÁGENES -->
           <div class="imagenes-section mb-4">
-            <h5 class="text-success mb-3">
+            <h5 class="text-success mb-3" style="color: whitesmoke;">
               <i class="fas fa-camera me-2"></i>Registro Fotográfico (Opcional)
             </h5>
             
@@ -391,7 +398,8 @@ export default {
         firma_responsable: '',
         firma_recibe: '',
         firma_testigo: '',
-        imagenes: []
+        imagenes: [],
+        fecha_cierre: '',
       },
       datosCierre: null,
       datosPersonales: null,
@@ -893,6 +901,8 @@ export default {
     }
   },
   async mounted() {
+    const hoy = new Date().toISOString().split('T')[0];
+    this.formData.fecha_cierre = hoy;
     this.visitaId = new URLSearchParams(window.location.search).get('visita_id') || localStorage.getItem('visita_id');
     localStorage.setItem('visita_id', this.visitaId);
 

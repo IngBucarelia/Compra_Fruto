@@ -15,6 +15,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\VisitasSocialImport;
 
 
 class VisitaSocialController extends Controller
@@ -84,20 +85,116 @@ class VisitaSocialController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'fecha' => 'required|date',
-            'tecnico_campo' => 'required|exists:users,id',
-            'proveedor_id' => 'required|exists:proveedores,id',
-            'plantacion_id' => 'required|exists:plantaciones,id',
-            'ubicacion' => 'required|string',
-            'tipo_visita' => 'required|string',
-            'recibio_visita' => 'required|string',
-        ]);
+        try {
+            Log::info('=== INICIANDO STORE VISITA SOCIAL ===');
+            Log::info('Datos recibidos:', $request->all());
 
-        $visita = VisitaSocial::create([...$data, 'estado' => 'pendiente']);
+            // 🔹 Validación inicial
+            $validator = validator()->make($request->all(), [
+                'fecha' => 'required|date',
+                'tecnico_campo' => 'required|exists:users,id',
+                'proveedor_id' => 'required|exists:proveedores,id',
+                'plantacion_id' => 'required|exists:plantaciones,id',
+                'recibio_visita' => 'required|string',
+                'tipo_visita' => 'required|array', // Acepta múltiples opciones
+            ]);
 
-        return redirect()->route('visitas_social.indexSocial')->with('success', 'Visita Social creada con éxito.');
+            $tipoVisitaArray = $request->input('tipo_visita', []);
+            $tipoVisita = implode(', ', $tipoVisitaArray); // 🔸 Convertimos el array a string
+
+            $tiposValidos = [
+                'Inicial',
+                'Seguimiento',
+                'Capacitacion',
+                'Poa',
+                'Estudio Credito',
+                'Inclusion a Pequeños',
+                'Solidaridad',
+                'caracterizacion',
+                'Aps'
+            ];
+
+            // 🔹 Validar los tipos seleccionados
+            foreach ($tipoVisitaArray as $tipo) {
+                if (!in_array($tipo, $tiposValidos)) {
+                    $validator->errors()->add('tipo_visita', "Tipo de visita no válido: $tipo");
+                }
+            }
+
+            if ($validator->fails()) {
+                Log::error('Validación fallida en visita social:', $validator->errors()->toArray());
+                throw new \Illuminate\Validation\ValidationException($validator);
+            }
+
+            DB::beginTransaction();
+
+            Log::info('Creando planificación social...');
+
+            // 🔹 Crear la planificación social
+            $planificacion = \App\Models\PlanificacionSocial::create([
+                'fecha' => $request->fecha,
+                'tecnico_campo' => $request->tecnico_campo,
+                'proveedor_id' => $request->proveedor_id,
+                'plantacion_id' => $request->plantacion_id,
+                'estado' => 'pendiente',
+                'tipo_visita' => $tipoVisita // Guardamos como string
+            ]);
+
+            Log::info('Planificación social creada:', ['id' => $planificacion->id]);
+
+            // 🔹 Obtener ubicación desde la plantación
+            $plantacion = \App\Models\Plantacion::find($request->plantacion_id);
+            if (!$plantacion) {
+                throw new \Exception('No se encontró la plantación seleccionada.');
+            }
+
+            $ubicacion = $plantacion->vereda . ', ' . $plantacion->municipio . ', ' . $plantacion->departamento;
+
+            Log::info('Creando visita social...');
+
+            // 🔹 Crear la visita social
+            $visita = \App\Models\VisitaSocial::create([
+                'fecha' => $request->fecha,
+                'proveedor_id' => $request->proveedor_id,
+                'plantacion_id' => $request->plantacion_id,
+                'ubicacion' => $ubicacion,
+                'tecnico_campo' => $request->tecnico_campo,
+                'tipo_visita' => $tipoVisita, // Guardamos igual como string
+                'recibio_visita' => $request->recibio_visita,
+                'planificacion_id' => $planificacion->id,
+                'estado' => 'pendiente'
+            ]);
+
+            Log::info('Visita social creada correctamente:', ['id' => $visita->id]);
+
+            // 🔹 Vincular planificación con visita
+            $planificacion->update(['visita_id' => $visita->id]);
+
+            DB::commit();
+
+            Log::info('=== VISITA SOCIAL CREADA EXITOSAMENTE ===');
+
+            return redirect()->route('visitas_social.indexSocial')
+                ->with('success', 'Visita social y planificación creadas exitosamente.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            Log::error('Error de validación en visita social:', $e->errors());
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('error', 'Por favor verifica los datos ingresados.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al crear la visita social: ' . $e->getMessage());
+            Log::error('Stack trace:', ['trace' => $e->getTraceAsString()]);
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al crear la visita social: ' . $e->getMessage());
+        }
     }
+
 
 
         public function show($id)
@@ -329,7 +426,25 @@ public function update(Request $request, $id)
 
 
 
+public function importForm()
+{
+    return view('visitas_social.import');
+}
 
+public function import(Request $request)
+{
+    try {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        Excel::import(new VisitasSocialImport, $request->file('file'));
+
+        return redirect()->back()->with('success', '✅ Archivo cargado correctamente.');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', '❌ Error al procesar el archivo: ' . $e->getMessage());
+    }
+}
 
 
 }

@@ -4,6 +4,7 @@
 <div class="container my-4">
     <div class="card shadow-lg border-0 rounded-4 mx-auto" style="max-width: 900px; background-color: #e8d5dce0;">
         <div class="card-body">
+            
             {{-- Botón dinámico según estado --}}
             @if ($visita->estado !== 'finalizada')
                 <form action="{{ route('redireccion_seccion_social', $visita->id) }}" method="GET" class="mt-4">
@@ -12,7 +13,7 @@
                         <select id="seccion" name="seccion" class="form-select" required>
                             <option value="">Seleccione una sección</option>
                             @if ($visita->estado === 'pendiente' || $visita->estado === 'en_ejecucion')
-                                <option value="inicio"> Pagina de Inicio de Visita</option>
+                                <option value="inicio">Página de Inicio de Visita</option>
                                 <option value="datos_personales">👤 Datos Personales</option>
                                 <option value="miembros">👨‍👩‍👧‍👦 Miembros del Hogar</option>
                                 <option value="predio">🏡 Datos del Predio</option>
@@ -25,7 +26,7 @@
                 </form>
             @endif
 
-            {{-- ✅ NUEVO: Acordeón de Datos Personales --}}
+            {{-- ✅ Acordeón de Datos Personales --}}
             @if($datosPersonales)
             <div class="accordion-container mb-4">
                 <div class="accordion-card">
@@ -50,6 +51,7 @@
                                 <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
                             </div>
                         </div>
+
                         @if($datosPersonales->rnp || $datosPersonales->fedepalma)
                         <div class="row mt-3">
                             <div class="col-12">
@@ -70,7 +72,7 @@
             </div>
             @endif
 
-            {{-- ✅ NUEVO: Acordeón de Miembros del Hogar --}}
+            {{-- ✅ Acordeón de Miembros del Hogar --}}
             @if($miembros && $miembros->count() > 0)
             <div class="accordion-container mb-4">
                 <div class="accordion-card">
@@ -112,6 +114,7 @@
             </div>
             @endif
 
+            {{-- ✅ Datos del Predio --}}
             <h3 class="text-center mb-3 text-success fw-bold">🏡 Datos del Predio</h3>
             <p class="text-muted text-center mb-4">
                 Visita <span class="fw-semibold">#{{ $visita->id }}</span> – Proveedor <b>{{ $visita->proveedor->proveedor_nombre }}</b>
@@ -131,53 +134,83 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <p><b>📍 Nombre finca:</b> {{ $dato->nombre_finca }}</p>
-                                    <p><b>📍 Forma Tenencia:</b> {{ $dato->forma_tenencia }}</p>
+
+                                    {{-- ✅ Corrige forma_tenencia (array seguro) --}}
+                                    @php
+                                        $formaTenencia = is_array($dato->forma_tenencia)
+                                            ? implode(', ', $dato->forma_tenencia)
+                                            : (is_string($dato->forma_tenencia)
+                                                ? $dato->forma_tenencia
+                                                : 'No especificado');
+                                    @endphp
+                                    <p><b>📜 Forma Tenencia:</b> {{ $formaTenencia }}</p>
+
                                     <p><b>📍 Municipio:</b> {{ $dato->municipio }}</p>
                                     <p><b>📍 Vereda:</b> {{ $dato->vereda }}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <p><b>📍 Registro ICA:</b> {{ $dato->registrado_ica ? 'Sí' : 'No' }}</p>
                                     <p><b>📍 Vive en el predio:</b> {{ $dato->vive_predio ? 'Sí' : 'No' }}</p>
-                                    <p><b>📍 Infraestructura de predio:</b> {{ $dato->infraestructura_predio }}</p>
+                                    <p><b>📍 Infraestructura de predio:</b> {{ $dato->infraestructura_predio ?? 'No especificado' }}</p>
                                 </div>
                             </div>
 
-                            @if($dato->infraestructura_vial || $dato->servicios_publicos)
-                            <div class="row mt-3">
-                                @if($dato->infraestructura_vial)
-                                <div class="col-md-6">
-                                    <p><b>🛣️ Infraestructura Vial:</b></p>
-                                    <ul>
-                                        @foreach(json_decode($dato->infraestructura_vial) as $vial)
-                                            <li>{{ $vial }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                                @endif
-                                @if($dato->servicios_publicos)
-                                <div class="col-md-6">
-                                    <p><b>⚡ Servicios Públicos:</b></p>
-                                    <ul>
-                                        @foreach(json_decode($dato->servicios_publicos) as $servicio)
-                                            <li>{{ $servicio }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                                @endif
-                            </div>
-                            @endif
+                            {{-- Infraestructura vial y servicios públicos --}}
+                            {{-- Infraestructura vial y servicios públicos --}}
+@if(!empty($dato->infraestructura_vial) || !empty($dato->servicios_publicos))
+    @php
+        // 🔧 Asegura que ambas variables sean arrays
+        $infraestructura = is_string($dato->infraestructura_vial)
+            ? json_decode($dato->infraestructura_vial, true)
+            : (array) $dato->infraestructura_vial;
+
+        $servicios = is_string($dato->servicios_publicos)
+            ? json_decode($dato->servicios_publicos, true)
+            : (array) $dato->servicios_publicos;
+
+        // 🔧 Limpia valores nulos o vacíos
+        $infraestructura = array_filter((array) $infraestructura);
+        $servicios = array_filter((array) $servicios);
+    @endphp
+
+    <div class="row mt-3">
+        @if(!empty($infraestructura))
+        <div class="col-md-6">
+            <p><b>🛣️ Infraestructura Vial:</b></p>
+            <ul class="list-inline">
+                @foreach($infraestructura as $vial)
+                    <li class="list-inline-item">
+                        <span class="badge bg-success">{{ is_string($vial) ? $vial : json_encode($vial) }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        @if(!empty($servicios))
+        <div class="col-md-6">
+            <p><b>⚡ Servicios Públicos:</b></p>
+            <ul>
+                @foreach($servicios as $servicio)
+                    <li>{{ is_string($servicio) ? $servicio : json_encode($servicio) }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+    </div>
+@endif
+
 
                             <div class="d-flex gap-2 mt-3">
-                                <a href="{{ route('datos_predio_social.edit', [$visita->id, $dato->id]) }}" 
-                                   class="btn btn-warning btn-sm">✏️ Editar</a>
+                                <a href="{{ route('datos_predio_social.edit', [$visita->id, $dato->id]) }}" class="btn btn-warning btn-sm">✏️ Editar</a>
                                 <form action="{{ route('datos_predio_social.destroy', [$visita->id, $dato->id]) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este registro?')">
-                                    @csrf @method('DELETE')
+                                    @csrf
+                                    @method('DELETE')
                                     <button class="btn btn-danger btn-sm">🗑️ Eliminar</button>
                                 </form>
                             </div>
                         @else
-                            <a href="{{ route('datos_predio_social.create', [$visita->id, $plantacion->id]) }}" 
-                               class="btn btn-success">➕ Registrar datos del predio</a>
+                            <a href="{{ route('datos_predio_social.create', [$visita->id, $plantacion->id]) }}" class="btn btn-success">➕ Registrar datos del predio</a>
                         @endif
                     </div>
                 </div>
@@ -185,6 +218,16 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleAccordion(header, type) {
+    const content = document.getElementById(`content-${type}`);
+    const icon = document.getElementById(`icon-${type}`);
+    content.classList.toggle('active');
+    icon.classList.toggle('rotated');
+}
+</script>
+
 
 <style>
 .members-wrap {

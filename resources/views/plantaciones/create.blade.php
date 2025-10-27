@@ -46,18 +46,58 @@
 
                         <div class="row">
                             <!-- Proveedor -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold text-success">
-                                    <i class="fas fa-building me-2"></i>Proveedor
-                                </label>
-                                <select name="id_proveedor" class="form-control form-control-lg" required
-                                        style="border-radius: 10px; border: 2px solid #e9ecef;">
-                                    <option value="">Seleccione un proveedor</option>
-                                    @foreach($proveedores as $proveedor)
-                                        <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor_nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+<div class="col-md-6 mb-3">
+    <label class="form-label fw-bold text-success">
+        <i class="fas fa-building me-2"></i>Proveedor
+    </label>
+
+    <div style="position: relative;">
+        <!-- Campo de búsqueda -->
+        <input type="text"
+               id="buscarProveedor"
+               class="form-control form-control-lg mb-2"
+               placeholder="🔍 Buscar proveedor..."
+               style="border-radius: 10px; border: 2px solid #e9ecef;">
+
+        <!-- Select de proveedores -->
+        <select id="id_proveedor"
+                name="id_proveedor"
+                class="form-control form-control-lg"
+                required
+                size="6"
+                style="border-radius: 10px; border: 2px solid #e9ecef; height:auto;">
+            <option value="">Seleccione un proveedor</option>
+            @foreach($proveedores as $proveedor)
+                <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor_nombre }}</option>
+            @endforeach
+        </select>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const inputBusqueda = document.getElementById('buscarProveedor');
+    const selectProveedor = document.getElementById('id_proveedor');
+
+    inputBusqueda.addEventListener('keyup', () => {
+        const filtro = inputBusqueda.value.toLowerCase();
+        const opciones = selectProveedor.querySelectorAll('option');
+
+        opciones.forEach(op => {
+            const texto = op.textContent.toLowerCase();
+            if (texto.includes(filtro) || op.value === '') {
+                op.style.display = '';
+            } else {
+                op.style.display = 'none';
+            }
+        });
+
+        // Mantener visible siempre la opción principal
+        opciones[0].style.display = '';
+    });
+});
+</script>
+
 
                             <!-- Nombre de Plantación -->
                             <div class="col-md-6 mb-3">

@@ -96,7 +96,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener los valores guardados (deberías pasarlos desde el controlador)
-    const valoresGuardados = @json($dato->infraestructura_vial ? json_decode($dato->infraestructura_vial) : []);
+const valoresGuardados = @json($dato->infraestructura_vial ?? []);
     
     // Preseleccionar las opciones en el select multiple
     const selectVial = document.querySelector('select[name="infraestructura_vial"]');

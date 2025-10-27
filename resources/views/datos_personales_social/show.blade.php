@@ -46,6 +46,7 @@
                 <tr><th>📞 Teléfono</th><td>{{ $datos->telefono }}</td></tr>
                 <tr><th>⚧ Sexo</th><td>{{ $datos->sexo }}</td></tr>
                 <tr><th>🆔 RNP</th><td>{{ $datos->rnp }}</td></tr>
+                <tr><th>🆔 # RNP</th><td>{{ $datos->numero_rnp }}</td></tr>
                 <tr><th>🌴 Afiliado Fedepalma</th><td>{{ $datos->fedepalma }}</td></tr>
                 <tr><th>📖 Alfabetizado</th><td>{{ $datos->alfabetizado }}</td></tr>
                 <tr><th>🎓 Nivel de estudio</th><td>{{ $datos->nivel_estudio }}</td></tr>

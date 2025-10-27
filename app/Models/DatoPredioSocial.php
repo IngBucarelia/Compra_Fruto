@@ -23,6 +23,12 @@ class DatoPredioSocial extends Model
         'infraestructura_vial', // json para múltiples opciones
         'infraestructura_predio',
     ];
+     protected $casts = [
+    'infraestructura_vial' => 'array',
+    'forma_tenencia' => 'array',
+    'servicios_publicos' => 'array',
+];
+
 
     public function visitaSocial()
     {
@@ -33,4 +39,5 @@ class DatoPredioSocial extends Model
     {
         return $this->belongsTo(Plantacion::class, 'plantacion_id');
     }
+    
 }

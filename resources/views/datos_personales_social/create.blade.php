@@ -46,13 +46,54 @@
             </select>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label fw-semibold">📝 ¿Ha firmado oferta mercantil?</label>
+            <select id="ofertaMercantil" name="oferta_mercantil" class="form-select" required>
+                <option value="">Seleccione...</option>
+                <option value="SI" {{ old('oferta_mercantil', $dato->oferta_mercantil ?? '') == 'SI' ? 'selected' : '' }}>Sí</option>
+                <option value="NO" {{ old('oferta_mercantil', $dato->oferta_mercantil ?? '') == 'NO' ? 'selected' : '' }}>No</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="campoHaceCuanto" style="display: none;">
+            <label class="form-label fw-semibold">📅 ¿Hace cuánto firmó la oferta mercantil?</label>
+            <input type="text" name="hace_cuanto" class="form-control" value="{{ old('hace_cuanto', $dato->hace_cuanto ?? '') }}" placeholder="Ejemplo: 3 meses, 1 año, etc.">
+        </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectOferta = document.getElementById('ofertaMercantil');
+    const campoHaceCuanto = document.getElementById('campoHaceCuanto');
+
+    function toggleCampo() {
+        if (selectOferta.value === 'SI') {
+            campoHaceCuanto.style.display = 'block';
+        } else {
+            campoHaceCuanto.style.display = 'none';
+        }
+    }
+
+    // Ejecutar al cargar la página
+    toggleCampo();
+
+    // Detectar cambios
+    selectOferta.addEventListener('change', toggleCampo);
+});
+</script>
+
         {{-- RNP --}}
         <div class="mb-3">
             <label class="form-label fw-bold">🆔 Cuenta con RNP (Registro Nacional Palmero)?</label>
-            <select name="rnp" class="form-select">
-                <option>SI</option>
-                <option>NO</option>
+            <select name="rnp" id="rnp_select" class="form-select">
+                <option value="SI">SI</option>
+                <option value="NO">NO</option>
             </select>
+        </div>
+
+        {{-- Número RNP - Solo visible cuando selecciona SI --}}
+        <div class="mb-3" id="numero_rnp_container" style="display: none;">
+            <label class="form-label fw-bold">🔢 Número de RNP</label>
+            <input type="text" name="numero_rnp" class="form-control" placeholder="Digite el número de RNP">
         </div>
 
         {{-- Fedepalma --}}
@@ -329,4 +370,25 @@
         padding-bottom: 10px;
     }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rnpSelect = document.getElementById('rnp_select');
+        const rnpContainer = document.getElementById('numero_rnp_container');
+        
+        rnpSelect.addEventListener('change', function() {
+            if (this.value === 'SI') {
+                rnpContainer.style.display = 'block';
+            } else {
+                rnpContainer.style.display = 'none';
+                // Limpiar el campo cuando se selecciona NO
+                document.querySelector('input[name="numero_rnp"]').value = '';
+            }
+        });
+        
+        // Ejecutar al cargar la página por si hay un valor previo
+        if (rnpSelect.value === 'SI') {
+            rnpContainer.style.display = 'block';
+        }
+    });
+</script>
 @endsection

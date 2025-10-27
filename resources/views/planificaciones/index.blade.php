@@ -31,9 +31,11 @@
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <div class="d-flex gap-2 flex-wrap">
+                                 @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
                                 <a href="{{ route('planificaciones.create') }}" class="btn btn-success btn-lg">
                                     <i class="fas fa-plus-circle me-2"></i>Nueva Planificación
                                 </a>
+                                @endif
                                 <a href="{{ route('planificaciones.calendario') }}" class="btn btn-info btn-lg">
                                     <i class="fas fa-calendar me-2"></i>Ver Calendario
                                 </a>
@@ -141,7 +143,7 @@
                                                    data-bs-toggle="tooltip" title="Ver detalles">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                
+                                                 @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
                                                 <!-- Editar -->
                                                 <a href="{{ route('planificaciones.edit', $p->id) }}" 
                                                    class="btn btn-warning btn-sm btn-circle"
@@ -150,6 +152,10 @@
                                                 </a>
                                                 
                                                 <!-- Eliminar con confirmación -->
+<<<<<<< HEAD
+=======
+                                                 @if(Auth::check() && in_array(Auth::user()->rol, [1]))
+>>>>>>> cd467f5 (todo terminado componente social y agronomico y anexado los permisos de usabilidad por roles de usuario)
                                                <form action="{{ route('planificaciones.destroy', $p->id) }}" method="POST" class="d-inline" id="deleteForm-{{ $p->id }}">
                                                 @csrf 
                                                 @method('DELETE')
@@ -164,6 +170,8 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
+                                            @endif
+                                            @endif
                                             </div>
                                         </td>
                                     </tr>

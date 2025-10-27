@@ -44,10 +44,11 @@
             <input type="hidden" name="id_usuario" value="{{ $planificacion->id_usuario }}">
             <input type="hidden" name="tipo_visita" value="{{ $planificacion->tipo_visita }}">
             <input type="hidden" name="estado" value="pendiente">
-            
+             @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
             <button type="submit" class="btn btn-primary mt-3">
                 ➕ Crear y comenzar visita
             </button>
+            @endif
         </form>
 
         @if ($planificacion->visita)

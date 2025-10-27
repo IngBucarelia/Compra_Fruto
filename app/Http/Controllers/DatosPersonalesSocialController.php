@@ -47,8 +47,13 @@ class DatosPersonalesSocialController extends Controller
         'tipo_persona' => 'nullable|string',
         'red_social' => 'nullable|string',
         'regimen_salud' => 'nullable|string',
+        'numero_rnp' => 'nullable|string|max:50',
+        'oferta_mercantil' => 'nullable|string|max:50',
+        'hace_cuanto' => 'nullable|string|max:50',
     ]);
-
+     if ($request->rnp === 'NO') {
+        $validated['numero_rnp'] = null;
+    }
     // 🔹 Obtenemos la visita
     $visita = VisitaSocial::with('plantacion')->findOrFail($visitaId);
 

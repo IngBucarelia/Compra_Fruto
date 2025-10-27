@@ -37,40 +37,70 @@
 
                 <!-- Forma de tenencia -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">📜 Forma de tenencia:</label>
-                    <select name="forma_tenencia" class="form-select"  required>
-                        <option value="Propietario con escritura">Propietario con escritura</option>
-                        <option value="Arrendamiento">Arrendamiento</option>
-                        <option value="Carta venta">Carta venta</option>
-                        <option value="Tradición y libertad">Tradición y libertad</option>
-                    </select>
+                    <label class="form-label fw-semibold d-block">📜 Forma de tenencia:</label>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="Propietario con escritura" id="tenencia1">
+                        <label class="form-check-label" for="tenencia1">Propietario con escritura</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="Arrendamiento" id="tenencia2">
+                        <label class="form-check-label" for="tenencia2">Arrendamiento</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="Carta venta" id="tenencia3">
+                        <label class="form-check-label" for="tenencia3">Carta venta</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="Tradición y libertad" id="tenencia4">
+                        <label class="form-check-label" for="tenencia4">Tradición y libertad</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="En Sucesión" id="tenencia5">
+                        <label class="form-check-label" for="tenencia4">En Sucesión</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="Problemas Jurídicos" id="tenencia6">
+                        <label class="form-check-label" for="tenencia4">Predio con Problemas Jurídicos</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="forma_tenencia[]" value="Sana Posesión" id="tenencia7">
+                        <label class="form-check-label" for="tenencia4">Sana Posesión</label>
+                    </div>
+
                     <small class="text-muted">Puedes seleccionar una o varias opciones</small>
                 </div>
 
-                <!-- Municipio -->
-                <!-- 🌍 Municipio -->
-<div class="mb-3">
-    <label class="form-label fw-semibold">🌍 Municipio:</label>
-    <input 
-        type="text" 
-        class="form-control" 
-        value="{{ $plantacion->municipio }}" 
-        readonly
-    >
-    <input type="hidden" name="municipio" value="{{ $plantacion->municipio }}">
-</div>
 
-<!-- 🏘️ Vereda -->
-<div class="mb-3">
-    <label class="form-label fw-semibold">🏘️ Vereda:</label>
-    <input 
-        type="text" 
-        class="form-control" 
-        value="{{ $plantacion->vereda }}" 
-        readonly
-    >
-    <input type="hidden" name="vereda" value="{{ $plantacion->vereda }}">
-</div>
+                                <!-- Municipio -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">🌍 Municipio:</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        value="{{ $plantacion->municipio }}" 
+                        readonly
+                    >
+                    <input type="hidden" name="municipio" value="{{ $plantacion->municipio }}">
+                </div>
+
+                <!-- 🏘️ Vereda -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">🏘️ Vereda:</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        value="{{ $plantacion->vereda }}" 
+                        readonly
+                    >
+                    <input type="hidden" name="vereda" value="{{ $plantacion->vereda }}">
+                </div>
 
 
                 <!-- ICA -->
@@ -95,15 +125,31 @@
 
                 <!-- Infraestructura vial -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">🛣️ Infraestructura vial:</label>
-                    <select name="infraestructura_vial" class="form-select" multiple required>
-                        <option value="Vía destapada carreteable">Vía destapada carreteable</option>
-                        <option value="Vía pavimentada">Vía pavimentada</option>
-                        <option value="Camino">Camino</option>
-                        <option value="Fluvial">Fluvial</option>
-                    </select>
-                    <small class="text-muted">Puedes seleccionar varias opciones</small>
+                    <label class="form-label fw-semibold d-block">🛣️ Infraestructura vial:</label>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="infraestructura_vial[]" value="Vía destapada carreteable" id="vial1">
+                        <label class="form-check-label" for="vial1">Vía destapada carreteable</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="infraestructura_vial[]" value="Vía pavimentada" id="vial2">
+                        <label class="form-check-label" for="vial2">Vía pavimentada</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="infraestructura_vial[]" value="Camino" id="vial3">
+                        <label class="form-check-label" for="vial3">Camino</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="infraestructura_vial[]" value="Fluvial" id="vial4">
+                        <label class="form-check-label" for="vial4">Fluvial</label>
+                    </div>
+
+                    <small class="text-muted">Puedes seleccionar una o varias opciones</small>
                 </div>
+
 
                 <!-- Infraestructura vivienda -->
                 <div class="mb-4">

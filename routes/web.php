@@ -12,6 +12,7 @@ use App\Http\Controllers\AreaOfflineController;
 use App\Http\Controllers\CierreVisitaController;
 use App\Http\Controllers\DatoPredioSocialController;
 use App\Http\Controllers\DatosPersonalesSocialController;
+use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\FertilizacionController;
 use App\Http\Controllers\LaboresCultivoController;
 use App\Http\Controllers\SanidadController;
@@ -26,6 +27,8 @@ use App\Http\Controllers\VisitaSocialController;
 use App\Http\Controllers\VisitaImportController;
 use App\Models\Plantacion;
 use App\Http\Controllers\MiembroHogarController;
+use App\Http\Controllers\FullVisitaSocialImportController;
+
 
 
 
@@ -37,6 +40,17 @@ require __DIR__.'/auth.php';
 
 // Rutas para usuarios autenticados
 Route::middleware('auth')->group(function () {
+    Route::get('/proveedores/search', [App\Http\Controllers\ProveedorController::class, 'search'])
+    ->name('proveedores.search');
+
+    // rutas de envios 
+    Route::get('/proveedor/{id}/plantaciones', [EnvioController::class, 'getPlantacionesByProveedor'])->name('proveedor.plantaciones');
+
+    Route::resource('envios', EnvioController::class);
+    Route::post('envios/{envio}/ejecutar', [EnvioController::class, 'ejecutar'])->name('envios.ejecutar');
+    Route::post('envios/{envio}/completar', [EnvioController::class, 'completar'])->name('envios.completar');
+    Route::post('envios/{envio}/evidencias', [EnvioController::class, 'uploadEvidencias'])->name('envios.evidencias.store');
+
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -173,6 +187,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/visitas/import', [VisitaImportController::class, 'import'])->name('visitas.import');
     Route::get('/visitas/full-import/form', [FullVisitaImportController::class, 'showForm'])->name('visitas.full-import.form');
     Route::post('/visitas/full-import', [FullVisitaImportController::class, 'import'])->name('visitas.full-import');
+    
   
 
  
@@ -211,7 +226,9 @@ Route::get('/visitas/{visita}/redireccion-seccion-agronomica', [VisitaController
     // Exportaciones
     Route::get('/{id}/export-pdfSocial', [VisitaSocialController::class, 'exportarPDF'])->name('exportar_pdfSocial');
     Route::get('/{id}/export-excelSocial', [VisitaSocialController::class, 'exportarExcel'])->name('exportar_excelSocial');
-       
+    
+   
+
 
 
 
@@ -229,7 +246,19 @@ Route::get('/visitas/{visita}/redireccion-seccion-agronomica', [VisitaController
     
 });
 
+ // Importar visitas sociales
+    Route::get('/visitas-social/import', [App\Http\Controllers\VisitaSocialController::class, 'importForm'])
+        ->name('visitas_social.import.form');
+
+    Route::post('/visitas-social/import', [App\Http\Controllers\VisitaSocialController::class, 'import'])
+        ->name('visitas_social.import');
+
     Route::put('/visitas/{visita}/iniciar', [VisitaSocialController::class, 'iniciar'])->name('visitas.iniciar');
+    Route::get('/visitas-social/full-import/form', [FullVisitaSocialImportController::class, 'showForm'])
+    ->name('visitas_social.full-import.form');
+
+    Route::post('/visitas-social/full-import', [FullVisitaSocialImportController::class, 'import'])
+    ->name('visitas_social.full-import');
 
 
 Route::get('/visitas-social/{id}/edit', [VisitaSocialController::class, 'edit'])->name('visitas_social.edit');

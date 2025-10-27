@@ -150,7 +150,7 @@
         <form @submit.prevent="guardarDatos">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold " style="color: whitesmoke;"><br><br>
                 <i class="fas fa-file-contract me-2"></i>Forma de contratación
               </label>
               <div class="contratacion-options">
@@ -166,7 +166,7 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold " style="color: whitesmoke;">
                 <i class="fas fa-users me-2"></i>Número total de trabajadores
               </label>
               <input type="number" v-model="formData.num_trabajadores" class="form-control" 
@@ -176,7 +176,7 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-venus-mars me-2"></i>Distribución por género
               </label>
               <div class="row">
@@ -194,7 +194,7 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-handshake me-2"></i>Tipo de contrato predominante
               </label>
               <select v-model="formData.tipo_contrato" class="form-select">
@@ -211,7 +211,7 @@
 
           <div class="row">
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-file-signature me-2"></i>¿Contrato formal?
               </label>
               <select v-model="formData.contrato_formal" class="form-select">
@@ -223,7 +223,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold " style="color: whitesmoke;">
                 <i class="fas fa-shield-alt me-2"></i>¿Seguridad social?
               </label>
               <select v-model="formData.seguridad_social" class="form-select">
@@ -236,7 +236,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold " style="color: whitesmoke;">
                 <i class="fas fa-signature me-2"></i>¿Contrato firmado?
               </label>
               <select v-model="formData.contrato_firmado" class="form-select">
@@ -250,7 +250,7 @@
 
           <div class="row">
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold " style="color: whitesmoke;">
                 <i class="fas fa-first-aid me-2"></i>¿Sistema de Gestión SST?
               </label>
               <select v-model="formData.sg_sst" class="form-select">
@@ -262,7 +262,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-stethoscope me-2"></i>¿Exámenes médicos?
               </label>
               <select v-model="formData.examenes_medicos" class="form-select">
@@ -274,7 +274,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-passport me-2"></i>¿Trabajadores migrantes?
               </label>
               <select v-model="formData.trabajadores_migrantes" class="form-select">
@@ -287,7 +287,7 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-receipt me-2"></i>¿Comprobantes de pago?
               </label>
               <select v-model="formData.comprobantes_pago" class="form-select">
@@ -299,7 +299,7 @@
             </div>
 
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold"style="color: whitesmoke;">
                 <i class="fas fa-tshirt me-2"></i>¿Dotación?
               </label>
               <select v-model="formData.dotacion" class="form-select">
@@ -312,7 +312,7 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-sticky-note me-2"></i>Observaciones adicionales
             </label>
             <textarea v-model="formData.observaciones" class="form-control" 

@@ -26,7 +26,7 @@
 
     <!-- Resumen Completo de Todos los Datos Previos -->
     <div class="resumen-completo-cards mb-4">
-      <h5 class="text-center mb-3 text-success">
+      <h5 class="text-center mb-3" >
         <i class="fas fa-clipboard-check me-2"></i>Resumen Completo de Datos Ingresados
       </h5>
       <div class="row">
@@ -164,7 +164,7 @@
     <!-- Formulario de Organización Social -->
     <div class="form-card">
       <div class="card-header bg-white">
-        <h5 class="mb-0 text-success">
+        <h5 class="mb-0" style="color: whitesmoke;">
           <i class="fas fa-handshake me-2"></i>Información de Organización Social
         </h5>
       </div>
@@ -172,8 +172,8 @@
         <form @submit.prevent="guardarDatos">
           <div class="row">
             <!-- Pertenece a JAC -->
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+            <div class="col-md-6 mb-3"><br><br>
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-home me-2"></i>¿Pertenece a la JAC (Junta de Acción Comunal)?
               </label>
               <select v-model="formData.pertenece_jac" class="form-select" required>
@@ -188,7 +188,7 @@
 
             <!-- Pertenece a asociación de palmicultores -->
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-tree me-2"></i>¿Pertenece a asociación de palmicultores?
               </label>
               <select v-model="formData.pertenece_asociacion" class="form-select" required>
@@ -203,7 +203,7 @@
 
           <!-- Nombre de la asociación (si pertenece) -->
           <div v-if="formData.pertenece_asociacion === 'SI'" class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-signature me-2"></i>Nombre de la asociación a la que pertenece
             </label>
             <input type="text" v-model="formData.nombre_asociacion" class="form-control" 
@@ -213,7 +213,7 @@
           <div class="row">
             <!-- Participa en otras organizaciones -->
             <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-users me-2"></i>¿Participa en otras organizaciones?
               </label>
               <select v-model="formData.participa_otras_organizaciones" class="form-select">
@@ -226,7 +226,7 @@
 
             <!-- Tipo de organizaciones adicionales -->
             <div class="col-md-6 mb-3" v-if="formData.participa_otras_organizaciones === 'SI'">
-              <label class="form-label fw-bold text-success">
+              <label class="form-label fw-bold" style="color: whitesmoke;">
                 <i class="fas fa-network-wired me-2"></i>¿En qué tipo de organizaciones?
               </label>
               <select v-model="formData.tipo_organizaciones" class="form-select" multiple>
@@ -245,7 +245,7 @@
 
           <!-- Cargos en organizaciones -->
           <div v-if="formData.pertenece_jac === 'SI' || formData.pertenece_asociacion === 'SI'" class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-user-tie me-2"></i>¿Ha desempeñado algún cargo directivo?
             </label>
             <select v-model="formData.cargos_directivos" class="form-select">
@@ -258,7 +258,7 @@
 
           <!-- Descripción de cargos (si ha tenido) -->
           <div v-if="formData.cargos_directivos === 'SI' || formData.cargos_directivos === 'Actualmente'" class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-briefcase me-2"></i>¿Qué cargos ha desempeñado?
             </label>
             <textarea v-model="formData.descripcion_cargos" class="form-control" 
@@ -268,7 +268,7 @@
 
           <!-- Beneficios de la participación -->
           <div class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-gift me-2"></i>¿Qué beneficios obtiene de su participación?
             </label>
             <div class="beneficios-options">
@@ -288,7 +288,7 @@
 
           <!-- Frecuencia de participación -->
           <div class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-calendar-alt me-2"></i>Frecuencia de participación en reuniones
             </label>
             <select v-model="formData.frecuencia_participacion" class="form-select">
@@ -306,7 +306,7 @@
 
           <!-- Observaciones adicionales -->
           <div class="mb-3">
-            <label class="form-label fw-bold text-success">
+            <label class="form-label fw-bold" style="color: whitesmoke;">
               <i class="fas fa-sticky-note me-2"></i>Observaciones adicionales
             </label>
             <textarea v-model="formData.observaciones" class="form-control" 

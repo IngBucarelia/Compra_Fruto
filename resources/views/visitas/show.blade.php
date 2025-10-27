@@ -123,6 +123,7 @@
             @endif
 
             <!-- Card de Modo Offline -->
+            @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
             <div class="card shadow mb-4">
                 <div class="card-header bg-dark text-white py-3">
                     <h5 class="mb-0">
@@ -135,12 +136,26 @@
                         <h5>Trabaja sin conexión a internet</h5>
                         <p class="text-muted">Complete los formularios sin necesidad de conexión</p>
                     </div>
+                    <!-- En tu archivo Laravel Blade -->
                     <a href="{{ url('/offline/area?visita_id=' . $visita->id) }}" 
-                       class="btn btn-dark btn-lg" 
-                       target="_blank" 
-                       rel="noopener noreferrer">
+                    class="btn btn-dark btn-lg" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onclick="guardarVisitaOffline({{ json_encode($visita) }})">
                         <i class="fas fa-download me-2"></i>Continuar sin conexión
                     </a>
+
+                    <script>
+                    function guardarVisitaOffline(visita) {
+                        // Guardar la visita en localStorage temporalmente
+                        localStorage.setItem('visita_offline_' + visita.id, JSON.stringify(visita));
+                        
+                        // También puedes guardar en IndexedDB si quieres
+                        if (window.saveFormData) {
+                            window.saveFormData('visita', visita);
+                        }
+                    }
+                    </script>
                 </div>
             </div>
 
@@ -203,21 +218,17 @@
                                         </div>
                                     </div>
                                 </form>
-
-                                <div class="text-center mt-3">
-                                    <a href="{{ route('visitas.detalle', $visita->id) }}" class="btn btn-info btn-lg">
-                                        <i class="fas fa-search me-2"></i>Ver Detalle Completo
-                                    </a>
-                                </div>
+                                @endif
+                               
                             </div>
                         </div>
                     @endif
                 @endif
-            <div class="text-center mt-3">
+           <div class="text-center mt-3">
                                     <a href="{{ route('visitas.detalle', $visita->id) }}" class="btn btn-info btn-lg">
                                         <i class="fas fa-search me-2"></i>Ver Detalle Completo
                                     </a>
-                                </div>
+                                </div><br><br>
 
             <!-- Card de Otras Visitas -->
             <div class="card shadow mb-4">
@@ -566,39 +577,84 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Script para redirección de secciones
-        document.getElementById('formRedireccion').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const url = document.getElementById('seccion').value;
-            if (url) window.location.href = url;
-        });
+document.addEventListener('DOMContentLoaded', function() {
 
-        // Mapa Leaflet
-        const geo = "{{ $visita->plantacion->geolocalizacion ?? '' }}";
+    // =========================
+    //  🗺️ MAPA SIMPLE LEAFLET
+    // =========================
+    const geo = "{{ $visita->plantacion->geolocalizacion ?? '' }}";
+    const map = L.map('map').setView([4.5709, -74.2973], 6); // Vista inicial: Colombia
 
-        if (!geo || !geo.includes(',')) {
-            console.warn("No hay geolocalización disponible para esta visita.");
-            return;
+    // Capa base OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    if (geo && geo.includes(',')) {
+        const [lat, lon] = geo.split(',').map(v => parseFloat(v.trim()));
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+            const marker = L.marker([lat, lon]).addTo(map);
+
+            // Popup con información básica
+            const popupContent = `
+                <div style="min-width: 260px;">
+                    <h4>📍 Visita Social</h4>
+                    <p><strong>🌱 Plantación:</strong> {{ $visita->plantacion->nombre ?? 'N/A' }}</p>
+                    <p><strong>🏢 Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre ?? 'N/A' }}</p>
+                    <p><strong>👨‍💼 Técnico:</strong> {{ $visita->tecnico->name ?? 'N/A' }}</p>
+                    <p><strong>📅 Fecha:</strong> {{ $visita->fecha }}</p>
+                    <div style="font-family: monospace;">
+                        <strong>Coordenadas:</strong><br>
+                        Lat: ${lat.toFixed(6)}<br>
+                        Lon: ${lon.toFixed(6)}
+                    </div>
+                </div>
+            `;
+            marker.bindPopup(popupContent).openPopup();
+
+            // Centrar en la ubicación
+            map.setView([lat, lon], 15);
+
+            // Círculo decorativo
+            L.circle([lat, lon], {
+                color: '#2e7d32',
+                fillColor: '#4caf50',
+                fillOpacity: 0.15,
+                radius: 100,
+                weight: 1
+            }).addTo(map);
+
+            // Mostrar coordenadas en texto
+            const coordText = document.getElementById('coordenadas');
+            if (coordText) {
+                coordText.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                coordText.style.fontFamily = 'Courier New, monospace';
+                coordText.style.color = '#2e7d32';
+            }
+
+        } else {
+            mostrarMapaSinUbicacion();
         }
+    } else {
+        mostrarMapaSinUbicacion();
+    }
 
-        const [lat, lon] = geo.split(',').map(coord => parseFloat(coord.trim()));
-
-        const map = L.map('map').setView([lat, lon], 15);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        L.marker([lat, lon]).addTo(map)
-            .bindPopup(`
-                <strong>📍 Ubicación de la Visita</strong><br>
-                <strong>Plantación:</strong> {{ $visita->plantacion->nombre ?? 'N/A' }}<br>
-                <strong>Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre }}<br>
-                <strong>Coordenadas:</strong> ${lat.toFixed(6)}, ${lon.toFixed(6)}
-            `)
+    function mostrarMapaSinUbicacion() {
+        const center = map.getCenter();
+        L.marker(center).addTo(map)
+            .bindPopup("<b>⚠️ Ubicación no disponible</b><br>Actualice las coordenadas de la plantación.")
             .openPopup();
-    });
+
+        const coordText = document.getElementById('coordenadas');
+        if (coordText) {
+            coordText.textContent = 'Coordenadas no disponibles';
+            coordText.style.color = '#e74a3b';
+        }
+    }
+
+});
 </script>
+
 @endsection

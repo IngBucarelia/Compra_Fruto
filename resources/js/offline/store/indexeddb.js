@@ -199,4 +199,19 @@ export async function eliminarRegistrosPorVisita(formName, visitaId) {
   });
 }
 
+export async function saveVisitaData(visitaData) {
+  const db = await openDB();
+  const tx = db.transaction('submissions', 'readwrite');
+  const store = tx.objectStore('submissions');
+
+  await store.add({
+    formName: 'visita',
+    formData: JSON.parse(JSON.stringify(visitaData)),
+    synced: false,
+    created_at: new Date()
+  });
+
+  await tx.done;
+}
+
 

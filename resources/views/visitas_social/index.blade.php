@@ -35,6 +35,7 @@
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
+                            @if(Auth::check() && in_array(Auth::user()->rol, [1,3]))
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
@@ -47,6 +48,7 @@
                                     </a>
                                 </div>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -247,11 +249,14 @@
                                                    data-bs-toggle="tooltip" title="Ver detalles de la visita">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                @if(Auth::check() && in_array(Auth::user()->rol, [1,3]))
                                                 <a href="{{ route('visitas_social.editSocial', $visita->id) }}" 
                                                    class="btn btn-sm btn-warning btn-circle"
                                                    data-bs-toggle="tooltip" title="Editar visita">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                                @endif
+                                                @if(Auth::check() && in_array(Auth::user()->rol, [1]))
                                                 <form action="{{ route('visitas_social.destroySocial', $visita->id) }}" 
                                                       method="POST" class="d-inline">
                                                     @csrf @method('DELETE')
@@ -260,6 +265,7 @@
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

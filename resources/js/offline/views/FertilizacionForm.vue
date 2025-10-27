@@ -124,13 +124,27 @@
         </div>
           <div class="form-group mb-2">
             <label>Fertilizante:</label>
-            <select v-model="item.nombre" class="form-control" @change="toggleOtroFertilizante(index)" required>
+           <select v-model="item.nombre" class="form-control" @change="toggleOtroFertilizante(index)" required>
               <option value="">Seleccione fertilizante</option>
-              <option value="urea">Urea</option>
               <option value="compost">Compost</option>
               <option value="npk">NPK</option>
+              <option value="Grado Palmero (Yara)">Grado Palmero (Yara)</option>
+              <option value="Kieserita">Kieserita</option>
+              <option value="Mezcla Fisica">Mezcla Física</option>
+              <option value="Borato 48">Borato 48</option>
+              <option value="DAP">DAP</option>
+              <option value="KCl">KCl</option>
+              <option value="Nitrax">Nitrax</option>
+              <option value="Mezcla por el Productor">Mezcla por el Productor</option>
+              <option value="KMAG">KMAG</option>
+              <option value="Caldolomita">Caldolomita</option>
+              <option value="Enmienda Paz del Rio">Enmienda Paz del Rio</option>
+              <option value="Mezcla 14-4-29-4 (Acepalma)">Mezcla 14-4-29-4 (Acepalma)</option>
+              <option value="UREA">UREA</option>
+              <option value="Nitrabor">Nitrabor</option>
+              <option value="Grado 13-6-23-6 (Monomeros)">Grado 13-6-23-6 (Monomeros)</option>
               <option value="otro">Otro</option>
-            </select>
+          </select>
             <div v-if="item.nombre === 'otro'" class="mt-2">
               <label>Especifique el fertilizante:</label>
               <input 
@@ -141,6 +155,7 @@
                 required
               >
             </div>
+            
           </div>
         <div class="form-group mb-2">
           <label>Cantidad:</label>

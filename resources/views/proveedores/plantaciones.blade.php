@@ -37,8 +37,8 @@
 </style>
 <div class="container" >
     <h2 class="mb-3">Plantaciones de: {{ $proveedor->proveedor_nombre }}</h2>
-
-    <a href="{{ route('plantaciones.create') }}" class="btn btn-success mb-3">Agregar nueva plantación</a>
+ @if(Auth::check() && in_array(Auth::user()->rol, [1,4]))
+    <a href="{{ route('plantaciones.create') }}" class="btn btn-success mb-3">Agregar nueva plantación</a>@endif
     <a href="{{ route('proveedores.index') }}" class="btn btn-secondary mb-3">Volver a Proveedores</a>
 <div class="table-responsive">
     <table class="table table-bordered" style="background-color: #fdffe5; border-color:#000">
@@ -62,11 +62,13 @@
                      <td>{{ $plantacion->geolocalizacion }}</td>
                     <td>
                         <a href="{{ route('plantaciones.show', $plantacion->id) }}" class="btn btn-sm btn-primary"><span style="font-size: 1.5em;">👁️</span>Ver</a>
+                        @if(Auth::check() && in_array(Auth::user()->rol, [1,4]))
                         <a href="{{ route('plantaciones.edit', $plantacion->id) }}" class="btn btn-sm btn-warning"><span style="font-size: 1.5em;">✏️</span>Editar</a>
                         <form action="{{ route('plantaciones.destroy', $plantacion->id) }}" method="POST" class="d-inline">
                             @csrf @method('DELETE')
                             <button type="submit" onclick="return confirm('¿Eliminar esta plantación?')" class="btn btn-sm btn-danger"><span style="font-size: 1.5em;">🗑️</span>Eliminar</button>
                         </form>
+                        @endif
                     </td>
                 </tr>
             @endforeach

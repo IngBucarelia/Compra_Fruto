@@ -22,148 +22,97 @@
                     <form method="POST" action="{{ route('visitas_social.storeSocial') }}" id="visitaForm">
                         @csrf
 
-                        <div class="row">
-                            <!-- Columna Izquierda -->
-                            <div class="col-md-6">
-                                <!-- Fecha -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-calendar-day me-2"></i>Fecha de Visita
-                                    </label>
-                                    <input type="date" name="fecha" class="form-control form-control-lg" required 
-                                           value="{{ old('fecha', now()->format('Y-m-d')) }}"
-                                           style="border-left: 4px solid #1cc88a;">
-                                </div>
-
-                                <!-- Proveedor -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-building me-2"></i>Proveedor
-                                    </label>
-                                    <select name="proveedor_id" class="form-select form-select-lg" required id="proveedor_id"
-                                            style="border-left: 4px solid #36b9cc;">
-                                        <option value="">Seleccione un proveedor</option>
-                                        @foreach($proveedores as $proveedor)
-                                            <option value="{{ $proveedor->id }}" {{ old('proveedor_id') == $proveedor->id ? 'selected' : '' }}>
-                                                🏢 {{ $proveedor->proveedor_nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Plantación -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-seedling me-2"></i>Plantación
-                                    </label>
-                                    <select name="plantacion_id" class="form-select form-select-lg" required id="plantacion_id"
-                                            style="border-left: 4px solid #f6c23e;">
-                                        <option value="">Seleccione un proveedor primero</option>
-                                    </select>
-                                    <div class="form-text">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Las plantaciones se cargan automáticamente al seleccionar el proveedor
-                                    </div>
-                                </div>
-
-                                <!-- Ubicación -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-map-marker-alt me-2"></i>Ubicación
-                                    </label>
-                                    <input type="text" name="ubicacion" class="form-control form-control-lg" required 
-                                           id="ubicacion" placeholder="Ej: Vereda La Cabaña, Municipio, Departamento"
-                                           style="border-left: 4px solid #e74a3b;"
-                                           value="{{ old('ubicacion') }}">
-                                    <div class="form-text">
-                                        <i class="fas fa-sync-alt me-1"></i>
-                                        La ubicación se completa automáticamente al seleccionar la plantación
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Columna Derecha -->
-                            <div class="col-md-6">
-                                <!-- Técnico de Campo -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-user-check me-2"></i>Técnico de Campo
-                                    </label>
-                                    <select name="tecnico_campo" class="form-select form-select-lg" required
-                                            style="border-left: 4px solid #4e73df;">
-                                        <option value="">Seleccione un técnico</option>
-                                        @foreach($tecnicos as $tecnico)
-                                            <option value="{{ $tecnico->id }}" {{ old('tecnico_campo') == $tecnico->id ? 'selected' : '' }}>
-                                                👨‍💼 {{ $tecnico->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Tipo de Visita -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-tasks me-2"></i>Tipo de Visita
-                                    </label>
-                                    <select name="tipo_visita" class="form-select form-select-lg" required
-                                            style="border-left: 4px solid #6f42c1;">
-                                        <option value="">Seleccione el tipo de visita</option>
-                                        <option value="Inicial" {{ old('tipo_visita') == 'Inicial' ? 'selected' : '' }}>🏁 Inicial</option>
-                                        <option value="Seguimiento" {{ old('tipo_visita') == 'Seguimiento' ? 'selected' : '' }}>📋 Seguimiento</option>
-                                        <option value="Capacitacion" {{ old('tipo_visita') == 'Capacitacion' ? 'selected' : '' }}>🎓 Capacitación</option>
-                                        <option value="Poa" {{ old('tipo_visita') == 'Poa' ? 'selected' : '' }}>📊 POA</option>
-                                        <option value="Estudio Credito" {{ old('tipo_visita') == 'Estudio Credito' ? 'selected' : '' }}>💳 Estudio Crédito</option>
-                                        <option value="Inclusion a Pequeños" {{ old('tipo_visita') == 'Inclusion a Pequeños' ? 'selected' : '' }}>🤝 Inclusión a Pequeños</option>
-                                        <option value="Solidaridad" {{ old('tipo_visita') == 'Solidaridad' ? 'selected' : '' }}>❤️ Solidaridad</option>
-                                        <option value="caracterizacion" {{ old('tipo_visita') == 'caracterizacion' ? 'selected' : '' }}>📈 Caracterización Socio-Económica</option>
-                                        <option value="Aps" {{ old('tipo_visita') == 'Aps' ? 'selected' : '' }}>🔍 APS</option>
-                                    </select>
-                                </div>
-
-                                <!-- Recibió la Visita -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-user-tie me-2"></i>Recibió la Visita
-                                    </label>
-                                    <input type="text" name="recibio_visita" class="form-control form-control-lg" required 
-                                           placeholder="Nombre completo de quien recibió la visita"
-                                           style="border-left: 4px solid #fd7e14;"
-                                           value="{{ old('recibio_visita') }}">
-                                </div>
-
-                                <!-- Campo Oculto -->
-                                <input type="hidden" name="es_planificada" value="0">
-
-                                <!-- Información Adicional -->
-                                <div class="alert alert-success mt-4">
-                                    <div class="d-flex">
-                                        <i class="fas fa-exclamation-circle fa-2x me-3 text-success"></i>
-                                        <div>
-                                            <h6 class="alert-heading mb-2">Visita Manual</h6>
-                                            <p class="mb-0 small">
-                                                Esta visita se crea de forma manual y no está asociada a una planificación previa.
-                                                El estado inicial será "pendiente".
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Fecha:</label>
+                            <input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required>
                         </div>
 
-                        <!-- Botones de Acción -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex gap-3 justify-content-end">
-                                    <a href="{{ route('visitas.index') }}" class="btn btn-outline-secondary btn-lg">
-                                        <i class="fas fa-times me-2"></i>Cancelar
-                                    </a>
-                                    <button type="submit" class="btn btn-success btn-lg px-4">
-                                        <i class="fas fa-save me-2"></i>Guardar Visita
-                                    </button>
-                                </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Proveedor:</label>
+                            <select id="proveedor_id" name="proveedor_id" class="form-control" required>
+                                <option value="">Seleccione proveedor</option>
+                                @foreach($proveedores as $proveedor)
+                                    <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor_nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Plantación:</label>
+                            <select id="plantacion_id" name="plantacion_id" class="form-control" required>
+                                <option value="">Seleccione una plantación</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Ubicación:</label>
+                            <input type="text" id="ubicacion" name="ubicacion" class="form-control" placeholder="Ej. Vereda La Cabaña" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Técnico de campo:</label>
+                            <select name="tecnico_campo" class="form-control" required>
+                                <option value="">Seleccione técnico</option>
+                                @foreach($tecnicos as $tecnico)
+                                    <option value="{{ $tecnico->id }}">{{ $tecnico->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Tipos de visita:</label>
+                            <div class="tipos-visita-grid">
+                                @php
+                                    $tipos = [
+                                        ['Inicial', 'flag', 'text-primary'],
+                                        ['Seguimiento', 'sync-alt', 'text-info'],
+                                        ['Capacitacion', 'chalkboard-teacher', 'text-warning'],
+                                        ['Poa', 'chart-line', 'text-success'],
+                                        ['Estudio Credito', 'file-invoice-dollar', 'text-danger'],
+                                        ['Inclusion a Pequeños', 'hands-helping', 'text-info'],
+                                        ['Solidaridad', 'heart', 'text-danger'],
+                                        ['Aps', 'clipboard-check', 'text-success']
+                                    ];
+                                @endphp
+
+                                @foreach($tipos as [$valor, $icono, $color])
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tipo_visita[]" value="{{ $valor }}" id="tipo_{{ strtolower(str_replace(' ', '_', $valor)) }}">
+                                        <label class="form-check-label" for="tipo_{{ strtolower(str_replace(' ', '_', $valor)) }}">
+                                            <i class="fas fa-{{ $icono }} {{ $color }} me-1"></i>{{ $valor }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
+                            <small class="text-muted">Puede seleccionar múltiples tipos de visita</small>
+                            @error('tipo_visita')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-success">Recibió la visita:</label>
+                            <input type="text" name="recibio_visita" class="form-control" placeholder="Nombre de quien recibió" required>
+                        </div>
+
+                        <input type="hidden" name="es_planificada" value="0">
+
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Esta visita se crea de forma manual y no está asociada a una planificación previa.
+                            El estado inicial será <b>pendiente</b>.
+                        </div>
+
+                        <div class="d-flex gap-3 flex-wrap mt-4">
+                            <button type="submit" class="btn btn-success" id="submit-btn">
+                                <i class="fas fa-save me-2"></i>Guardar visita
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

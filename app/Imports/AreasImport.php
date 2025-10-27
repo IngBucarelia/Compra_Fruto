@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Visita;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use PhpOffice\PhpSpreadsheet\Shared\Date; // 👈 importante
 
 class AreasImport implements ToModel, WithHeadingRow
 {
@@ -13,9 +14,20 @@ class AreasImport implements ToModel, WithHeadingRow
     {
         // Buscar la visita por algún identificador único
         $visita = Visita::where('id', $row['visita_id'])->first();
-        
         if (!$visita) {
             return null;
+        }
+
+        // Convertir fecha si existe y no es nula
+        $anioSiembra = null;
+        if (!empty($row['anio_siembra'])) {
+            if (is_numeric($row['anio_siembra'])) {
+                // Excel date number -> PHP DateTime
+                $anioSiembra = Date::excelToDateTimeObject($row['anio_siembra'])->format('Y-m-d');
+            } else {
+                // Si viene como texto tipo "2024-10-01"
+                $anioSiembra = date('Y-m-d', strtotime($row['anio_siembra']));
+            }
         }
 
         return new Area([
@@ -23,7 +35,7 @@ class AreasImport implements ToModel, WithHeadingRow
             'variedad' => $row['variedad'] ?? null,
             'material' => $row['material'] ?? null,
             'estado' => $row['estado'] ?? null,
-            'anio_siembra' => $row['anio_siembra'] ?? null,
+            'anio_siembra' => $anioSiembra,
             'area' => $row['area'] ?? null,
             'orden_plantis_numero' => $row['orden_plantis_numero'] ?? null,
             'estado_oren_plantis' => $row['estado_oren_plantis'] ?? null,

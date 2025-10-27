@@ -110,7 +110,7 @@
         }
         .data-card {
             padding: 10px;
-        }
+        } 
         .firma-img, .img-thumb {
             max-height: 100px;
         }
@@ -136,6 +136,7 @@
                         <p><strong>Teléfono:</strong> {{ $visita->datosPersonales->telefono ?? 'N/A' }}</p>
                         <p><strong>Sexo:</strong> {{ $visita->datosPersonales->sexo ?? 'N/A' }}</p>
                         <p><strong>RNP:</strong> {{ $visita->datosPersonales->rnp ?? 'N/A' }}</p>
+                        <p><strong># RNP:</strong> {{ $visita->datosPersonales->numero_rnp }}<p>
                         <p><strong>Fedepalma:</strong> {{ $visita->datosPersonales->fedepalma ?? 'N/A' }}</p>
                         <p><strong>Alfabetizado:</strong> {{ $visita->datosPersonales->alfabetizado ?? 'N/A' }}</p>
                         <p><strong>Nivel de estudio:</strong> {{ $visita->datosPersonales->nivel_estudio ?? 'N/A' }}</p>
@@ -375,46 +376,54 @@
                         <p><strong>💡 Recomendaciones:</strong> {{ $visita->cierreVisitaSocial->recomendaciones ?? 'N/A' }}</p>
 
                         <div class="row mt-3">
-                            <div class="col-md-4 text-center">
-                                <h6>✍️ Firma Responsable</h6>
-                                @if($visita->cierreVisitaSocial->firma_responsable)
-<img src="{{ asset($visita->cierreVisitaSocial->firma_responsable) }}" class="firma-img" alt="Firma Responsable">
-                                @else
-                                    <p>No registrada</p>
-                                @endif
-                            </div>
-                            <div class="row firma-container">
-    <div class="col-md-4 text-center">
-        <h6>✍️ Firma Recibe</h6>
-        @if($visita->cierreVisitaSocial->firma_recibe)
-            <img src="{{ asset($visita->cierreVisitaSocial->firma_recibe) }}" class="firma-img" alt="Firma Recibe">
-        @else
-            <p>No registrada</p>
-        @endif
-    </div>
+                            {{-- Firmas --}}
+                            @if ($visita->cierreVisitaSocial->firma_responsable)
+                                <div class="mt-3">
+                                    <strong>📄 Firma Responsable de Visita:</strong><br>
+                                    <img src="{{ $visita->cierreVisitaSocial->firma_responsable }}" alt="Firma Responsable" class="firma-img">
+                                </div>
+                            @endif
+                            @if ($visita->cierreVisitaSocial->firma_recibe)
+                                <div class="mt-3">
+                                    <strong>📄 Firma de quien recibió la visita:</strong><br>
+                                    <img src="{{ $visita->cierreVisitaSocial->firma_recibe }}" alt="Firma Recibe" class="firma-img">
+                                </div>
+                            @endif
+                            @if ($visita->cierreVisitaSocial->firma_testigo)
+                                <div class="mt-3">
+                                    <strong>📄 Firma del testigo:</strong><br>
+                                    <img src="{{ $visita->cierreVisitaSocial->firma_testigo }}" alt="Firma Testigo" class="firma-img">
+                                </div>
+                            @endif
 
-    <div class="col-md-4 text-center">
-        <h6>✍️ Firma Testigo</h6>
-        @if($visita->cierreVisitaSocial->firma_testigo)
-            <img src="{{ asset($visita->cierreVisitaSocial->firma_testigo) }}" class="firma-img" alt="Firma Testigo">
-        @else
-            <p>No registrada</p>
-        @endif
-    </div>
+   
 </div>
 
 
-                       @php
-    $imagenes = is_string($visita->cierreVisitaSocial->imagenes)
-        ? json_decode($visita->cierreVisitaSocial->imagenes, true)
-        : $visita->cierreVisitaSocial->imagenes;
-@endphp
-
-@foreach($visita->cierreVisitaSocial->imagenes ?? [] as $imagen)
-    <div class="col-md-3 mb-2">
-        <img src="{{ asset($imagen) }}" class="img-thumb" alt="Foto visita">
-    </div>
-@endforeach
+                   {{-- Imágenes finales --}}
+                                @php
+                                    // Manejo seguro del campo 'imagenes'
+                                    $imagenes = [];
+                                    if ($visita->cierreVisitaSocial && $visita->cierreVisitaSocial->imagenes) {
+                                        $imagenes = is_array($visita->cierreVisitaSocial->imagenes) 
+                                            ? $visita->cierreVisitaSocial->imagenes 
+                                            : json_decode($visita->cierreVisitaSocial->imagenes, true) ?? [];
+                                    }
+                                @endphp
+                                
+                                {{-- Verificamos si hay imágenes --}}
+                                @if (count($imagenes) > 0)
+                                    <div class="mt-4">
+                                        <strong>🖼️ Tomas destacadas durante la visita:</strong><br>
+                                        <div class="row">
+                                            @foreach ($imagenes as $img)
+                                                <div class="col-md-4 col-6 mb-3">
+                                                    <img src="{{ $img }}" class="img-fluid rounded shadow img-thumb">
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
 
 
                     @else
@@ -425,9 +434,15 @@
         </div>
 
     </div>
-    <button onclick="descargarPDFSocial()" class="btn btn-danger">
-    📥 Exportar PDF
-</button>
+      <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+        <button onclick="descargarPDFSocial()" class="btn btn-danger">
+            📥 Exportar PDF
+        </button>
+        <button onclick="descargarExcelConSweet()" class="btn btn-success">
+            📊 Exportar a Excel
+        </button>
+        <a href="{{ route('visitas_social.indexSocial') }}" class="btn btn-secondary">⬅️ Volver</a>
+    </div>
 </div>
  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

@@ -103,4 +103,17 @@ class ProveedorController extends Controller
             return back()->withErrors(['error' => 'Hubo un problema al importar el archivo. Revisa el formato.']);
         }
     }
+
+
+    public function search(Request $request)
+    {
+        $term = $request->get('q', '');
+        $proveedores = \App\Models\Proveedor::where('proveedor_nombre', 'like', '%' . $term . '%')
+            ->orderBy('proveedor_nombre', 'asc')
+            ->limit(10)
+            ->get(['id', 'proveedor_nombre']);
+
+        return response()->json($proveedores);
+    }
+
 }

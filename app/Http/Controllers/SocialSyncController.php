@@ -38,7 +38,11 @@ class SocialSyncController extends Controller
             'reside_predio' => 'nullable|boolean',
             'administra_cultivo' => 'nullable|boolean',
             'internet' => 'nullable|string|max:40',
-            'red_social' => 'nullable|string|max:100'
+            'red_social' => 'nullable|string|max:100',
+            'numero_rnp' => 'nullable|string|max:50',
+            'oferta_mercantil' => 'nullable|string|max:50',
+            'hace_cuanto' => 'nullable|string|max:50',           
+            
         ];
 
         return $this->handleSyncRequest($request, DatosPersonalesSocial::class, $rules);

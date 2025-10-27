@@ -163,8 +163,12 @@
                                     <p><strong>🛣️ Infraestructura Vial:</strong></p>
                                     <ul>
                                         @foreach($infraestructuraVial as $vial)
-                                            @if(!empty($vial))
-                                                <li>{{ $vial }}</li>
+                                            @if(is_array($dato->infraestructura_vial))
+                                                @foreach($dato->infraestructura_vial as $vial)
+                                                    <li>{{ $vial }}</li>
+                                                @endforeach
+                                            @else
+                                                <li>No hay datos registrados</li>
                                             @endif
                                         @endforeach
                                     </ul>

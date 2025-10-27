@@ -66,9 +66,15 @@
 
         <div class="mb-3">
             <label for="fechaCierre" class="form-label">📅 Fecha de Cierre *</label>
-            <input type="date" id="fechaCierre" class="form-control" name="fecha_cierre" required />
-        </div>
-
+            <input 
+                type="date" 
+                id="fechaCierre" 
+                class="form-control" 
+                name="fecha_cierre" 
+                value="{{ date('Y-m-d') }}" 
+                readonly
+            />
+            </div>
         <div class="mb-3">
             <label for="estadoVisita" class="form-label">📊 Estado de la Visita *</label>
             <select id="estadoVisita" class="form-control" name="estado_visita" required>

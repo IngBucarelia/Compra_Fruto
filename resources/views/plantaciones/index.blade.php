@@ -29,6 +29,7 @@
             <div class="card shadow">
                 <div class="card-header bg-white py-3">
                     <div class="row align-items-center">
+                        @if(Auth::check() && in_array(Auth::user()->rol, [1,4]))
                         <div class="col-md-6">
                             <div class="d-flex gap-2 flex-wrap">
                                 <a href="{{ route('plantaciones.create') }}"style="background-color: darkgreen" class="btn btn-info btn-lg text-black">
@@ -36,6 +37,7 @@
                                 </a>
                             </div>
                         </div>
+                        @endif
                         <div class="col-md-6">
                             <!-- Buscador -->
                             <form method="GET" action="{{ route('plantaciones.index') }}" id="form-busqueda">
@@ -121,7 +123,7 @@
                                                    data-bs-toggle="tooltip" title="Ver detalles">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                
+                                                @if(Auth::check() && in_array(Auth::user()->rol, [1,4]))
                                                 <!-- Editar -->
                                                 <a href="{{ route('plantaciones.edit', $plantacion->id) }}" 
                                                    class="btn btn-warning btn-sm btn-circle"
@@ -144,6 +146,7 @@
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

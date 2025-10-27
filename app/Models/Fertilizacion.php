@@ -22,7 +22,7 @@ class Fertilizacion extends Model
     }
     public function fertilizantes()
         {
-            return $this->hasMany(\App\Models\FertilizanteFertilizacion::class);
+            return $this->hasMany(FertilizanteFertilizacion::class, 'local_id', 'local_id');
         }
 
 }

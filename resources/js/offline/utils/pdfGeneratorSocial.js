@@ -58,6 +58,7 @@ export async function generarResumenPDFSocial({
     doc.setFontSize(16);
     doc.setTextColor(40, 40, 40);
     doc.text('📋 RESUMEN DE VISITA SOCIAL', 10, y);
+    doc.text(' RESUMEN DE VISITA SOCIAL', 10, y);
     y += 8;
     
     doc.setFontSize(10);
@@ -70,6 +71,7 @@ export async function generarResumenPDFSocial({
     // --- DATOS PERSONALES
     if (datosPersonales) {
       addTitulo('👤 DATOS PERSONALES DEL PRODUCTOR');
+      addTitulo(' DATOS PERSONALES DEL PRODUCTOR');
       saltarSiEsNecesario(80);
 
       const datosPersonalesBody = [
@@ -110,6 +112,7 @@ export async function generarResumenPDFSocial({
     // --- MIEMBROS DEL HOGAR
     if (miembrosHogar && miembrosHogar.length > 0) {
       addTitulo(`👨‍👩‍👧‍👦 MIEMBROS DEL HOGAR (${miembrosHogar.length})`);
+      addTitulo(` MIEMBROS DEL HOGAR (${miembrosHogar.length})`);
       saltarSiEsNecesario(30);
 
       const miembrosBody = miembrosHogar.map(miembro => [
@@ -159,7 +162,7 @@ export async function generarResumenPDFSocial({
 
     // --- DATOS DEL PREDIO
     if (datosPredio) {
-      addTitulo('🏡 DATOS DEL PREDIO');
+      addTitulo('DATOS DEL PREDIO');
       saltarSiEsNecesario(60);
 
       const datosPredioBody = [
@@ -229,7 +232,7 @@ export async function generarResumenPDFSocial({
 
     // --- FUERZA LABORAL
     if (datosFuerzaLaboral) {
-      addTitulo('🧑‍🌾 FUERZA LABORAL');
+      addTitulo('FUERZA LABORAL');
       saltarSiEsNecesario(50);
 
       const fuerzaLaboralBody = [
@@ -291,7 +294,7 @@ export async function generarResumenPDFSocial({
 
     // --- ORGANIZACIÓN SOCIAL
     if (datosOrganizacion) {
-      addTitulo('👥 ORGANIZACIÓN SOCIAL');
+      addTitulo('ORGANIZACIÓN SOCIAL');
       saltarSiEsNecesario(50);
 
       const organizacionBody = [
@@ -371,7 +374,7 @@ export async function generarResumenPDFSocial({
 
     // --- CIERRE DE VISITA
     if (datosCierre) {
-      addTitulo('✅ CIERRE DE VISITA SOCIAL');
+      addTitulo('CIERRE DE VISITA SOCIAL');
       saltarSiEsNecesario(40);
 
       const cierreBody = [
@@ -450,7 +453,7 @@ export async function generarResumenPDFSocial({
     };
 
     if (datosCierre && (datosCierre.firma_responsable || datosCierre.firma_recibe || datosCierre.firma_testigo)) {
-      addTitulo('✍️ FIRMAS REGISTRADAS');
+      addTitulo('FIRMAS REGISTRADAS');
       addFirma('Firma del Responsable', datosCierre.firma_responsable);
       addFirma('Firma de Quien Recibe', datosCierre.firma_recibe);
       addFirma('Firma del Testigo', datosCierre.firma_testigo);
@@ -461,7 +464,7 @@ export async function generarResumenPDFSocial({
       doc.addPage();
       y = 10;
       doc.setFontSize(14);
-      doc.text('📸 IMÁGENES DE LA VISITA SOCIAL', 10, y);
+      doc.text('IMÁGENES DE LA VISITA SOCIAL', 10, y);
       y += 15;
 
       let x = 10;

@@ -61,7 +61,9 @@
         <i class="fas fa-cogs me-2"></i>
         <span x-show="sidebarOpen">Zona Admon</span>
     </a>
-
+{{-- ZONA ADMIN — solo para rol 1 --}}
+{{-- ZONA VISITAS — solo para roles 1 y 2 --}}
+@if(Auth::check() && in_array(Auth::user()->rol, [1,2,3, 4]))
     <ul id="zonaAdmonSubmenu" class="sidebar-submenu collapse 
         {{ request()->routeIs('proveedores.*') || request()->routeIs('plantaciones.*') ? 'show' : '' }}" 
         data-bs-parent="#sidebarMenu">
@@ -78,11 +80,13 @@
                         <span x-show="sidebarOpen">Listar Proveedores</span>
                     </a>
                 </li>
+                @if(Auth::check() && in_array(Auth::user()->rol, [1,4]))
                 <li class="sidebar-item">
                     <a href="{{ route('proveedores.import.form') }}" class="sidebar-link">
                         <span x-show="sidebarOpen">Importar Proveedores</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </li>
 
@@ -98,14 +102,17 @@
                         <span x-show="sidebarOpen">Listar Plantaciones</span>
                     </a>
                 </li>
+                @if(Auth::check() && in_array(Auth::user()->rol, [1,4]))
                 <li class="sidebar-item">
                     <a href="{{ route('plantaciones.create') }}" class="sidebar-link">
                         <span x-show="sidebarOpen">Importar Plantaciones</span>
                     </a>
                 </li>
+                 @endif
             </ul>
         </li>
-
+          
+    @if(Auth::check() && in_array(Auth::user()->rol, [1]))
         {{-- Submenú Plantaciones --}}
         <li class="sidebar-item has-submenu {{ request()->routeIs('usuarios.*') ? 'active' : '' }}">
             <a href="#usuariosSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
@@ -118,101 +125,148 @@
                         <span x-show="sidebarOpen">Agregar Usuario</span>
                     </a>
                 </li>
-                
+                 @endif
             </ul>
         </li>
+        
+
+    </ul>
+    @endif
+
+</li>
+
+        @if(Auth::check() && in_array(Auth::user()->rol, [1, 2, 3 ,4]))
+        
+    <li class="sidebar-item has-submenu 
+        {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'active' : '' }}">
+        
+        <a href="#visitasSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+            <i class="fas fa-clipboard-list me-2"></i>
+            <span x-show="sidebarOpen">Visitas</span>
+        </a>
+
+        <ul id="visitasSubmenu" class="sidebar-submenu collapse 
+            {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'show' : '' }}" 
+            data-bs-parent="#sidebarMenu">
+
+            {{-- Submenú Visita Agronómica --}}
+            <li class="sidebar-item has-submenu {{ request()->routeIs('visitas.*') ? 'active' : '' }}">
+                <a href="#visitaAgroSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                    <i class="fas fa-seedling me-2"></i>
+                    <span x-show="sidebarOpen">Visita - Agronómica</span>
+                </a>
+                <ul id="visitaAgroSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas.*') ? 'show' : '' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('visitasHome') }}" class="sidebar-link">
+                            <span x-show="sidebarOpen">Home Visitas</span>
+                        </a>
+                    </li> 
+                    @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('visitas.import.form') }}" class="sidebar-link">
+                            <span x-show="sidebarOpen">Importar <br> Individual</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('visitas.full-import.form') }}" class="sidebar-link">
+                            <span x-show="sidebarOpen">Importar <br> Componente</span>
+                        </a>
+                    </li>
+                    @endif
+                </ul>
+            </li>
+
+            {{-- Submenú Visita Social --}}
+            <li class="sidebar-item has-submenu {{ request()->routeIs('visitas_social.*') ? 'active' : '' }}">
+                <a href="#visitaSocialSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                    <i class="fas fa-users me-2"></i>
+                    <span x-show="sidebarOpen">Visita - Social</span>
+                </a>
+                <ul id="visitaSocialSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas_social.*') ? 'show' : '' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('visitas_social.homeSocial') }}" class="sidebar-link">
+                            <span x-show="sidebarOpen">Home Social</span>
+                        </a>
+                    </li>
+                    @if(Auth::check() && in_array(Auth::user()->rol, [1,3]))
+                    <li class="sidebar-item">
+                        <a href="{{ route('visitas_social.import.form') }}" class="sidebar-link">
+                            <span>Importar <br>  individual </span>
+                        </a>
+
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('visitas_social.full-import.form') }}" class="sidebar-link">
+                            <span x-show="sidebarOpen">Importar <br> Componente Social</span>
+                        </a>
+                    </li>
+                    @endif
+
+                </ul>
+        </li>
+         @endif
 
     </ul>
 </li>
 
+ @if(Auth::check() && in_array(Auth::user()->rol, [1, 2, 3]))
+    <li class="sidebar-item has-submenu 
+        {{ request()->routeIs('envios.*') ? 'active' : '' }}">
         
-        
+        <a href="#enviosSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+            <i class="fas fa-truck me-2"></i>
+            <span x-show="sidebarOpen">Envíos</span>
+        </a>
+
+        <ul id="enviosSubmenu" class="sidebar-submenu collapse 
+            {{ request()->routeIs('envios.*') ? 'show' : '' }}" 
+            data-bs-parent="#sidebarMenu">
+
+            {{-- Listado de envíos --}}
+            <li class="sidebar-item">
+                <a href="{{ route('envios.index') }}" class="sidebar-link">
+                    <span x-show="sidebarOpen">📋 Listado de Envíos</span>
+                </a>
+            </li>
+
+            {{-- Crear nuevo envío --}}
+            <li class="sidebar-item">
+                <a href="{{ route('envios.create') }}" class="sidebar-link">
+                    <span x-show="sidebarOpen">➕ Nuevo Envío</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+@endif
+
+    @if(Auth::check() && in_array(Auth::user()->rol, [1, 2, 3 ]))
         <li class="sidebar-item has-submenu 
-    {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'active' : '' }}">
-    
-    <a href="#visitasSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
-        <i class="fas fa-clipboard-list me-2"></i>
-        <span x-show="sidebarOpen">Visitas</span>
-    </a>
-
-    <ul id="visitasSubmenu" class="sidebar-submenu collapse 
-        {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'show' : '' }}" 
-        data-bs-parent="#sidebarMenu">
-
-        {{-- Submenú Visita Agronómica --}}
-        <li class="sidebar-item has-submenu {{ request()->routeIs('visitas.*') ? 'active' : '' }}">
-            <a href="#visitaAgroSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
-                <i class="fas fa-seedling me-2"></i>
-                <span x-show="sidebarOpen">Visita - Agronómica</span>
+            {{ request()->routeIs('planificaciones.*') || request()->routeIs('planificaciones_social.*') ? 'active' : '' }}">
+            
+            <a href="#planificacionSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
+                <i class="fas fa-calendar-alt me-2"></i>
+                <span x-show="sidebarOpen">Planificación</span>
             </a>
-            <ul id="visitaAgroSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas.*') ? 'show' : '' }}">
+
+            <ul id="planificacionSubmenu" class="sidebar-submenu collapse 
+                {{ request()->routeIs('planificaciones.*') || request()->routeIs('planificaciones_social.*') ? 'show' : '' }}" 
+                data-bs-parent="#sidebarMenu">
+
+                {{-- Planificación Agronómica --}}
                 <li class="sidebar-item">
-                    <a href="{{ route('visitasHome') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Home Visitas</span>
+                    <a href="{{ route('planificaciones.calendario') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Agronómica</span>
                     </a>
                 </li>
+
+                {{-- Planificación Social --}}
                 <li class="sidebar-item">
-                    <a href="{{ route('visitas.import.form') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar Individual</span>
+                    <a href="{{ route('planificaciones_social.index') }}" class="sidebar-link">
+                        <span x-show="sidebarOpen">Social</span>
                     </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('visitas.full-import.form') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar Componente</span>
-                    </a>
-                </li>
-            </ul>
         </li>
-
-        {{-- Submenú Visita Social --}}
-        <li class="sidebar-item has-submenu {{ request()->routeIs('visitas_social.*') ? 'active' : '' }}">
-            <a href="#visitaSocialSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
-                <i class="fas fa-users me-2"></i>
-                <span x-show="sidebarOpen">Visita - Social</span>
-            </a>
-            <ul id="visitaSocialSubmenu" class="sidebar-submenu collapse {{ request()->routeIs('visitas_social.*') ? 'show' : '' }}">
-                <li class="sidebar-item">
-                    <a href="{{ route('visitas_social.homeSocial') }}" class="sidebar-link">
-                        <span x-show="sidebarOpen">Home Social</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                        <span x-show="sidebarOpen">Importar (próximamente)</span>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-    </ul>
-</li>
-
-        <li class="sidebar-item has-submenu 
-    {{ request()->routeIs('planificaciones.*') || request()->routeIs('planificaciones_social.*') ? 'active' : '' }}">
-    
-    <a href="#planificacionSubmenu" data-bs-toggle="collapse" class="sidebar-link collapsed">
-        <i class="fas fa-calendar-alt me-2"></i>
-        <span x-show="sidebarOpen">Planificación</span>
-    </a>
-
-    <ul id="planificacionSubmenu" class="sidebar-submenu collapse 
-        {{ request()->routeIs('planificaciones.*') || request()->routeIs('planificaciones_social.*') ? 'show' : '' }}" 
-        data-bs-parent="#sidebarMenu">
-
-        {{-- Planificación Agronómica --}}
-        <li class="sidebar-item">
-            <a href="{{ route('planificaciones.calendario') }}" class="sidebar-link">
-                <span x-show="sidebarOpen">Agronómica</span>
-            </a>
-        </li>
-
-        {{-- Planificación Social --}}
-        <li class="sidebar-item">
-            <a href="{{ route('planificaciones_social.index') }}" class="sidebar-link">
-                <span x-show="sidebarOpen">Social</span>
-            </a>
-        </li>
-
+         @endif
     </ul>
 </li>
 

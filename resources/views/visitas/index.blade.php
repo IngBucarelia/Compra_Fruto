@@ -32,13 +32,16 @@
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
+                @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
+                        
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Nueva Visita
                             </div>
                         </div>
+                       
                         <div class="col-auto">
                             <a href="{{ route('visitas.create') }}" class="btn btn-success btn-circle">
                                 <i class="fas fa-plus"></i>
@@ -46,6 +49,7 @@
                         </div>
                     </div>
                 </div>
+                 @endif
             </div>
         </div>
 
@@ -238,11 +242,14 @@
                                            data-bs-toggle="tooltip" title="Ver detalles de la visita">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        @if(Auth::check() && in_array(Auth::user()->rol, [1,2]))
                                         <a href="{{ route('visitas.edit', $visita->id) }}" 
                                            class="btn btn-sm btn-warning btn-circle"
                                            data-bs-toggle="tooltip" title="Editar visita">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        @endif
+                                        @if(Auth::check() && in_array(Auth::user()->rol, [1]))
                                         <form action="{{ route('visitas.destroy', $visita->id) }}" 
                                               method="POST" class="d-inline">
                                             @csrf @method('DELETE')
@@ -251,6 +258,8 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        @endif
+                                        
                                     </div>
                                 </td>
                             </tr>

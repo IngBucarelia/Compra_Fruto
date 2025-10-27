@@ -123,6 +123,7 @@
             @endif
 
             <!-- Card de Modo Offline -->
+            @if(Auth::check() && in_array(Auth::user()->rol, [1,3]))
             <div class="card shadow mb-4">
                 <div class="card-header bg-dark text-white py-3">
                     <h5 class="mb-0">
@@ -143,7 +144,9 @@
                     </a>
                 </div>
             </div>
-
+            <a href="{{ route('visitas_social.detalleSocial', $visita->id) }}" class="btn btn-info btn-lg">
+                                    <i class="fas fa-search me-2"></i>Ver Detalle Completo
+                                </a>
             <!-- Card de Navegación entre Secciones Sociales -->
             @if ($visita->estado !== 'finalizada')
                 @if ($visita->estado === 'pendiente')
@@ -202,16 +205,17 @@
                                 </div>
                             </form>
 
-                            <div class="text-center mt-3">
-                                <a href="{{ route('visitas_social.detalleSocial', $visita->id) }}" class="btn btn-info btn-lg">
-                                    <i class="fas fa-search me-2"></i>Ver Detalle Completo
-                                </a>
-                            </div>
+                            
                         </div>
                     </div>
                 @endif
             @endif
-
+            @endif
+                    <div class="text-center mt-3">
+                                <a href="{{ route('visitas_social.detalleSocial', $visita->id) }}" class="btn btn-info btn-lg">
+                                    <i class="fas fa-search me-2"></i>Ver Detalle Completo
+                                </a>
+                            </div><br><br>
             <!-- Card de Otras Visitas Sociales -->
             <div class="card shadow mb-4">
                 <div class="card-header bg-white py-3">
@@ -443,72 +447,62 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar mapa
-    const map = L.map('map').setView([4.6097, -74.0817], 6);
-    let marker;
 
-    // Capas base
-    const baseLayers = {
-        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}/', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }),
-        "Satélite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            maxZoom: 19,
-            attribution: '© Esri, Maxar, Earthstar Geographics'
-        })
-    };
-
-    // Añadir capa por defecto
-    baseLayers.OpenStreetMap.addTo(map);
-
-    // Obtener coordenadas de la plantación
+    // =========================
+    //  🗺️ MAPA SIMPLE LEAFLET
+    // =========================
     const geo = "{{ $visita->plantacion->geolocalizacion ?? '' }}";
+    const map = L.map('map').setView([4.5709, -74.2973], 6); // Vista inicial: Colombia
+
+    // Capa base OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
     if (geo && geo.includes(',')) {
-        const [lat, lon] = geo.split(',').map(coord => parseFloat(coord.trim()));
-        
+        const [lat, lon] = geo.split(',').map(v => parseFloat(v.trim()));
+
         if (!isNaN(lat) && !isNaN(lon)) {
-            // Crear marcador con información detallada
-            marker = L.marker([lat, lon]).addTo(map);
-            
-            // Popup con información de la visita y plantación
+            const marker = L.marker([lat, lon]).addTo(map);
+
+            // Popup con información básica
             const popupContent = `
-                <div style="min-width: 280px;">
+                <div style="min-width: 260px;">
                     <h4>📍 Visita Social</h4>
                     <p><strong>🌱 Plantación:</strong> {{ $visita->plantacion->nombre ?? 'N/A' }}</p>
-                    <p><strong>🏢 Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre }}</p>
-                    <p><strong>👨‍💼 Técnico:</strong> {{ $visita->tecnico->name }}</p>
+                    <p><strong>🏢 Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre ?? 'N/A' }}</p>
+                    <p><strong>👨‍💼 Técnico:</strong> {{ $visita->tecnico->name ?? 'N/A' }}</p>
                     <p><strong>📅 Fecha:</strong> {{ $visita->fecha }}</p>
-                    <p><strong>📍 Ubicación:</strong> {{ $visita->ubicacion }}</p>
-                    <p><strong>🤝 Recibió:</strong> {{ $visita->recibio_visita }}</p>
-                    <div class="coordenadas">
+                    <div style="font-family: monospace;">
                         <strong>Coordenadas:</strong><br>
                         Lat: ${lat.toFixed(6)}<br>
                         Lon: ${lon.toFixed(6)}
                     </div>
                 </div>
             `;
-            
             marker.bindPopup(popupContent).openPopup();
-            
-            // Centrar mapa en la ubicación
+
+            // Centrar en la ubicación
             map.setView([lat, lon], 15);
-            
-            // Agregar círculo para mejor visualización
+
+            // Círculo decorativo
             L.circle([lat, lon], {
                 color: '#2e7d32',
                 fillColor: '#4caf50',
-                fillOpacity: 0.1,
+                fillOpacity: 0.15,
                 radius: 100,
-                weight: 2
+                weight: 1
             }).addTo(map);
-            
-            // Actualizar coordenadas en el texto
-            document.getElementById('coordenadas').textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-            document.getElementById('coordenadas').style.fontFamily = 'Courier New, monospace';
-            document.getElementById('coordenadas').style.color = '#2e7d32';
-            
+
+            // Mostrar coordenadas en texto
+            const coordText = document.getElementById('coordenadas');
+            if (coordText) {
+                coordText.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                coordText.style.fontFamily = 'Courier New, monospace';
+                coordText.style.color = '#2e7d32';
+            }
+
         } else {
             mostrarMapaSinUbicacion();
         }
@@ -517,130 +511,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function mostrarMapaSinUbicacion() {
-        // Mostrar mensaje en el mapa cuando no hay coordenadas
-        const bounds = map.getBounds();
-        const center = bounds.getCenter();
-        
-        L.marker([center.lat, center.lng]).addTo(map)
-            .bindPopup(`
-                <div style="text-align: center; min-width: 250px;">
-                    <h4 style="color: #e74a3b;">⚠️ Ubicación No Disponible</h4>
-                    <p>No se encontraron coordenadas geográficas para esta plantación.</p>
-                    <small>Actualice la información de la plantación para ver su ubicación en el mapa.</small>
-                </div>
-            `)
+        const center = map.getCenter();
+        L.marker(center).addTo(map)
+            .bindPopup("<b>⚠️ Ubicación no disponible</b><br>Actualice las coordenadas de la plantación.")
             .openPopup();
-            
-        // Actualizar texto de coordenadas
-        document.getElementById('coordenadas').textContent = 'Coordenadas no disponibles';
-        document.getElementById('coordenadas').style.color = '#e74a3b';
+
+        const coordText = document.getElementById('coordenadas');
+        if (coordText) {
+            coordText.textContent = 'Coordenadas no disponibles';
+            coordText.style.color = '#e74a3b';
+        }
     }
-
-    // Control de escala
-    L.control.scale({ 
-        imperial: false,
-        position: 'bottomleft'
-    }).addTo(map);
-
-    // Control de capas
-    L.control.layers(baseLayers, null, {
-        position: 'topright',
-        collapsed: true
-    }).addTo(map);
-
-    // Control de geolocalización (ubicación del usuario)
-    L.control.locate({
-        position: 'topright',
-        drawCircle: true,
-        follow: true,
-        setView: true,
-        keepCurrentZoomLevel: true,
-        markerStyle: {
-            weight: 2,
-            opacity: 0.9,
-            fillOpacity: 0.8,
-            color: '#136aec',
-            fillColor: '#136aec'
-        },
-        circleStyle: {
-            weight: 1,
-            opacity: 0.5,
-            fillOpacity: 0.15,
-            color: '#136aec',
-            fillColor: '#136aec'
-        },
-        icon: 'fas fa-crosshairs',
-        metric: true,
-        strings: {
-            title: "Mostrar mi ubicación actual",
-            popup: "Estás dentro de {distance} {unit} de este punto",
-            outsideMapBoundsMsg: "Parece que estás fuera de los límites del mapa"
-        },
-        locateOptions: {
-            maxZoom: 16,
-            watch: true,
-            enableHighAccuracy: true,
-            maximumAge: 10000,
-            timeout: 10000
-        }
-    }).addTo(map);
-
-    // Agregar botón de pantalla completa (simulado)
-    L.Control.FullScreen = L.Control.extend({
-        onAdd: function(map) {
-            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-            const button = L.DomUtil.create('a', 'leaflet-control-fullscreen', container);
-            button.innerHTML = '⛶';
-            button.href = '#';
-            button.title = 'Pantalla completa';
-            
-            L.DomEvent.on(button, 'click', function(e) {
-                L.DomEvent.stopPropagation(e);
-                L.DomEvent.preventDefault(e);
-                const elem = document.getElementById('map');
-                if (!document.fullscreenElement) {
-                    elem.requestFullscreen().catch(err => {
-                        alert(`Error al activar pantalla completa: ${err.message}`);
-                    });
-                } else {
-                    document.exitFullscreen();
-                }
-            });
-            
-            return container;
-        }
-    });
-
-    L.control.fullscreen = function(opts) {
-        return new L.Control.FullScreen(opts);
-    }
-    
-    L.control.fullscreen({ position: 'topright' }).addTo(map);
-
-    // Evento para cambiar estilo al pasar el ratón sobre el marcador
-    map.on('popupopen', function(e) {
-        const marker = e.popup._source;
-        if (marker instanceof L.Marker) {
-            marker.setZIndexOffset(1000);
-        }
-    });
-
-    // Mejorar el zoom con animación suave
-    map.on('zoomstart', function() {
-        map.eachLayer(function(layer) {
-            if (layer instanceof L.Marker) {
-                layer.setOpacity(0.7);
-            }
-        });
-    });
-
-    map.on('zoomend', function() {
-        map.eachLayer(function(layer) {
-            if (layer instanceof L.Marker) {
-                layer.setOpacity(1);
-            }
-        });
-    });
 
 });
 </script>

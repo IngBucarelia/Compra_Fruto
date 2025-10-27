@@ -38,7 +38,8 @@
               <p><strong class="text-white">Nivel Estudio:</strong> <span class="text-white">{{ datosPersonales.nivel_estudio }}</span></p>
             </div>
             <div class="col-md-4">
-              <p><strong class="text-white">RNP:</strong> <span class="text-white">{{ datosPersonales.rnp }}</span></p>
+               <p><strong class="text-white">RNP:</strong> <span class="text-white">{{ datosPersonales.rnp || 'No especificado' }}</span></p>
+          <p v-if="datosPersonales.rnp === 'SI'"><strong class="text-white">Número RNP:</strong> <span class="text-white">{{ datosPersonales.numero_rnp || 'No especificado' }}</span></p>
               <p><strong class="text-white">Fedepalma:</strong> <span class="text-white">{{ datosPersonales.fedepalma }}</span></p>
               <p><strong class="text-white">Grupo Poblacional:</strong> <span class="text-white">{{ datosPersonales.grupo_poblacional }}</span></p>
             </div>

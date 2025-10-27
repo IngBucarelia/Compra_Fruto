@@ -161,11 +161,18 @@
                             <div class="col-md-6">
                                 <p><strong>🛣️ Infraestructura Vial:</strong></p>
                                 <ul>
-                                    @foreach($infraestructuraVial as $vial)
-                                        @if(!empty($vial))
-                                            <li>{{ $vial }}</li>
+                                    @php
+                                            $infraestructura = json_decode($dato->infraestructura_vial, true);
+                                        @endphp
+
+
+                                        @if(is_array($infraestructura) && count($infraestructura) > 0)
+                                            @foreach($infraestructura as $vial)
+                                                <span class="badge bg-success">{{ $vial }}</span>
+                                            @endforeach
+                                        @else
+                                            <p class="text-muted">Dato de predio no registrado</p>
                                         @endif
-                                    @endforeach
                                 </ul>
                             </div>
                             @endif

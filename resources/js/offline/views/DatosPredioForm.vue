@@ -100,9 +100,15 @@
         <div class="card-body">
           <div class="row">
             <div class="col-md-4">
-              <p><strong class="text-white">Forma Tenencia:</strong> <span class="text-white">{{ datosPredio.forma_tenencia }}</span></p>
+              <p><strong class="text-white">Forma Tenencia:</strong> 
+                <span class="text-white">
+                  {{ Array.isArray(datosPredio.forma_tenencia) 
+                      ? datosPredio.forma_tenencia.join(', ') 
+                      : datosPredio.forma_tenencia }}
+                </span>
+              </p>
               <p><strong class="text-white">Registro ICA:</strong> <span class="text-white">{{ datosPredio.registrado_ica }}</span></p>
-            </div>
+                          </div>
             <div class="col-md-4">
               <p><strong class="text-white">Vive en Predio:</strong> <span class="text-white">{{ datosPredio.vive_predio }}</span></p>
               <p><strong class="text-white">Infraestructura:</strong> <span class="text-white">{{ datosPredio.infraestructura_predio }}</span></p>
@@ -140,22 +146,25 @@
             </div>
 
             <!-- Forma de tenencia -->
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-white">
-                <i class="fas fa-file-contract me-2"></i>Forma de tenencia
-              </label>
-              <select v-model="formData.forma_tenencia" class="form-select" required>
-                <option value="">Seleccione...</option>
-                <option value="Propietario con escritura">Propietario con escritura</option>
-                <option value="Arrendamiento">Arrendamiento</option>
-                <option value="Carta venta">Carta venta</option>
-                <option value="Tradición y libertad">Tradición y libertad</option>
-                <option value="Posesión">Posesión</option>
-                <option value="Comunidad">Comunidad</option>
-                <option value="Otro">Otro</option>
-              </select>
-              <small class="text-white">Seleccione la forma de tenencia de la tierra</small>
-            </div>
+                          
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-white">
+                  <i class="fas fa-file-contract me-2"></i>Forma de tenencia
+                </label>
+
+                <div class="form-check" v-for="opcion in opcionesTenencia" :key="opcion.value">
+                  <input class="form-check-input" type="checkbox"
+                        :value="opcion.value"
+                        v-model="formData.forma_tenencia"
+                        :id="'tenencia-' + opcion.value" />
+                  <label class="form-check-label text-white" :for="'tenencia-' + opcion.value">
+                    {{ opcion.label }}
+                  </label>
+                </div>
+
+                <small class="text-white">Puedes seleccionar una o varias opciones</small>
+              </div>
+
           </div>
 
           <div class="row">
@@ -332,7 +341,7 @@ export default {
     return {
       formData: {
         nombre_finca: '',
-        forma_tenencia: '',
+        forma_tenencia: [],
         municipio: '',
         vereda: '',
         registrado_ica: '',
@@ -369,7 +378,18 @@ export default {
         { value: 'Internet', label: '🌐 Internet' },
         { value: 'Recolección basuras', label: '🗑️ Recolección basuras' },
         { value: 'Ninguno', label: '❌ Ninguno' }
-      ]
+      ],
+      opcionesTenencia: [
+        { value: 'Propietario con escritura', label: 'Propietario con escritura' },
+        { value: 'Arrendamiento', label: 'Arrendamiento' },
+        { value: 'Carta venta', label: 'Carta venta' },
+        { value: 'Tradición y libertad', label: 'Tradición y libertad' },
+        { value: 'Posesión', label: 'Posesión' },
+        { value: 'Problemas Juridos', label: 'Prddio con Problemas Juridicos' },
+        { value: 'Comunidad', label: 'Comunidad' },
+        { value: 'Otro', label: 'Otro' }
+      ],
+
     };
   },
   computed: {

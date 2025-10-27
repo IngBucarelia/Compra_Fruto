@@ -56,66 +56,112 @@ class VisitaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-   public function store(Request $request)
-    {
-        try {
-            $data = $request->validate([
-                'fecha' => 'required|date',
-                'tecnico_campo' => 'required|exists:users,id',
-                'proveedor_id' => 'required|exists:proveedores,id',
-                'plantacion_id' => 'required|exists:plantaciones,id',
-                'tipo_visita' => 'required|string',
-            ]);
+ public function store(Request $request)
+{
+    try {
+        Log::info('=== INICIANDO STORE VISITA ===');
+        Log::info('Todos los datos del request:', $request->all());
+        Log::info('Tipos de visita recibidos:', ['tipos' => $request->input('tipos_visita', [])]);
 
-            DB::beginTransaction();
+        // Validación personalizada
+        $validator = validator()->make($request->all(), [
+            'fecha' => 'required|date',
+            'tecnico_campo' => 'required|exists:users,id',
+            'proveedor_id' => 'required|exists:proveedores,id',
+            'plantacion_id' => 'required|exists:plantaciones,id',
+            'recibio_visita' => 'required|string',
+        ]);
 
-            // Crear la planificación
-            $planificacion = Planificacion::create([
-                ...$data,
-                'estado' => 'pendiente'
-            ]);
-
-            // Obtener datos de la plantación para la ubicación
-            $plantacion = \App\Models\Plantacion::find($data['plantacion_id']);
-            $ubicacion = $plantacion->vereda . ', ' . $plantacion->municipio;
-
-            // Crear la visita asociada
-            $visita = Visita::create([
-                'fecha' => $data['fecha'],
-                'tecnico_campo' => $data['tecnico_campo'],
-                'proveedor_id' => $data['proveedor_id'],
-                'plantacion_id' => $data['plantacion_id'],
-                'tipo_visita' => $data['tipo_visita'],
-                'ubicacion' => $ubicacion,
-                'recibio_visita' => 'SIN REGISTRAR',
-                'estado' => 'pendiente',
-                'planificacion_id' => $planificacion->id
-            ]);
-
-            // Actualizar la planificación con el ID de la visita
-            $planificacion->update(['visita_id' => $visita->id]);
-
-            DB::commit();
-
-            return redirect()->route('planificaciones.create')
-                ->with('success', 'Planificación agronómica y visita creadas y vinculadas correctamente.');
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->withErrors($e->validator)
-                ->withInput()
-                ->with('error', 'Error de validación: Por favor verifica los datos ingresados.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al crear planificación agronómica: ' . $e->getMessage());
-            
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Error al crear la planificación: ' . $e->getMessage());
+        // Validar manualmente los tipos de visita
+        $tiposVisita = $request->input('tipos_visita', []);
+        if (empty($tiposVisita)) {
+            $validator->errors()->add('tipos_visita', 'Debe seleccionar al menos un tipo de visita');
+            Log::warning('Validación fallida: No hay tipos de visita seleccionados');
         }
+
+        // Validar cada tipo seleccionado
+        $tiposValidos = ['Inicial', 'Seguimiento', 'Capacitacion', 'Poa', 'Estudio Credito', 'Inclusion a Pequeños', 'Solidaridad', 'Aps'];
+        foreach ($tiposVisita as $tipo) {
+            if (!in_array($tipo, $tiposValidos)) {
+                $validator->errors()->add('tipos_visita', 'Tipo de visita no válido: ' . $tipo);
+                Log::warning('Validación fallida: Tipo no válido', ['tipo' => $tipo]);
+            }
+        }
+
+        if ($validator->fails()) {
+            Log::error('Validación fallida:', $validator->errors()->toArray());
+            throw new \Illuminate\Validation\ValidationException($validator);
+        }
+
+        DB::beginTransaction();
+
+        $tiposVisitaString = implode(', ', $tiposVisita);
+        
+        Log::info('Creando planificación...');
+
+        // Crear la planificación
+        $planificacion = Planificacion::create([
+            'fecha' => $request->fecha,
+            'tecnico_campo' => $request->tecnico_campo,
+            'proveedor_id' => $request->proveedor_id,
+            'plantacion_id' => $request->plantacion_id,
+            'tipo_visita' => $tiposVisitaString, 
+            'estado' => 'pendiente'
+        ]);
+        Log::info('Planificación creada:', ['id' => $planificacion->id]);
+
+        // Obtener datos de la plantación para la ubicación
+        $plantacion = \App\Models\Plantacion::find($request->plantacion_id);
+        if (!$plantacion) {
+            throw new \Exception('Plantación no encontrada con ID: ' . $request->plantacion_id);
+        }
+        $ubicacion = $plantacion->vereda . ', ' . $plantacion->municipio;
+
+        Log::info('Creando visita...');
+
+        // Crear la visita asociada
+        $visita = Visita::create([
+            'fecha' => $request->fecha,
+            'tecnico_campo' => $request->tecnico_campo,
+            'proveedor_id' => $request->proveedor_id,
+            'plantacion_id' => $request->plantacion_id,
+            'tipo_visita' => $tiposVisitaString, // Aquí usamos el string convertido
+            'ubicacion' => $ubicacion,
+            'recibio_visita' => $request->recibio_visita, // Usamos el valor del formulario
+            'estado' => 'pendiente',
+            'planificacion_id' => $planificacion->id
+        ]);
+
+        Log::info('Visita creada:', ['id' => $visita->id]);
+
+        // Actualizar la planificación con el ID de la visita
+        $planificacion->update(['visita_id' => $visita->id]);
+
+        DB::commit();
+
+        Log::info('=== VISITA CREADA EXITOSAMENTE ===');
+
+        return redirect()->route('planificaciones.create')
+            ->with('success', 'Planificación agronómica y visita creadas correctamente con ' . count($tiposVisita) . ' tipo(s) de visita.');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        Log::error('Error de validación en store visita:', $e->errors());
+        return redirect()->back()
+            ->withErrors($e->validator)
+            ->withInput()
+            ->with('error', 'Error de validación: Por favor verifica los datos ingresados.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al crear planificación agronómica: ' . $e->getMessage());
+        Log::error('Stack trace:', ['trace' => $e->getTraceAsString()]);
+        
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Error al crear la planificación: ' . $e->getMessage());
     }
+}
 
 
 

@@ -92,11 +92,9 @@ class CierreVisitaController extends Controller
 
      public function syncOffline(Request $request)
         {
-            // Log de depuración
             Log::info('Datos recibidos para sincronizar cierre de visita:', $request->all());
 
             try {
-                // Validación correcta usando el facade Validator o el método validate() del request
                 $validatedData = $request->validate([
                     'visita_id' => 'nullable|integer|exists:visitas,id',
                     'fecha_cierre' => 'required|date',
@@ -107,26 +105,36 @@ class CierreVisitaController extends Controller
                     'firma_recibe' => 'required|string',
                     'firma_testigo' => 'nullable|string',
                     'imagenes' => 'nullable|array',
-                    'imagenes.*' => 'nullable|string', // Aceptamos strings Base64 directamente
+                    'imagenes.*' => 'nullable|string',
                     'finalizada_en' => 'nullable|date'
                 ]);
 
-                // Procesamiento de imágenes (opcional, si necesitas guardarlas como archivos)
                 if (!empty($validatedData['imagenes'])) {
-                    $validatedData['imagenes'] = json_encode($validatedData['imagenes']); // Guardar como JSON
+                    $validatedData['imagenes'] = json_encode($validatedData['imagenes']);
                 }
 
-                // Buscar o crear el registro
+                // Guardar o actualizar cierre
                 $cierreVisita = CierreVisita::updateOrCreate(
                     ['visita_id' => $validatedData['visita_id']],
                     $validatedData
                 );
 
+                // ✅ ACTUALIZAR ESTADO DE LA VISITA A FINALIZADA
+                if (!empty($validatedData['visita_id'])) {
+                    $visita = Visita::find($validatedData['visita_id']);
+                    if ($visita) {
+                        $visita->update(['estado' => 'finalizada']);
+                        Log::info('Visita actualizada a estado finalizada', ['visita_id' => $visita->id]);
+                    } else {
+                        Log::warning('No se encontró la visita para actualizar su estado', ['visita_id' => $validatedData['visita_id']]);
+                    }
+                }
+
                 Log::info('Cierre de visita sincronizado exitosamente', ['id' => $cierreVisita->id]);
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Cierre de visita sincronizado correctamente',
+                    'message' => 'Cierre de visita sincronizado correctamente y visita finalizada.',
                     'data' => $cierreVisita
                 ]);
 
@@ -135,18 +143,15 @@ class CierreVisitaController extends Controller
                     'errors' => $e->errors(),
                     'input' => $request->all()
                 ]);
-                
                 return response()->json([
                     'success' => false,
                     'message' => 'Error de validación',
                     'errors' => $e->errors()
                 ], 422);
-                
             } catch (\Exception $e) {
                 Log::error('Error al sincronizar cierre de visita: ' . $e->getMessage(), [
                     'trace' => $e->getTraceAsString()
                 ]);
-                
                 return response()->json([
                     'success' => false,
                     'message' => 'Error interno del servidor',
@@ -154,6 +159,5 @@ class CierreVisitaController extends Controller
                 ], 500);
             }
         }
-    // fin de sincronizador 
 
 }

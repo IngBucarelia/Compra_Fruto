@@ -74,18 +74,46 @@
             </div>
           </div>
 
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold text-white">
+              <i class="fas fa-file-signature me-2"></i>¿Ha firmado oferta mercantil?
+            </label>
+            <select v-model="formData.oferta_mercantil" @change="toggleOfertaMercantil" class="form-select">
+              <option value="">Seleccione</option>
+              <option value="SI">SI</option>
+              <option value="NO">NO</option>
+            </select>
+          </div>
+
+          <!-- Campo condicional: Hace cuánto -->
+          <div class="col-md-6 mb-3" v-if="showHaceCuanto">
+            <label class="form-label fw-bold text-white">
+              <i class="fas fa-calendar-check me-2"></i>¿Hace cuánto?
+            </label>
+            <input type="text" v-model="formData.hace_cuanto" class="form-control" placeholder="Ej: 6 meses, 1 año...">
+          </div>
+
           <div class="row">
-            <!-- RNP -->
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-bold text-white">
-                <i class="fas fa-id-card me-2"></i>Cuenta con RNP?
-              </label>
-              <select v-model="formData.rnp" class="form-select">
-                <option value="">Seleccione</option>
-                <option value="SI">SI</option>
-                <option value="NO">NO</option>
-              </select>
-            </div>
+           <!-- RNP -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold text-white">
+              <i class="fas fa-id-card me-2"></i>Cuenta con RNP?
+            </label>
+            <select v-model="formData.rnp" @change="toggleNumeroRNP" class="form-select">
+              <option value="">Seleccione</option>
+              <option value="SI">SI</option>
+              <option value="NO">NO</option>
+            </select>
+          </div>
+
+          <!-- Número RNP - Campo condicional -->
+          <div class="col-md-6 mb-3" v-if="showNumeroRNP">
+            <label class="form-label fw-bold text-white">
+              <i class="fas fa-hashtag me-2"></i>Número de RNP
+            </label>
+            <input type="text" v-model="formData.numero_rnp" class="form-control" 
+                  placeholder="Digite el número de RNP" maxlength="50">
+          </div>
 
             <!-- Fedepalma -->
             <div class="col-md-6 mb-3">
@@ -363,6 +391,7 @@ export default {
         telefono: '',
         sexo: '',
         rnp: '',
+        numero_rnp: '',
         fedepalma: '',
         alfabetizado: '', // Cambiado a string vacío
         nivel_estudio: '',
@@ -377,14 +406,19 @@ export default {
         internet: '',
         tipo_persona: '',
         red_social: '',
-        regimen_salud: ''
+        regimen_salud: '',
+        oferta_mercantil: '',
+        hace_cuanto:''
       },
       datosGuardados: null,
       visitaId: null,
       proveedorNombre: 'Cargando...',
       canSync: navigator.onLine,
       fechaActual: new Date().toLocaleDateString(),
-      showAdditionalFields: false
+      showAdditionalFields: false,
+      showNumeroRNP: false,
+      showHaceCuanto: false,
+
     };
   },
   computed: {
@@ -402,6 +436,20 @@ export default {
       });
     },
 
+    toggleOfertaMercantil() {
+      this.showHaceCuanto = this.formData.oferta_mercantil === 'SI';
+      if (this.formData.oferta_mercantil === 'NO') {
+        this.formData.hace_cuanto = '';
+      }
+    },
+    toggleNumeroRNP() {
+      this.showNumeroRNP = this.formData.rnp === 'SI';
+      // Si selecciona NO, limpiar el campo número RNP
+      if (this.formData.rnp === 'NO') {
+        this.formData.numero_rnp = '';
+      }
+    },
+
     async cargarDatosGuardados() {
       try {
         this.datosGuardados = await getFormDataByVisita('datos_personales_social', this.visitaId);
@@ -411,6 +459,7 @@ export default {
             ...this.datosGuardados 
           };
         }
+        this.showNumeroRNP = this.formData.rnp === 'SI';
       } catch (error) {
         console.error('Error cargando datos:', error);
       }
@@ -424,15 +473,16 @@ export default {
           telefono: this.formData.telefono || null,
           sexo: this.formData.sexo || null,
           rnp: this.formData.rnp || null,
+          numero_rnp: this.formData.rnp === 'SI' ? (this.formData.numero_rnp || null) : null, 
           fedepalma: this.formData.fedepalma || null,
-          alfabetizado: this.formData.alfabetizado || null, // Ahora es string
+          alfabetizado: this.formData.alfabetizado || null, 
           nivel_estudio: this.formData.nivel_estudio || null,
           fecha_nacimiento: this.formData.fecha_nacimiento || null,
           grupo_poblacional: this.formData.grupo_poblacional || null,
           anios_palmicultura: this.formData.anios_palmicultura ? parseInt(this.formData.anios_palmicultura) : null,
           regimen_salud: this.formData.regimen_salud || null,
-          reside_predio: this.formData.reside_predio || null, // Ahora es string
-          administra_cultivo: this.formData.administra_cultivo || null, // Ahora es string
+          reside_predio: this.formData.reside_predio || null, 
+          administra_cultivo: this.formData.administra_cultivo || null, 
           internet: this.formData.internet || null,
           red_social: this.formData.red_social || null,
           
@@ -441,6 +491,9 @@ export default {
           supervisa_cultivo: this.formData.supervisa_cultivo || null,
           realiza_cultivo: this.formData.realiza_cultivo || null,
           tipo_persona: this.formData.tipo_persona || null,
+          oferta_mercantil: this.formData.oferta_mercantil || null,
+          hace_cuanto: this.formData.oferta_mercantil === 'SI' ? (this.formData.hace_cuanto || null) : null,
+
 
           // Metadatos
           local_id: this.generateUUID(),

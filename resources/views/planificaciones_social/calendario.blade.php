@@ -32,6 +32,7 @@
     <div class="row mb-4">
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
+                @if(Auth::check() && in_array(Auth::user()->rol, [1,3]))
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
@@ -46,6 +47,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
 
