@@ -218,7 +218,7 @@
 
             <!-- Botón Volver -->
             <div class="text-center mt-3" >
-                <a href="{{ route('plantaciones.index') }}" class="btn btn-outline btn-lg" style="background-color: seagreen;color:#f8f9fa">
+                <a href="{{ url()->previous() }}" class="btn btn-outline btn-lg" style="background-color: seagreen;color:#f8f9fa">
                     <i class="fas fa-arrow-left me-2" ></i>Volver al Listado
                 </a>
             </div>

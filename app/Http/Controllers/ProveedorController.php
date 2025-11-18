@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AuditoriaHelper;
 use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use App\Models\Plantacion;
@@ -13,19 +14,20 @@ use Maatwebsite\Excel\Facades\Excel;
 class ProveedorController extends Controller
 {
     public function index(Request $request)
-        {
-            $buscar = $request->input('buscar');
+{
+    $buscar = $request->input('buscar');
 
-            $proveedores = \App\Models\Proveedor::when($buscar, function ($query, $buscar) {
-                    return $query->where('proveedor_nombre', 'like', "%{$buscar}%")
-                                ->orWhere('nit', 'like', "%{$buscar}%");
-                })
-                ->orderBy('id', 'desc')
-                ->paginate(10)
-                ->withQueryString(); // Esto mantiene el filtro al cambiar de página
+    $proveedores = \App\Models\Proveedor::when($buscar, function ($query) use ($buscar) {
+            $query->where('proveedor_nombre', 'like', "%$buscar%")
+                  ->orWhere('nit', 'like', "%$buscar%");
+        })
+        ->where('estado', 1) // Solo activos
+        ->latest()
+        ->paginate(10);
 
-            return view('proveedores.index', compact('proveedores', 'buscar'));
-        }
+    return view('proveedores.index', compact('proveedores', 'buscar'));
+}
+
 
     public function show(Proveedor $proveedor)
     {
@@ -45,6 +47,12 @@ class ProveedorController extends Controller
         ]);
 
         Proveedor::create($request->all() + ['dia_creado' => now()]);
+        AuditoriaHelper::registrar(
+                'create',
+                'Proveedor ',
+                $request->nit,
+                'Se creó un nuevo  proveedor nombre :  ' . $request->proveedor_nombre
+            );
 
         return redirect()->route('proveedores.index');
     }
@@ -62,16 +70,38 @@ class ProveedorController extends Controller
         ]);
 
         $proveedor->update($request->only('proveedor_nombre', 'nit'));
-
+        AuditoriaHelper::registrar(
+                'edit',
+                'Proveedor ',
+                $request->nit,
+                'Se edito un proveedor nombre :  ' . $request->proveedor_nombre
+            );
         return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado correctamente.');
     }
 
-    public function destroy(Proveedor $proveedor)
+   public function destroy(Proveedor $proveedor)
     {
-        $proveedor->delete();
+        try {
+            // Cambiamos el estado a 0 (inactivo)
+            $proveedor->estado = 0;
+            $proveedor->save();
 
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado correctamente.');
+            // Registrar en auditoría (opcional si ya usas tu helper)
+            \App\Helpers\AuditoriaHelper::registrar(
+                'delete',
+                'Proveedor',
+                $proveedor->id,
+                'Proveedor marcado como inactivo (estado = 0).'
+            );
+
+            return redirect()->route('proveedores.index')
+                ->with('success', 'Proveedor marcado como inactivo correctamente.');
+        } catch (\Exception $e) {
+            return redirect()->route('proveedores.index')
+                ->with('error', 'Error al marcar el proveedor como inactivo: ' . $e->getMessage());
+        }
     }
+
 
     public function plantacionesIndex($id)
             {
@@ -114,6 +144,22 @@ class ProveedorController extends Controller
             ->get(['id', 'proveedor_nombre']);
 
         return response()->json($proveedores);
+    }
+
+     public function eliminados(Request $request)
+    {
+        $buscar = $request->input('buscar');
+
+       $proveedores = Proveedor::with('auditorias')
+            ->when($buscar, function ($query) use ($buscar) {
+                $query->where('proveedor_nombre', 'like', "%$buscar%")
+                    ->orWhere('nit', 'like', "%$buscar%");
+            })
+            ->where('estado', 0)
+            ->latest()
+            ->paginate(10);
+
+        return view('proveedores.eliminados', compact('proveedores', 'buscar'));
     }
 
 }

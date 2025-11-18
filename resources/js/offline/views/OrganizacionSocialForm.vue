@@ -39,36 +39,66 @@
               </h6>
             </div>
             <div class="card-body p-2">
-              <p class="mb-1"><small><strong>Teléfono:</strong> {{ datosPersonales.telefono }}</small></p>
-              <p class="mb-1"><small><strong>Sexo:</strong> {{ datosPersonales.sexo }}</small></p>
-              <p class="mb-1"><small><strong>Estudio:</strong> {{ datosPersonales.nivel_estudio }}</small></p>
-              <p class="mb-1"><small><strong>RNP:</strong> {{ datosPersonales.rnp }}</small></p>
-              <p class="mb-0"><small><strong>Experiencia:</strong> {{ datosPersonales.anios_palmicultura }} años</small></p>
+              <p class="mb-1"><small><strong>Teléfono:</strong> {{ datosPersonales.telefono || 'No registrado' }}</small></p>
+              <p class="mb-1"><small><strong>Sexo:</strong> {{ datosPersonales.sexo || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>RNP:</strong> {{ datosPersonales.rnp || 'No especificado' }}</small></p>
+              <p class="mb-1" v-if="datosPersonales.rnp === 'SI'">
+                <small><strong>Número RNP:</strong> {{ datosPersonales.numero_rnp || 'No especificado' }}</small>
+              </p>
+              <p class="mb-1"><small><strong>Fedepalma:</strong> {{ datosPersonales.fedepalma || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Alfabetizado:</strong> {{ datosPersonales.alfabetizado || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Nivel Estudio:</strong> {{ datosPersonales.nivel_estudio || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Otras Líneas:</strong> {{ datosPersonales.otras_lineas || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Fecha Nacimiento:</strong> {{ datosPersonales.fecha_nacimiento || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Grupo Poblacional:</strong> {{ datosPersonales.grupo_poblacional || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Reside Predio:</strong> {{ datosPersonales.reside_predio || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Administra Cultivo:</strong> {{ datosPersonales.administra_cultivo || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Supervisa Cultivo:</strong> {{ datosPersonales.supervisa_cultivo || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Realiza Cultivo:</strong> {{ datosPersonales.realiza_cultivo || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Años Palmicultura:</strong> {{ datosPersonales.anios_palmicultura || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Internet:</strong> {{ datosPersonales.internet || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Tipo Persona:</strong> {{ datosPersonales.tipo_persona || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Red Social:</strong> {{ datosPersonales.red_social || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Régimen Salud:</strong> {{ datosPersonales.regimen_salud || 'No especificado' }}</small></p>
+              <p class="mb-1"><small><strong>Oferta Mercantil:</strong> {{ datosPersonales.oferta_mercantil || 'No especificado' }}</small></p>
+              <p class="mb-0"><small><strong>Hace Cuánto:</strong> {{ datosPersonales.hace_cuanto || 'No especificado' }}</small></p>
+           
             </div>
           </div>
         </div>
 
         <!-- Miembros del Hogar -->
-        <div class="col-lg-3 col-md-6 mb-3" v-if="miembrosHogar.length > 0">
+        <div class="col-md-4 mb-3" v-if="miembrosHogar.length > 0">
           <div class="card h-100">
-            <div class="card-header bg-primary text-white py-2">
+            <div class="card-header bg-primary text-white py-2 text-center">
               <h6 class="mb-0">
-                <i class="fas fa-users me-1"></i>Miembros ({{ miembrosHogar.length }})
+                <i class="fas fa-users me-1"></i>Miembros del Hogar ({{ miembrosHogar.length }})
               </h6>
             </div>
-            <div class="card-body p-2">
-              <div v-for="miembro in miembrosHogar.slice(0, 2)" :key="miembro.local_id" class="mb-1">
-                <p class="mb-0"><small><strong>{{ miembro.nombre.split(' ')[0] }}</strong></small></p>
-                <p class="mb-0"><small>{{ miembro.parentezco }} | {{ miembro.nivel_estudio }}</small></p>
-                <hr class="my-1" v-if="miembro !== miembrosHogar[1]">
+            <div class="card-body p-2 bg-light" style="overflow-x: auto;">
+              <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered align-middle mb-0">
+                  <thead class="table-primary text-center">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Parentesco</th>
+                      <th>Documento</th>
+                      <th>Sexo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="miembro in miembrosHogar" :key="miembro.local_id">
+                      <td>{{ miembro.nombre }}</td>
+                      <td>{{ miembro.parentezco }}</td>
+                      <td>{{ miembro.documento }}</td>
+                      <td>{{ miembro.sexo }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <p class="mb-0 text-center" v-if="miembrosHogar.length > 2">
-                <small class="text-muted">+{{ miembrosHogar.length - 2 }} más</small>
-              </p>
             </div>
           </div>
         </div>
-
         <!-- Datos del Predio -->
         <div class="col-lg-3 col-md-6 mb-3" v-if="datosPredio">
           <div class="card h-100">
@@ -78,11 +108,22 @@
               </h6>
             </div>
             <div class="card-body p-2">
-              <p class="mb-1"><small><strong>Finca:</strong> {{ datosPredio.nombre_finca }}</small></p>
-              <p class="mb-1"><small><strong>Tenencia:</strong> {{ datosPredio.forma_tenencia }}</small></p>
-              <p class="mb-1"><small><strong>Ubicación:</strong> {{ datosPredio.municipio }}</small></p>
+              <p class="mb-1"><small><strong>Visita Social ID:</strong> {{ datosPredio.visita_social_id }}</small></p>
+              <p class="mb-1"><small><strong>Plantación ID:</strong> {{ datosPredio.plantacion_id }}</small></p>
+              <p class="mb-1"><small><strong>Nombre de la Finca:</strong> {{ datosPredio.nombre_finca }}</small></p>
+              <p class="mb-1"><small><strong>Forma de Tenencia:</strong> 
+                {{ Array.isArray(datosPredio.forma_tenencia) ? datosPredio.forma_tenencia.join(', ') : datosPredio.forma_tenencia }}
+              </small></p>
+              <p class="mb-1"><small><strong>Municipio:</strong> {{ datosPredio.municipio }}</small></p>
               <p class="mb-1"><small><strong>Vereda:</strong> {{ datosPredio.vereda }}</small></p>
-              <p class="mb-0"><small><strong>ICA:</strong> {{ datosPredio.registrado_ica }}</small></p>
+              <p class="mb-1"><small><strong>Registrado ICA:</strong> {{ datosPredio.registrado_ica }}</small></p>
+              <p class="mb-1"><small><strong>Vive en el Predio:</strong> {{ datosPredio.vive_predio }}</small></p>
+              <p class="mb-1"><small><strong>Infraestructura Vial:</strong> 
+                {{ Array.isArray(datosPredio.infraestructura_vial) ? datosPredio.infraestructura_vial.join(', ') : datosPredio.infraestructura_vial }}
+              </small></p>
+              <p class="mb-0"><small><strong>Infraestructura del Predio:</strong> 
+                {{ Array.isArray(datosPredio.infraestructura_predio) ? datosPredio.infraestructura_predio.join(', ') : datosPredio.infraestructura_predio }}
+              </small></p>
             </div>
           </div>
         </div>
@@ -96,12 +137,20 @@
               </h6>
             </div>
             <div class="card-body p-2">
-              <p class="mb-1"><small><strong>Total:</strong> {{ datosFuerzaLaboral.num_trabajadores }}</small></p>
-              <p class="mb-1"><small><strong>Hombres:</strong> {{ datosFuerzaLaboral.num_hombres }}</small></p>
-              <p class="mb-1"><small><strong>Mujeres:</strong> {{ datosFuerzaLaboral.num_mujeres }}</small></p>
-              <p class="mb-1"><small><strong>Contrato:</strong> {{ datosFuerzaLaboral.contrato_formal }}</small></p>
-              <p class="mb-0"><small><strong>Seg. Social:</strong> {{ datosFuerzaLaboral.seguridad_social }}</small></p>
-            </div>
+              <p class="mb-1"><small><strong>Forma Contratación:</strong> {{ datosFuerzaLaboral.forma_contratacion }}</small></p>
+      <p class="mb-1"><small><strong>Total Trabajadores:</strong> {{ datosFuerzaLaboral.num_trabajadores }}</small></p>
+      <p class="mb-1"><small><strong>Hombres:</strong> {{ datosFuerzaLaboral.num_hombres }}</small></p>
+      <p class="mb-1"><small><strong>Mujeres:</strong> {{ datosFuerzaLaboral.num_mujeres }}</small></p>
+      <p class="mb-1"><small><strong>Contrato Formal:</strong> {{ datosFuerzaLaboral.contrato_formal }}</small></p>
+      <p class="mb-1"><small><strong>Tipo Contrato:</strong> {{ datosFuerzaLaboral.tipo_contrato }}</small></p>
+      <p class="mb-1"><small><strong>Contrato Firmado:</strong> {{ datosFuerzaLaboral.contrato_firmado }}</small></p>
+      <p class="mb-1"><small><strong>Seguridad Social:</strong> {{ datosFuerzaLaboral.seguridad_social }}</small></p>
+      <p class="mb-1"><small><strong>SG-SST:</strong> {{ datosFuerzaLaboral.sg_sst }}</small></p>
+      <p class="mb-1"><small><strong>Exámenes Médicos:</strong> {{ datosFuerzaLaboral.examenes_medicos }}</small></p>
+      <p class="mb-1"><small><strong>Trabajadores Migrantes:</strong> {{ datosFuerzaLaboral.trabajadores_migrantes }}</small></p>
+      <p class="mb-1"><small><strong>Comprobantes de Pago:</strong> {{ datosFuerzaLaboral.comprobantes_pago }}</small></p>
+      <p class="mb-0"><small><strong>Dotación:</strong> {{ datosFuerzaLaboral.dotacion }}</small></p>
+   </div>
           </div>
         </div>
       </div>

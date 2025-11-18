@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3">
+<div class="container-fluid px-3" >
     <!-- Header con Estadísticas -->
-    <div class="row mb-4 justify-content-center">
-        <div class="col-12 col-lg-10 col-xl-8">
+    <div class="row mb-4 justify-content-center"  >
+        <div class="col-12 col-lg-10 col-xl-8" >
             <div class="card shadow-lg border-0" style="background-color: #206227a5;">
-                <div class="card-body py-4">
-                    <div class="row align-items-center">
+                <div class="card-body py-4" >
+                    <div class="row align-items-center" >
                         <div class="col-md-8">
                             <h2 class="text-white mb-1">
                                 <i class="fas fa-users me-2"></i>Visitas Sociales
@@ -18,6 +18,11 @@
                         </div>
                         <div class="col-md-4 text-end">
                             <div class="bg-white rounded-pill px-3 py-1 d-inline-block">
+                                
+                                <a href="{{ url()->previous() }}" class="button-33">⬅️ Volver atrás</a>
+                            </div>
+                            <div class="bg-white rounded-pill px-3 py-1 d-inline-block">
+                                
                                 <span class="text-success fw-bold fs-5">{{ $visitas->total() }}</span>
                                 <span class="text-dark">Visitas</span>
                             </div>
@@ -257,14 +262,13 @@
                                                 </a>
                                                 @endif
                                                 @if(Auth::check() && in_array(Auth::user()->rol, [1]))
-                                                <form action="{{ route('visitas_social.destroySocial', $visita->id) }}" 
-                                                      method="POST" class="d-inline">
-                                                    @csrf @method('DELETE')
-                                                    <button type="button" class="btn btn-sm btn-danger btn-circle delete-btn"
-                                                            data-bs-toggle="tooltip" title="Eliminar visita">
-                                                        <i class="fas fa-trash"></i>
+                                              <form action="{{ route('visitas_social.destroySocial', $visita->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">
+                                                        Eliminar 
                                                     </button>
-                                                </form>
+                                              </form>
                                                 @endif
                                             </div>
                                         </td>
@@ -303,6 +307,17 @@
                 @endif
             </div>
         </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-success">
+        <i class="fas fa-users-slash me-2"></i>Visitas Sociales Activas
+    </h4><br><br><br>
+    @if(Auth::check() && in_array(Auth::user()->rol, [1]))
+    <a href="{{ route('visitas_social.eliminadas') }}" class="btn btn-outline-danger">
+        <i class="fas fa-trash-alt"></i> Ver Eliminadas
+    </a>
+    @endif
+</div>
+
     </div>
 </div>
 

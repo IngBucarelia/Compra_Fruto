@@ -4,31 +4,67 @@
     <meta charset="UTF-8">
     <title>Visita Social - {{ $visita->id }}</title>
     <style>
+        /* La fuente DejaVu Sans es crucial para que Dompdf muestre caracteres especiales como emojis */
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #222; }
         h1, h2 { color: #2F4F4F; margin-bottom: 5px; }
-        .section { margin-bottom: 18px; }
-        .section h2 { border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        .section { margin-bottom: 25px; }
+        .section h2 { border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 10px; }
         table th, table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-        .data-card { padding: 8px; margin-bottom: 8px; border-radius: 4px; background: #f7f7f7; }
-        .img-thumb { max-width: 260px; max-height: 260px; margin: 6px; display:inline-block; }
+        ul { margin: 5px 0 10px 20px; padding: 0; }
+        /* Ajusta el tamaño de las miniaturas de imagen para el PDF */
+        .img-thumb { max-height: 920px; max-width: 720px; margin: 5px; display: inline-block; border: 1px solid #eee; }
+        .firma-img { max-height: 100px; max-width: 200px; margin: 5px; display: block; border: 1px solid #eee; }
+        .title-bar { background: #e0f7fa; padding: 10px; margin-bottom: 15px; border-radius: 5px; }
+        .data-card {
+            background-color: #f0fff0;
+            border: 1px solid #d4edda;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .data-card h5 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #2F4F4F;
+        }
+
+        .company-logo {
+            width: 180px; /* Ancho fijo */
+            height: 60px; /* Alto fijo (ajusta según proporciones de tu logo) */
+            object-fit: contain; /* Mantiene las proporciones */
+            margin: 0 auto; /* Centrado horizontal */
+            display: block; /* Para que funcione el margin auto */
+        }
     </style>
 </head>
 <body>
 
-    <h1>Detalle Visita Social - #{{ $visita->id }}</h1>
-    <p><strong>Fecha:</strong> {{ $visita->fecha ?? 'N/A' }}</p>
-    <p><strong>Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre ?? 'N/A' }}</p>
-    <hr>
+    <div class="title-bar">
+        <div class="logo-container">
+        <img src="{{ public_path('images/logo2.webp') }}" class="company-logo" alt="Logo de la empresa">
+    </div>
+        <h1> Detalle completo de la Visita Social</h1>
+        <p><strong>Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre }}</p>
+        <p><strong>Plantación:</strong> {{ $visita->plantacion->nombre ?? 'No registrada' }}</p>
+        <p><strong>Responsable de Visita:</strong> {{ $visita->tecnico->name ?? 'No registrada' }}</p>
+        <p><strong>Recibió la Visita :</strong> {{ $visita->recibio_visita ?? 'No registrada' }}</p>
+        <p><strong>Fecha de visita:</strong> {{ $visita->fecha }}</p>
+    </div>
+
 
     {{-- Datos Personales --}}
     <div class="section">
-        <h2>👤 Datos Personales</h2>
+        <h2> Datos Personales</h2>
         <div class="data-card">
             <<p><strong>Proveedor:</strong> {{ $visita->datosPersonales->proveedor ? $visita->datosPersonales->proveedor->proveedor_nombre : 'N/A' }}</p>
                         <p><strong>Teléfono:</strong> {{ $visita->datosPersonales->telefono ?? 'N/A' }}</p>
                         <p><strong>Sexo:</strong> {{ $visita->datosPersonales->sexo ?? 'N/A' }}</p>
                         <p><strong>RNP:</strong> {{ $visita->datosPersonales->rnp ?? 'N/A' }}</p>
+                        <p><strong># RNP:</strong> {{ $visita->datosPersonales->numero_rnp ?? 'N/A' }}</p>
+                        <p><strong>firmó la oferta mercantil:</strong> {{ $visita->datosPersonales->oferta_mercantil ?? 'N/A' }}</p>
+                        <p><strong>¿Hace cuánto firmó la oferta mercantil?</strong> {{ $visita->datosPersonales->hace_cuanto ?? 'N/A' }}</p>
                         <p><strong>Fedepalma:</strong> {{ $visita->datosPersonales->fedepalma ?? 'N/A' }}</p>
                         <p><strong>Alfabetizado:</strong> {{ $visita->datosPersonales->alfabetizado ?? 'N/A' }}</p>
                         <p><strong>Nivel de estudio:</strong> {{ $visita->datosPersonales->nivel_estudio ?? 'N/A' }}</p>
@@ -49,10 +85,10 @@
 
     {{-- Miembros --}}
     <div class="section">
-        <h2>👨‍👩‍👧‍👦 Miembros del Hogar</h2>
+        <h2> Miembros del Hogar</h2>
        <h2 class="accordion-header" id="headingMiembros">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMiembros">
-                    👨‍👩‍👧‍👦 Miembros del Hogar
+                     Miembros del Hogar
                 </button>
             </h2>
             <div id="collapseMiembros" class="accordion-collapse collapse" data-bs-parent="#accordionVisita">
@@ -62,14 +98,14 @@
                             <table class="table table-bordered table-striped">
                                 <thead class="table-success">
                                     <tr>
-                                        <th>👤 Nombre</th>
-                                        <th>🪪 Documento</th>
-                                        <th>⚧ Sexo</th>
-                                        <th>👨‍👩‍👧 Parentesco</th>
-                                        <th>🏡 Reside en el Predio</th>
-                                        <th>📖 Sabe Leer</th>
-                                        <th>🎓 Nivel de Estudio</th>
-                                        <th>🌱 Participa en Labores</th>
+                                        <th> Nombre</th>
+                                        <th> Documento</th>
+                                        <th> Sexo</th>
+                                        <th> Parentesco</th>
+                                        <th> Reside en el Predio</th>
+                                        <th> Sabe Leer</th>
+                                        <th> Nivel de Estudio</th>
+                                        <th> Participa en Labores</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -96,7 +132,7 @@
 
     {{-- Predio / Plantaciones --}}
     <div class="section">
-        <h2>🏡 Datos del Predio / Plantaciones</h2>
+        <h2> Datos del Predio / Plantaciones</h2>
 
         @if(isset($plantaciones) && $plantaciones->count())
             @foreach($plantaciones as $plantacion)
@@ -126,7 +162,7 @@
 
     {{-- Fuerza Laboral --}}
     <div class="section">
-        <h2>🧑‍🌾 Fuerza Laboral</h2>
+        <h2> Fuerza Laboral</h2>
         @if($visita->fuerzaLaboral && $visita->fuerzaLaboral->count())
             <table>
                 <thead>
@@ -162,7 +198,7 @@
 
     {{-- Organización Social --}}
     <div class="section">
-        <h2>👥 Organización Social</h2>
+        <h2> Organización Social</h2>
         @if($visita->organizacionSocial)
             <div class="data-card">
                 <p><b>Pertenece a JAC:</b> {{ $visita->organizacionSocial->pertenece_jac ? 'Sí' : 'No' }}</p>
@@ -176,27 +212,27 @@
 
    {{-- Cierre de Visita Social --}}
 <div class="section">
-    <h2>✅ Cierre de Visita Social</h2>
+    <h2>Cierre de Visita Social</h2>
 
     @if($visita->cierreVisitaSocial)
-        <p><strong>📅 Fecha de Cierre:</strong> {{ $visita->cierreVisitaSocial->fecha_cierre ?? 'N/A' }}</p>
-        <p><strong>📌 Estado:</strong>
+        <p><strong> Fecha de Cierre:</strong> {{ $visita->cierreVisitaSocial->fecha_cierre ?? 'N/A' }}</p>
+        <p><strong> Estado:</strong>
             @if($visita->cierreVisitaSocial->estado_visita == 'completado')
-                ✅ Completado
+                 Completado
             @elseif($visita->cierreVisitaSocial->estado_visita == 'pendiente')
-                ⏳ Pendiente
+                 Pendiente
             @else
-                ❌ Cancelado
+                 Cancelado
             @endif
         </p>
-        <p><strong>📝 Observaciones Finales:</strong> {{ $visita->cierreVisitaSocial->observaciones_finales ?? 'N/A' }}</p>
-        <p><strong>💡 Recomendaciones:</strong> {{ $visita->cierreVisitaSocial->recomendaciones ?? 'N/A' }}</p>
+        <p><strong> Observaciones Finales:</strong> {{ $visita->cierreVisitaSocial->observaciones_finales ?? 'N/A' }}</p>
+        <p><strong> Recomendaciones:</strong> {{ $visita->cierreVisitaSocial->recomendaciones ?? 'N/A' }}</p>
 
         {{-- Firmas --}}
         <table width="100%" style="margin-top:20px; text-align:center;">
             <tr>
                 <td>
-                    <h4>✍️ Firma Responsable</h4>
+                    <h4> Firma Responsable</h4>
                     @if($visita->cierreVisitaSocial->firma_responsable)
                         <img src="{{ public_path($visita->cierreVisitaSocial->firma_responsable) }}" style="max-height:120px; max-width:200px;" alt="Firma Responsable">
                     @else
@@ -204,7 +240,7 @@
                     @endif
                 </td>
                 <td>
-                    <h4>✍️ Firma Recibe</h4>
+                    <h4> Firma Recibe</h4>
                     @if($visita->cierreVisitaSocial->firma_recibe)
                         <img src="{{ public_path($visita->cierreVisitaSocial->firma_recibe) }}" style="max-height:120px; max-width:200px;" alt="Firma Recibe">
                     @else
@@ -212,7 +248,7 @@
                     @endif
                 </td>
                 <td>
-                    <h4>✍️ Firma Testigo</h4>
+                    <h4> Firma Testigo</h4>
                     @if($visita->cierreVisitaSocial->firma_testigo)
                         <img src="{{ public_path($visita->cierreVisitaSocial->firma_testigo) }}" style="max-height:120px; max-width:200px;" alt="Firma Testigo">
                     @else

@@ -23,7 +23,7 @@
                         </select>
                         <button type="submit" class="btn btn-success">Ir</button>
                     </div>
-                </form>
+                </form><br>
             @endif
 
             {{-- ✅ Acordeón de Datos Personales --}}
@@ -37,36 +37,50 @@
                         </h3>
                     </div>
                     <div class="accordion-content" id="content-personal">
-                        <div class="row">
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <p><strong>📞 Teléfono:</strong> {{ $datosPersonales->telefono ?? 'No especificado' }}</p>
                                 <p><strong>🚻 Sexo:</strong> {{ $datosPersonales->sexo ?? 'No especificado' }}</p>
                                 <p><strong>📚 Nivel de Estudio:</strong> {{ $datosPersonales->nivel_estudio ?? 'No especificado' }}</p>
-                                <p><strong>🎂 Fecha Nacimiento:</strong> {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}</p>
+                                <p><strong>🎂 Fecha Nacimiento:</strong>
+                                    {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}
+                                </p>
+                                <p><strong>🏠 Reside en Predio:</strong> {{ $datosPersonales->reside_predio === 'SI' ? 'Sí' : 'No' }}</p>
+                                <p><strong>👨‍🌾 Administra Cultivo:</strong> {{ $datosPersonales->administra_cultivo ?? 'No especificado' }}</p>
                             </div>
+
                             <div class="col-md-6">
                                 <p><strong>🌴 Años en Palmicultura:</strong> {{ $datosPersonales->anios_palmicultura ?? '0' }} años</p>
-                                <p><strong>🏥 Régimen Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
-                                <p><strong>🏠 Reside en Predio:</strong> {{ $datosPersonales->reside_predio ? 'Sí' : 'No' }}</p>
+                                <p><strong>🏥 Régimen de Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
                                 <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
+                                <p><strong>👥 Grupo Poblacional:</strong> {{ $datosPersonales->grupo_poblacional ?? 'No especificado' }}</p>
+                                <p><strong>💬 Red Social:</strong> {{ $datosPersonales->red_social ?? 'No especificado' }}</p>
+                                <p><strong>💼 Tipo Persona:</strong> {{ $datosPersonales->tipo_persona ?? 'No especificado' }}</p>
                             </div>
                         </div>
 
-                        @if($datosPersonales->rnp || $datosPersonales->fedepalma)
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <p><strong>📄 Registros:</strong></p>
-                                <ul>
-                                    @if($datosPersonales->rnp)
-                                        <li>RNP: {{ $datosPersonales->rnp }}</li>
-                                    @endif
-                                    @if($datosPersonales->fedepalma)
-                                        <li>Fedepalma: {{ $datosPersonales->fedepalma }}</li>
-                                    @endif
-                                </ul>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>📝 RNP:</strong> {{ $datosPersonales->rnp ?? 'No especificado' }}</p>
+                                <p><strong>🔢 Número RNP:</strong> {{ $datosPersonales->numero_rnp ?? 'No especificado' }}</p>
                             </div>
+                            <div class="col-md-6">
+                                <p><strong>🏛️ Fedepalma:</strong> {{ $datosPersonales->fedepalma ?? 'No especificado' }}</p>
+                                <p><strong>📘 Alfabetizado:</strong> {{ $datosPersonales->alfabetizado ?? 'No especificado' }}</p>
+                            </div>
+                             <div class="row">
+                <div class="col-md-6">
+                    <p><strong>🕓 Oferta Mercantil:</strong> {{ $datosPersonales->oferta_mercantil ?? 'No especificado' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>⏳ Hace cuánto:</strong> {{ $datosPersonales->hace_cuanto ?? 'No aplica' }}</p>
+                </div>
+            </div>
                         </div>
-                        @endif
+
+                        
                     </div>
                 </div>
             </div>
@@ -216,7 +230,19 @@
                 </div>
             @endforeach
         </div>
+
+      
+        <div class="mb-4" style="margin-left: 50px">
+            <a href="{{ route('fuerza_laboral.index', $visita->id) }}" class="btn btn-primary">
+                🧑‍🌾 Ir a Fuerza Laboral 
+            </a>
+            <a href="{{ url()->previous() }}" class="btn btn-primary">
+                 Regresar  
+            </a>
+        </div>
+
     </div>
+    
 </div>
 
 <script>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4"  style="max-width: 1100px !important">
     <div class="row">
         <div class="col-12">
             <!-- Header con Estadísticas -->
@@ -152,10 +152,8 @@
                                                 </a>
                                                 
                                                 <!-- Eliminar con confirmación -->
-<<<<<<< HEAD
-=======
+
                                                  @if(Auth::check() && in_array(Auth::user()->rol, [1]))
->>>>>>> cd467f5 (todo terminado componente social y agronomico y anexado los permisos de usabilidad por roles de usuario)
                                                <form action="{{ route('planificaciones.destroy', $p->id) }}" method="POST" class="d-inline" id="deleteForm-{{ $p->id }}">
                                                 @csrf 
                                                 @method('DELETE')

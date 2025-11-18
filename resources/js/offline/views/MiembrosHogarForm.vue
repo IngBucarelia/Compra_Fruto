@@ -22,36 +22,54 @@
       </div>
     </div>
 
-    <!-- Datos Personales Guardados -->
-    <div v-if="datosPersonales" class="datos-personales-card mb-4">
-      <div class="card">
-        <div class="card-header bg-success text-white text-center">
-          <h5 class="mb-0">
-            <i class="fas fa-user-check me-2"></i>Datos Personales del Productor
-          </h5>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-4">
-              <p><strong class="text-white">Teléfono:</strong> <span class="text-white">{{ datosPersonales.telefono }}</span></p>
-              <p><strong class="text-white">Sexo:</strong> <span class="text-white">{{ datosPersonales.sexo }}</span></p>
-              <p><strong class="text-white">Nivel Estudio:</strong> <span class="text-white">{{ datosPersonales.nivel_estudio }}</span></p>
-            </div>
-            <div class="col-md-4">
-               <p><strong class="text-white">RNP:</strong> <span class="text-white">{{ datosPersonales.rnp || 'No especificado' }}</span></p>
+   <!-- Datos Personales Guardados -->
+<div v-if="datosPersonales" class="datos-personales-card mb-4">
+  <div class="card">
+    <div class="card-header bg-success text-white text-center">
+      <h5 class="mb-0">
+        <i class="fas fa-user-check me-2"></i>Datos Personales del Productor
+      </h5>
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+        <!-- Columna 1 -->
+        <div class="col-md-4">
+          <p><strong class="text-white">Teléfono:</strong> <span class="text-white">{{ datosPersonales.telefono || 'No registrado' }}</span></p>
+          <p><strong class="text-white">Sexo:</strong> <span class="text-white">{{ datosPersonales.sexo || 'No especificado' }}</span></p>
+          <p><strong class="text-white">RNP:</strong> <span class="text-white">{{ datosPersonales.rnp || 'No especificado' }}</span></p>
           <p v-if="datosPersonales.rnp === 'SI'"><strong class="text-white">Número RNP:</strong> <span class="text-white">{{ datosPersonales.numero_rnp || 'No especificado' }}</span></p>
-              <p><strong class="text-white">Fedepalma:</strong> <span class="text-white">{{ datosPersonales.fedepalma }}</span></p>
-              <p><strong class="text-white">Grupo Poblacional:</strong> <span class="text-white">{{ datosPersonales.grupo_poblacional }}</span></p>
-            </div>
-            <div class="col-md-4">
-              <p><strong class="text-white">Años Palmicultura:</strong> <span class="text-white">{{ datosPersonales.anios_palmicultura }}</span></p>
-              <p><strong class="text-white">Reside Predio:</strong> <span class="text-white">{{ datosPersonales.reside_predio }}</span></p>
-              <p><strong class="text-white">Red Social:</strong> <span class="text-white">{{ datosPersonales.red_social }}</span></p>
-            </div>
-          </div>
+          <p><strong class="text-white">Fedepalma:</strong> <span class="text-white">{{ datosPersonales.fedepalma || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Alfabetizado:</strong> <span class="text-white">{{ datosPersonales.alfabetizado || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Nivel de Estudio:</strong> <span class="text-white">{{ datosPersonales.nivel_estudio || 'No especificado' }}</span></p>
+        </div>
+
+        <!-- Columna 2 -->
+        <div class="col-md-4">
+          <p><strong class="text-white">Otras Líneas:</strong> <span class="text-white">{{ datosPersonales.otras_lineas || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Fecha de Nacimiento:</strong> <span class="text-white">{{ datosPersonales.fecha_nacimiento || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Grupo Poblacional:</strong> <span class="text-white">{{ datosPersonales.grupo_poblacional || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Reside en el Predio:</strong> <span class="text-white">{{ datosPersonales.reside_predio || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Administra Cultivo:</strong> <span class="text-white">{{ datosPersonales.administra_cultivo || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Supervisa Cultivo:</strong> <span class="text-white">{{ datosPersonales.supervisa_cultivo || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Realiza Cultivo:</strong> <span class="text-white">{{ datosPersonales.realiza_cultivo || 'No especificado' }}</span></p>
+        </div>
+
+        <!-- Columna 3 -->
+        <div class="col-md-4">
+          <p><strong class="text-white">Años en Palmicultura:</strong> <span class="text-white">{{ datosPersonales.anios_palmicultura || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Internet:</strong> <span class="text-white">{{ datosPersonales.internet || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Tipo de Persona:</strong> <span class="text-white">{{ datosPersonales.tipo_persona || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Red Social:</strong> <span class="text-white">{{ datosPersonales.red_social || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Régimen de Salud:</strong> <span class="text-white">{{ datosPersonales.regimen_salud || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Oferta Mercantil:</strong> <span class="text-white">{{ datosPersonales.oferta_mercantil || 'No especificado' }}</span></p>
+          <p><strong class="text-white">Hace Cuánto:</strong> <span class="text-white">{{ datosPersonales.hace_cuanto || 'No especificado' }}</span></p>
         </div>
       </div>
     </div>
+  </div>
+</div>
+
 
     <!-- Navegación entre secciones -->
     <div class="navigation-card mb-4">
@@ -86,26 +104,36 @@
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-striped">
-              <thead>
+              <thead class="table-success">
                 <tr>
                   <th class="text-black">Nombre</th>
                   <th class="text-black">Documento</th>
                   <th class="text-black">Sexo</th>
                   <th class="text-black">Parentezco</th>
-                  <th class="text-black">Reside</th>
-                  <th class="text-black">Estudio</th>
-                  <th class="text-black">Acciones</th>
+                  <th class="text-black">Reside en el Predio</th>
+                  <th class="text-black">Sabe Leer</th>
+                  <th class="text-black">Nivel de Estudio</th>
+                  <th class="text-black">Participa en Labores</th>
+                  <th class="text-black text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="miembro in miembrosGuardados" :key="miembro.local_id">
-                  <td class="text-black">{{ miembro.nombre }}</td>
-                  <td class="text-black">{{ miembro.documento }}</td>
-                  <td class="text-black">{{ miembro.sexo }}</td>
-                  <td class="text-black">{{ miembro.parentezco }}</td>
-                  <td class="text-black">{{ miembro.reside_predio ? 'Sí' : 'No' }}</td>
-                  <td class="text-black">{{ miembro.nivel_estudio }}</td>
-                  <td>
+                  <td class="text-black">{{ miembro.nombre || 'No registrado' }}</td>
+                  <td class="text-black">{{ miembro.documento || 'No especificado' }}</td>
+                  <td class="text-black">{{ miembro.sexo || 'No especificado' }}</td>
+                  <td class="text-black">{{ miembro.parentezco || 'No especificado' }}</td>
+                  <td class="text-black">
+                    {{ miembro.reside_predio === 'SI' || miembro.reside_predio === true ? 'Sí' : 'No' }}
+                  </td>
+                  <td class="text-black">
+                    {{ miembro.sabe_leer === 'SI' || miembro.sabe_leer === true ? 'Sí' : 'No' }}
+                  </td>
+                  <td class="text-black">{{ miembro.nivel_estudio || 'No especificado' }}</td>
+                  <td class="text-black">
+                    {{ miembro.participa_labores === 'SI' || miembro.participa_labores === true ? 'Sí' : 'No' }}
+                  </td>
+                  <td class="text-center">
                     <button @click="editarMiembro(miembro)" class="btn btn-sm btn-warning me-1">
                       <i class="fas fa-edit"></i>
                     </button>
@@ -116,6 +144,7 @@
                 </tr>
               </tbody>
             </table>
+
           </div>
         </div>
       </div>

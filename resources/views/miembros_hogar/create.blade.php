@@ -2,14 +2,15 @@
 
 @section('content')
 <div class="members-wrap">
-    <div class="members-card" style="background-color: #e8d5dce0; max-width: 900px;">
-        <form action="{{ route('redireccion_seccion_social', $visita->id) }}" method="GET" class="mt-4">
-            <label for="seccion" class="form-label fw-bold text-success">📋 Ir a sección:</label>
+    <div class="members-card">
+        <!-- 🔹 Selector de sección -->
+        <form action="{{ route('redireccion_seccion_social', $visita->id) }}" method="GET" class="section-form">
+            <label for="seccion" class="form-label fw-bold text-success mb-2">📋 Ir a otra sección</label>
             <div class="input-group">
                 <select id="seccion" name="seccion" class="form-select" required>
                     <option value="">Seleccione una sección</option>
                     @if ($visita->estado === 'pendiente' || $visita->estado === 'en_ejecucion')
-                        <option value="inicio"> Pagina de Inicio de Visita</option>
+                        <option value="inicio">🏁 Inicio de Visita</option>
                         <option value="datos_personales">👤 Datos Personales</option>
                         <option value="miembros">👨‍👩‍👧‍👦 Miembros del Hogar</option>
                         <option value="predio">🏡 Datos del Predio</option>
@@ -20,251 +21,189 @@
                 <button type="submit" class="btn btn-success">Ir</button>
             </div>
         </form>
-        <!-- Mensaje de éxito -->
+
+        <!-- ✅ Mensaje de éxito -->
         @if(session('success'))
-            <div class="alert success">
+            <div class="alert success mt-3">
                 {{ session('success') }}
             </div>
         @endif
 
-        <!-- Título -->
-        <h2 class="members-title">
-            👨‍👩‍👧‍👦 Registrar Miembro del Hogar
-        </h2>
+        <!-- 🧾 Título principal -->
+        <h2 class="members-title text-center mt-4">👨‍👩‍👧‍👦 Registrar Miembro del Hogar</h2>
+        <hr class="divider">
 
-        <!-- Formulario -->
+        <!-- 🧍 Formulario de registro -->
         <form action="{{ route('miembros_hogar.store', $visita->id) }}" method="POST" class="form">
             @csrf
 
-            <!-- Nombre -->
-            <div class="form-group">
-                <label>Nombres y Apellidos:</label>
-                <input type="text" name="nombre" required>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label>Nombres y Apellidos:</label>
+                    <input type="text" name="nombre" class="form-control" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label>Número de Documento:</label>
+                    <input type="text" name="documento" class="form-control" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label>Sexo:</label>
+                    <select name="sexo" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Mujer">Mujer</option>
+                        <option value="Hombre">Hombre</option>
+                        <option value="No se identifica">No se identifica</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label>Parentezco con el Productor/a:</label>
+                    <select name="parentezco" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Hijo/a">Hijo/a</option>
+                        <option value="Hijastro/a">Hijastro/a</option>
+                        <option value="Mamá">Mamá</option>
+                        <option value="Papá">Papá</option>
+                        <option value="Hermano/a">Hermana/o</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label>¿Reside en el Predio?</label>
+                    <select name="reside_predio" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label>¿Sabe leer y/o escribir?</label>
+                    <select name="sabe_leer" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label>Nivel de Estudio:</label>
+                    <select name="nivel_estudio" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Ninguno">Ninguno</option>
+                        <option value="Técnico">Técnico</option>
+                        <option value="Tecnólogo">Tecnólogo</option>
+                        <option value="Profesional">Profesional</option>
+                        <option value="Maestría">Maestría</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label>¿Participa en las labores del cultivo?</label>
+                    <select name="participa_labores" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Documento -->
-            <div class="form-group">
-                <label>Número de Documento:</label>
-                <input type="text" name="documento" required>
-            </div>
-
-            <!-- Sexo -->
-            <div class="form-group">
-                <label>Sexo:</label>
-                <select name="sexo" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Mujer">Mujer</option>
-                    <option value="Hombre">Hombre</option>
-                    <option value="No se identifica">No se identifica con ninguno</option>
-                </select>
-            </div>
-
-            <!-- Parentezco -->
-            <div class="form-group">
-                <label>Parentezco con el productor/a:</label>
-                <select name="parentezco" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Hijo/a">Hijo/a</option>
-                    <option value="Hijastro/a">Hijastro/a</option>
-                    <option value="Mamá">Mamá</option>
-                    <option value="Papá">Papá</option>
-                    <option value="Hermano/a">Hermana/o</option>
-                </select>
-            </div>
-
-            <!-- Reside en predio -->
-            <div class="form-group">
-                <label>¿Reside en el predio?</label>
-                <select name="reside_predio" required>
-                    <option value="">Seleccione...</option>
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-
-            <!-- Sabe leer -->
-            <div class="form-group">
-                <label>¿Sabe leer y/o escribir?</label>
-                <select name="sabe_leer" required>
-                    <option value="">Seleccione...</option>
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-
-            <!-- Nivel estudio -->
-            <div class="form-group">
-                <label>Nivel de estudio:</label>
-                <select name="nivel_estudio" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Ninguno">Ninguno</option>
-                    <option value="Técnico">Técnico</option>
-                    <option value="Tecnólogo">Tecnólogo</option>
-                    <option value="Profesional">Profesional</option>
-                    <option value="Maestría">Maestría</option>
-                </select>
-            </div>
-
-            <!-- Participa labores -->
-            <div class="form-group">
-                <label>¿Participa en las labores del cultivo?</label>
-                <select name="participa_labores" required>
-                    <option value="">Seleccione...</option>
-                    <option value="1">Sí</option>
-                    <option value="0">No</option>
-                </select>
-            </div>
-
-            <!-- Botones -->
-            <div class="form-actions">
-                <a href="{{ route('miembros_hogar.index', $visita->id) }}" class="btn btn-ghost">
+            <!-- 🔘 Botones -->
+            <div class="form-actions mt-4">
+                <a href="{{ route('miembros_hogar.index', $visita->id) }}" class="btn btn-secondary">
                     ⬅ Volver
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    💾 Guardar
+                <button type="submit" class="btn btn-success">
+                    💾 Guardar Registro
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Estilos locales -->
+<!-- 🎨 Estilos -->
 <style>
 .members-wrap {
-    max-width: 135%;
-    border-radius: 5px;
-    margin-left: 60px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 .members-card {
-     max-width: 125%;
-    background: #fff;
-    border-radius: 22px;
-    padding: 24px;
-    box-shadow: 0 8px 30px rgba(12, 50, 20, 0.08);
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    width: 95%;
+    max-width: 900px;
+    box-shadow: 0 4px 20px rgba(22, 101, 52, 0.15);
+    border-top: 6px solid #198754;
 }
 .members-title {
-    font-size: 1.6rem;
-    color: #19692b;
-    font-weight: 700;
-    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #14532d;
+    font-weight: 800;
+}
+.divider {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #198754, #71c17d);
+    margin-bottom: 25px;
+}
+label {
+    font-weight: 600;
+    color: #14532d;
+    margin-bottom: 5px;
+}
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    transition: border-color 0.3s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.25);
 }
 .alert.success {
-    background: #e9f7ee;
-    color: #19692b;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-weight: 600;
-}
-.custom-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-}
-.custom-table th {
-    background: #f0fdf4;
-    color: #14532d;
-    text-align: left;
-    padding: 10px 14px;
-    width: 40%;
-    font-weight: 600;
-    border-bottom: 1px solid #e5e7eb;
-}
-.custom-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid #e5e7eb;
-    color: #374151;
-}
-.custom-table tr:hover td {
-    background: #f9fafb;
+    background: #d1fae5;
+    color: #065f46;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1px solid #34d399;
 }
 .form-actions {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 10px;
 }
 .btn {
-    display: inline-block;
-    padding: 10px 18px;
-    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: none;
-    cursor: pointer;
-    text-align: center;
-}
-.btn-primary {
-    background: #198754;
-    color: #fff;
+    border-radius: 10px;
+    padding: 10px 20px;
     border: none;
 }
-.btn-primary:hover {
-    background: #14673f;
+.btn-success {
+    background: #198754;
+    color: white;
 }
-.btn-ghost {
-    background: #f3f4f6;
+.btn-success:hover {
+    background: #146c43;
+}
+.btn-secondary {
+    background: #e5e7eb;
     color: #374151;
 }
-.btn-ghost:hover {
-    background: #e5e7eb;
+.btn-secondary:hover {
+    background: #d1d5db;
 }
-.btn-warning {
-    background: #f59e0b;
-    color: #fff;
+@media (max-width: 768px) {
+    .members-card {
+        width: 98%;
+        padding: 20px;
+    }
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
-.btn-warning:hover {
-    background: #d97706;
-}
-   @media (max-width: 968px) {
-
-         .container.offline-form-container {
-        background-color: rgba(129, 165, 114, 0.929); /* Color de fondo específico para este formulario */
-    }
-        .button-group-top {
-            flex-direction: row;
-            justify-content: flex-start;
-        }
-
-         .container.offline-form-container {
-        padding: 15px;
-            margin-top: 15px;
-            border-radius: 0;
-            box-shadow: none;
-            width: 123%;
-            max-width: none;
-            margin-left: -60px !important;
-    }
-
-    .title{
-    text-align: center;
-    font-family: Arial Black;
-    font-weight: bold;
-    font-size: 30px;
-    color: #fdffe5;
-    text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-    margin-bottom: 25px;
-}
-
- .container {
-        margin-left: -70px;
-        width: 125%;
-    
-
-    }
-
-        .dashboard-content {
-            max-width: 100%;
-        }
-        .dashboard-card {
-            margin-bottom: 15px;
-        }
-
-        .card{
-        width: 100%;
-    }
-    }
 </style>
 @endsection

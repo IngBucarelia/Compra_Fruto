@@ -34,53 +34,74 @@
                 <a href="{{ route('datos_personales_sociales.create', $visita->id) }}" class="btn btn-ghost">
                     ← Ver Datos Personales
                 </a>
+                <a href="{{ route('datos_predio_social.index', $visita->id) }}" class="btn btn-ghost">
+                    ir a Datos Predio 
+                </a>
             </div>
         </div>
+            {{-- ✅ NUEVO: Acordeón con Datos Personales --}}
+            @if($datosPersonales)
+            <div class="accordion-container mb-4">
+                <div class="accordion-card">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <h3 class="accordion-title">
+                            👤 Datos Personales del Productor
+                            <span class="accordion-icon">▼</span>
+                        </h3>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>📞 Teléfono:</strong> {{ $datosPersonales->telefono ?? 'No especificado' }}</p>
+                                <p><strong>🚻 Sexo:</strong> {{ $datosPersonales->sexo ?? 'No especificado' }}</p>
+                                <p><strong>📚 Nivel de Estudio:</strong> {{ $datosPersonales->nivel_estudio ?? 'No especificado' }}</p>
+                                <p><strong>🎂 Fecha de Nacimiento:</strong> 
+                                    {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}
+                                </p>
+                                <p><strong>🧑 Tipo de Persona:</strong> {{ $datosPersonales->tipo_persona ?? 'No especificado' }}</p>
+                                <p><strong>💬 Red Social:</strong> {{ $datosPersonales->red_social ?? 'No especificado' }}</p>
+                                <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
+                            </div>
 
-        {{-- ✅ NUEVO: Acordeón con Datos Personales --}}
-        @if($datosPersonales)
-        <div class="accordion-container mb-4">
-            <div class="accordion-card">
-                <div class="accordion-header" onclick="toggleAccordion(this)">
-                    <h3 class="accordion-title">
-                        👤 Datos Personales del Productor
-                        <span class="accordion-icon">▼</span>
-                    </h3>
-                </div>
-                <div class="accordion-content">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>📞 Teléfono:</strong> {{ $datosPersonales->telefono ?? 'No especificado' }}</p>
-                            <p><strong>🚻 Sexo:</strong> {{ $datosPersonales->sexo ?? 'No especificado' }}</p>
-                            <p><strong>📚 Nivel de Estudio:</strong> {{ $datosPersonales->nivel_estudio ?? 'No especificado' }}</p>
-                            <p><strong>🎂 Fecha Nacimiento:</strong> {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}</p>
+                            <div class="col-md-6">
+                                <p><strong>🌴 Años en Palmicultura:</strong> {{ $datosPersonales->anios_palmicultura ?? '0' }} años</p>
+                                <p><strong>🏥 Régimen de Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
+                                <p><strong>🏠 Reside en el Predio:</strong> {{ $datosPersonales->reside_predio === 'SI' ? 'Sí' : 'No' }}</p>
+                                <p><strong>👨‍🌾 Administra Cultivo:</strong> {{ $datosPersonales->administra_cultivo ?? 'No especificado' }}</p>
+                                <p><strong>👁️ Supervisa Cultivo:</strong> {{ $datosPersonales->supervisa_cultivo ?? 'No especificado' }}</p>
+                                <p><strong>💪 Realiza Cultivo:</strong> {{ $datosPersonales->realiza_cultivo ?? 'No especificado' }}</p>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <p><strong>🌴 Años en Palmicultura:</strong> {{ $datosPersonales->anios_palmicultura ?? '0' }} años</p>
-                            <p><strong>🏥 Régimen Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
-                            <p><strong>🏠 Reside en Predio:</strong> {{ $datosPersonales->reside_predio ? 'Sí' : 'No' }}</p>
-                            <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <p><strong>📘 Alfabetizado:</strong> {{ $datosPersonales->alfabetizado ?? 'No especificado' }}</p>
+                                <p><strong>📋 Otras Líneas Productivas:</strong> {{ $datosPersonales->otras_lineas ?? 'No especificado' }}</p>
+                                <p><strong>🧍‍♂️ Grupo Poblacional:</strong> {{ $datosPersonales->grupo_poblacional ?? 'No especificado' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>📄 RNP:</strong> {{ $datosPersonales->rnp ?? 'No especificado' }}</p>
+                                <p><strong>🔢 Número RNP:</strong> {{ $datosPersonales->numero_rnp ?? 'No especificado' }}</p>
+                                <p><strong>🏢 Fedepalma:</strong> {{ $datosPersonales->fedepalma ?? 'No especificado' }}</p>
+                            </div>
                         </div>
-                    </div>
-                    @if($datosPersonales->rnp || $datosPersonales->fedepalma)
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <p><strong>📄 Registros:</strong></p>
-                            <ul>
-                                @if($datosPersonales->rnp)
-                                    <li>RNP: {{ $datosPersonales->rnp }}</li>
-                                @endif
-                                @if($datosPersonales->fedepalma)
-                                    <li>Fedepalma: {{ $datosPersonales->fedepalma }}</li>
-                                @endif
-                            </ul>
+
+                        {{-- ✅ Nueva sección: Oferta Mercantil --}}
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <p><strong>🧾 ¿Ha firmado oferta mercantil?:</strong> {{ $datosPersonales->oferta_mercantil ?? 'No especificado' }}</p>
+                            </div>
+                            @if($datosPersonales->oferta_mercantil === 'SI')
+                            <div class="col-md-6">
+                                <p><strong>📅 Hace cuánto:</strong> {{ $datosPersonales->hace_cuanto ?? 'No especificado' }}</p>
+                            </div>
+                            @endif
                         </div>
                     </div>
-                    @endif
                 </div>
             </div>
-        </div>
-        @endif
+            @endif
+
 
         <div class="table-wrapper">
             <table class="members-table" role="table" aria-label="Miembros del hogar">

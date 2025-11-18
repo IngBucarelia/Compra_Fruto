@@ -15,6 +15,8 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Imports\VisitasMultiSheetImport;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\AuditoriaHelper;
+
 
 class VisitaController extends Controller
 {
@@ -28,20 +30,45 @@ class VisitaController extends Controller
             'user' => Auth::user()
         ]);
     }
-    public function index(Request $request)
+   public function index(Request $request)
         {
             $buscar = $request->input('buscar');
 
             $visitas = \App\Models\Visita::with(['proveedor', 'tecnico'])
-                ->whereHas('proveedor', fn($q) => $q->where('proveedor_nombre', 'like', "%$buscar%"))
-                ->orWhereHas('tecnico', fn($q) => $q->where('name', 'like', "%$buscar%"))
-                ->orWhere('tipo_visita', 'like', "%$buscar%")
-                ->orWhere('ubicacion', 'like', "%$buscar%")
+                ->where(function ($query) use ($buscar) {
+                    if ($buscar) {
+                        $query->whereHas('proveedor', fn($q) => $q->where('proveedor_nombre', 'like', "%$buscar%"))
+                            ->orWhereHas('tecnico', fn($q) => $q->where('name', 'like', "%$buscar%"))
+                            ->orWhere('tipo_visita', 'like', "%$buscar%")
+                            ->orWhere('ubicacion', 'like', "%$buscar%");
+                    }
+                })
+                ->whereIn('estado', ['pendiente', 'en_ejecucion', 'finalizada'])
                 ->latest()
                 ->paginate(10);
 
             return view('visitas.index', compact('visitas', 'buscar'));
         }
+
+        public function eliminadas(Request $request)
+        {
+            $buscar = $request->input('buscar');
+
+            $visitas = \App\Models\Visita::with(['proveedor', 'tecnico'])
+                ->where('estado', 'eliminado')
+                ->when($buscar, function ($query) use ($buscar) {
+                    $query->whereHas('proveedor', fn($q) => $q->where('proveedor_nombre', 'like', "%$buscar%"))
+                        ->orWhereHas('tecnico', fn($q) => $q->where('name', 'like', "%$buscar%"))
+                        ->orWhere('tipo_visita', 'like', "%$buscar%")
+                        ->orWhere('ubicacion', 'like', "%$buscar%");
+                })
+                ->latest()
+                ->paginate(10);
+
+            return view('visitas.eliminadas', compact('visitas', 'buscar'));
+        }
+
+
 
 
     /**
@@ -141,6 +168,14 @@ class VisitaController extends Controller
 
         Log::info('=== VISITA CREADA EXITOSAMENTE ===');
 
+        AuditoriaHelper::registrar(
+                'create',
+                'Visita Agronómica',
+                $visita->id,
+                'Se creó una nueva visita agronómica al proveedor ID ' . $request->proveedor_id
+            );
+
+
         return redirect()->route('planificaciones.create')
             ->with('success', 'Planificación agronómica y visita creadas correctamente con ' . count($tiposVisita) . ' tipo(s) de visita.');
 
@@ -186,6 +221,8 @@ class VisitaController extends Controller
             $proveedores = \App\Models\Proveedor::all();
             $tecnicos = \App\Models\User::where('rol', 2)->get();
 
+            
+
             return view('visitas.edit', compact('visita', 'proveedores', 'tecnicos'));
             
         } catch (\Exception $e) {
@@ -213,7 +250,12 @@ class VisitaController extends Controller
             $visita->update($data);
 
             DB::commit();
-
+            AuditoriaHelper::registrar(
+                'edit',
+                'Visita Agronómica',
+                $visita->id,
+                'Se edito la visita agronómica al proveedor ID ' . $request->proveedor_id
+            );
             return redirect()->route('visitas.index')
                 ->with('success', 'Visita agronómica actualizada exitosamente.');
 
@@ -237,27 +279,47 @@ class VisitaController extends Controller
 
 
     public function destroy($id)
-        {
+    {
+        try {
             $visita = \App\Models\Visita::findOrFail($id);
-            $visita->delete();
+            
+            // Cambiamos el estado en lugar de eliminar
+            $visita->estado = 'eliminado';
+            $visita->save();
 
-            return redirect()->route('visitas.index')->with('success', 'Visita eliminada.');
+            
+
+            AuditoriaHelper::registrar(
+                'delete',
+                'Visita Aagronomica',
+                $visita->id,
+                'Se Elimino  una visita Agronomica  ' 
+            );
+
+            return redirect()->route('visitas.index')
+                ->with('success', 'La visita fue marcada como eliminada correctamente.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('visitas.index')
+                ->with('error', 'Error al eliminar la visita: ' . $e->getMessage());
         }
+    }
+
 
         
 
    public function detalle($id)
     {
         $visita = Visita::with([
-            'areas', // ✅ CAMBIO: Cargar la relación 'areas' (plural)
-            'fertilizaciones.detalles',
+            'areas', 
+            'fertilizaciones.fertilizantes',
             'polinizaciones',
             'sanidad',
             'suelo',
-            'laboresCultivo', // ✅ CAMBIO: Cargar la relación 'laboresCultivo' (plural)
-            'evaluacionCosechaCampo', // ✅ CAMBIO: Cargar la relación 'evaluacionCosechaCampo' (plural)
+            'laboresCultivo', 
+            'evaluacionCosechaCampo', 
             'cierreVisita',
-            'tecnico' // Asegúrate de cargar la relación con el técnico si la usas
+            'tecnico' 
         ])->findOrFail($id);
 
         // Opcional: Para depurar los datos que recibes
@@ -273,7 +335,7 @@ class VisitaController extends Controller
         $visita = Visita::with([
             'proveedor',
             'plantacion',
-            'areas', // ✅ Asegúrate de que sea 'areas' (plural)
+            'areas', 
             'fertilizaciones.detalles',
             'polinizaciones',
             'sanidad',

@@ -136,7 +136,9 @@
                         <p><strong>Teléfono:</strong> {{ $visita->datosPersonales->telefono ?? 'N/A' }}</p>
                         <p><strong>Sexo:</strong> {{ $visita->datosPersonales->sexo ?? 'N/A' }}</p>
                         <p><strong>RNP:</strong> {{ $visita->datosPersonales->rnp ?? 'N/A' }}</p>
-                        <p><strong># RNP:</strong> {{ $visita->datosPersonales->numero_rnp }}<p>
+                        <p><strong># RNP:</strong> {{ $visita->datosPersonales->numero_rnp }}<p> 
+                        <p><strong>firmó la oferta mercantil:</strong> {{ $visita->datosPersonales->oferta_mercantil }}<p> 
+                        <p><strong>¿Hace cuánto firmó la oferta mercantil?</strong> {{ $visita->datosPersonales->hace_cuanto }}<p> 
                         <p><strong>Fedepalma:</strong> {{ $visita->datosPersonales->fedepalma ?? 'N/A' }}</p>
                         <p><strong>Alfabetizado:</strong> {{ $visita->datosPersonales->alfabetizado ?? 'N/A' }}</p>
                         <p><strong>Nivel de estudio:</strong> {{ $visita->datosPersonales->nivel_estudio ?? 'N/A' }}</p>
@@ -376,54 +378,105 @@
                         <p><strong>💡 Recomendaciones:</strong> {{ $visita->cierreVisitaSocial->recomendaciones ?? 'N/A' }}</p>
 
                         <div class="row mt-3">
-                            {{-- Firmas --}}
-                            @if ($visita->cierreVisitaSocial->firma_responsable)
-                                <div class="mt-3">
-                                    <strong>📄 Firma Responsable de Visita:</strong><br>
-                                    <img src="{{ $visita->cierreVisitaSocial->firma_responsable }}" alt="Firma Responsable" class="firma-img">
-                                </div>
-                            @endif
-                            @if ($visita->cierreVisitaSocial->firma_recibe)
-                                <div class="mt-3">
-                                    <strong>📄 Firma de quien recibió la visita:</strong><br>
-                                    <img src="{{ $visita->cierreVisitaSocial->firma_recibe }}" alt="Firma Recibe" class="firma-img">
-                                </div>
-                            @endif
-                            @if ($visita->cierreVisitaSocial->firma_testigo)
-                                <div class="mt-3">
-                                    <strong>📄 Firma del testigo:</strong><br>
-                                    <img src="{{ $visita->cierreVisitaSocial->firma_testigo }}" alt="Firma Testigo" class="firma-img">
-                                </div>
-                            @endif
+                    {{-- ✅ Firmas --}}
+                    <div class="row mt-3">
+                        @php
+                        $toPublic = function ($path) {
+                            if (!$path) return null;
 
-   
+                            // Normalizar
+                            $path = str_replace(['\\', '"'], ['/', ''], $path);
+                            $path = trim($path, " \t\n\r\0\x0B'\"");
+
+                            // 🔹 Si es una imagen base64, devolverla tal cual
+                            if (str_starts_with($path, 'data:image')) {
+                                return $path;
+                            }
+
+                            // 🔹 Si ya es una URL completa
+                            if (preg_match('#^https?://#i', $path)) {
+                                return $path;
+                            }
+
+                            // 🔹 Si está en /storage/
+                            if (str_contains($path, '/storage/')) {
+                                $relative = substr($path, strpos($path, '/storage/') + 9);
+                                return asset('storage/' . $relative);
+                            }
+
+                            // 🔹 Si contiene /app/public/
+                            if (str_contains($path, '/app/public/')) {
+                                $relative = substr($path, strpos($path, '/app/public/') + 12);
+                                return asset('storage/' . $relative);
+                            }
+
+                            // 🔹 Ajuste final
+                            $path = ltrim($path, '/');
+                            if (!str_starts_with($path, 'storage/')) {
+                                $path = 'storage/' . $path;
+                            }
+
+                            return asset($path);
+                        };
+
+                        $firmaResponsable = $toPublic($visita->cierreVisitaSocial->firma_responsable ?? null);
+                        $firmaRecibe = $toPublic($visita->cierreVisitaSocial->firma_recibe ?? null);
+                        $firmaTestigo = $toPublic($visita->cierreVisitaSocial->firma_testigo ?? null);
+                    @endphp
+
+
+    @if ($firmaResponsable)
+        <div class="col-md-4 mb-3 text-center">
+            <strong>📄 Firma Responsable:</strong><br>
+            <img src="{{ $firmaResponsable }}" alt="Firma Responsable" class="img-fluid rounded shadow firma-img">
+        </div>
+    @endif
+
+    @if ($firmaRecibe)
+        <div class="col-md-4 mb-3 text-center">
+            <strong>📄 Firma Quien Recibe:</strong><br>
+            <img src="{{ $firmaRecibe }}" alt="Firma Recibe" class="img-fluid rounded shadow firma-img">
+        </div>
+    @endif
+
+    @if ($firmaTestigo)
+        <div class="col-md-4 mb-3 text-center">
+            <strong>📄 Firma Testigo:</strong><br>
+            <img src="{{ $firmaTestigo }}" alt="Firma Testigo" class="img-fluid rounded shadow firma-img">
+        </div>
+    @endif
 </div>
 
+{{-- ✅ Imágenes capturadas durante la visita --}}
+@php
+    $imagenes = [];
+    if ($visita->cierreVisitaSocial && $visita->cierreVisitaSocial->imagenes) {
+        $imagenes = is_array($visita->cierreVisitaSocial->imagenes)
+            ? $visita->cierreVisitaSocial->imagenes
+            : json_decode($visita->cierreVisitaSocial->imagenes, true) ?? [];
+    }
+@endphp
 
-                   {{-- Imágenes finales --}}
-                                @php
-                                    // Manejo seguro del campo 'imagenes'
-                                    $imagenes = [];
-                                    if ($visita->cierreVisitaSocial && $visita->cierreVisitaSocial->imagenes) {
-                                        $imagenes = is_array($visita->cierreVisitaSocial->imagenes) 
-                                            ? $visita->cierreVisitaSocial->imagenes 
-                                            : json_decode($visita->cierreVisitaSocial->imagenes, true) ?? [];
-                                    }
-                                @endphp
-                                
-                                {{-- Verificamos si hay imágenes --}}
-                                @if (count($imagenes) > 0)
-                                    <div class="mt-4">
-                                        <strong>🖼️ Tomas destacadas durante la visita:</strong><br>
-                                        <div class="row">
-                                            @foreach ($imagenes as $img)
-                                                <div class="col-md-4 col-6 mb-3">
-                                                    <img src="{{ $img }}" class="img-fluid rounded shadow img-thumb">
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @endif
+@if (count($imagenes) > 0)
+    <div class="mt-4">
+        <strong>🖼️ Tomas destacadas durante la visita:</strong><br>
+        <div class="row">
+            @foreach ($imagenes as $img)
+                @php
+                    $imgUrl = $toPublic($img);
+                @endphp
+                <div class="col-md-4 col-6 mb-3 text-center">
+                    <a href="{{ $imgUrl }}" target="_blank" rel="noopener">
+                        <img src="{{ $imgUrl }}" class="img-fluid rounded shadow img-thumb" alt="Foto de visita">
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@else
+    <p class="mt-3"><em>No hay imágenes registradas.</em></p>
+@endif
+
 
 
                     @else

@@ -28,8 +28,10 @@ use App\Http\Controllers\VisitaImportController;
 use App\Models\Plantacion;
 use App\Http\Controllers\MiembroHogarController;
 use App\Http\Controllers\FullVisitaSocialImportController;
-
-
+use App\Http\Controllers\AuditoriaController;
+use App\Http\Controllers\DashboardPlantacionController;
+use App\Http\Controllers\DashboardVisitaSocialController;
+use App\Http\Controllers\UserController;
 
 
 // Redirección por defecto al login
@@ -40,8 +42,17 @@ require __DIR__.'/auth.php';
 
 // Rutas para usuarios autenticados
 Route::middleware('auth')->group(function () {
+
+     Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+    Route::get('/usuarios/crear', [UserController::class, 'create'])->name('usuarios.create');
+    Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store');
+    Route::get('/usuarios/{id}/editar', [UserController::class, 'edit'])->name('usuarios.edit');
+    Route::put('/usuarios/{id}', [UserController::class, 'update'])->name('usuarios.update');
+    Route::patch('/usuarios/{id}/estado', [UserController::class, 'cambiarEstado'])->name('usuarios.estado');
     Route::get('/proveedores/search', [App\Http\Controllers\ProveedorController::class, 'search'])
     ->name('proveedores.search');
+    Route::get('proveedores/eliminados', [ProveedorController::class, 'eliminados'])
+    ->name('proveedores.eliminados');
 
     // rutas de envios 
     Route::get('/proveedor/{id}/plantaciones', [EnvioController::class, 'getPlantacionesByProveedor'])->name('proveedor.plantaciones');
@@ -92,6 +103,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
     Route::get('/visitas/import', [VisitaController::class, 'importForm'])->name('visitas.import.form');
     Route::post('/visitas/import', [VisitaController::class, 'import'])->name('visitas.import.store');
+    Route::get('/visitas/eliminadas', [VisitaController::class, 'eliminadas'])->name('visitas.eliminadas');
+
 
     Route::resource('visitas', App\Http\Controllers\VisitaController::class);
     Route::get('/api/plantaciones/{proveedor}', function ($proveedorId) {
@@ -209,7 +222,6 @@ Route::get('/visitas/{visita}/redireccion-seccion-agronomica', [VisitaController
 
 // RUTAS PARA EL COMPONENETE SOCIAL 
     Route::get('/visitas/home', [VisitaController::class, 'homeVisitas'])->name('visitasHome');
-
     Route::prefix('visitas-social')->name('visitas_social.')->group(function () {
     Route::get('/homeSocial', [VisitaSocialController::class, 'home'])->name('homeSocial');
     Route::get('/Social', [VisitaSocialController::class, 'index'])->name('indexSocial');
@@ -218,7 +230,8 @@ Route::get('/visitas/{visita}/redireccion-seccion-agronomica', [VisitaController
     Route::get('Social/{id}', [VisitaSocialController::class, 'show'])->name('showSocial');
     Route::get('/{id}/editSocial', [VisitaSocialController::class, 'edit'])->name('editSocial');
     Route::put('SocialUpdate/{id}', [VisitaSocialController::class, 'update'])->name('updateSocial');
-    Route::delete('SocialDestroy/{id}', [VisitaSocialController::class, 'destroy'])->name('destroySocial');
+    Route::delete('social-destroy/{id}', [VisitaSocialController::class, 'destroy'])->name('destroySocial');
+    Route::get('eliminadas', [VisitaSocialController::class, 'eliminadas'])->name('eliminadas');
 
         Route::get('/visitas-social/{id}/detalleSocial', [App\Http\Controllers\VisitaSocialController::class, 'detalle'])->name('detalleSocial');
 
@@ -372,6 +385,53 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
 
     Route::put('/visitas-social/{visitaId}/update-status', [VisitaSocialController::class, 'updateStatus']);
 
+
+    // rutas para envios 
+
+    Route::get('/envios/{envio}/preparar', [EnvioController::class, 'preparar'])->name('envios.preparar');
+    Route::post('/envios/{envio}/iniciar', [EnvioController::class, 'iniciar'])->name('envios.iniciar');
+    Route::get('/envios/{envio}/stage', [EnvioController::class, 'stage'])->name('envios.stage');
+    Route::post('/envios/{envio}/comenzar', [EnvioController::class, 'comenzar'])->name('envios.comenzar');
+    Route::post('/envios/{envio}/evidencias', [EnvioController::class, 'uploadEvidencias'])->name('envios.upload');
+    Route::post('/envios/{envio}/completar', [EnvioController::class, 'completar'])->name('envios.completar');
+
+    Route::get('/envios/{id}/pdf', [App\Http\Controllers\EnvioController::class, 'generarPDF'])
+    ->name('envios.pdf');
+    // RUTAS AUDITORIA DE MOVIMIENTO 
+
+
+    Route::get('/auditorias', [AuditoriaController::class, 'index'])->name('auditorias.index');
+
+// rutas de informacion o get de bd con grafdicas 
+
+    Route::get('/dashboard/visitas-agro', [DashboardController::class, 'visitasAgro'])
+    ->name('dashboard.visitas_agro')
+    ->middleware('auth');
+
+    Route::get('/dashboard/visitas-agro', [DashboardController::class, 'visitasAgro'])
+    ->name('dashboard.visitas.agro');
+    Route::get('/dashboard/visitas-social', [DashboardVisitaSocialController::class, 'index'])->name('dashboard.visitas.social');
+
+
+    // Endpoints AJAX para datos filtrados
+    Route::get('/dashboard/visitas-agro/data', [DashboardController::class, 'dataVisitasAgro'])
+        ->name('dashboard.visitas.agro.data');
+    Route::get('/dashboard/visitas-agro/data-modulos', [DashboardController::class, 'dataModulos'])
+        ->name('dashboard.visitas.agro.data.modulos');
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/plantaciones', [DashboardPlantacionController::class, 'index'])
+        ->name('dashboard.plantaciones');
+    });
+
+    Route::get('/dashboard/plantaciones/{id}/visitas', [DashboardPlantacionController::class, 'verVisitas'])
+    ->name('dashboard.plantaciones.visitas');
+
+
+    
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('usuarios', UserController::class);
+    });
 
 
 });

@@ -1,7 +1,12 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm fixed-top" style="background-color:  rgba(29, 89, 7, 0.9)  !important">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm fixed-top" style="background-color: rgba(29, 89, 7, 0.9) !important">
     <div class="container-fluid" style="margin-bottom: -15px">
         
-       <span style="font-size: 2em;">🌴</span>
+        <!-- Botón hamburguesa para móvil -->
+        <button class="btn btn-sm text-white d-lg-none me-2" onclick="toggleSidebar()">
+            <i class="fas fa-bars fs-5"></i>
+        </button>
+        
+        <span style="font-size: 2em;">🌴</span>
         <a href="{{ route('dashboard') }}">
             <img class="logo" src="{{ asset('images/logo.webp') }}" alt="Logo">
         </a>

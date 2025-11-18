@@ -155,9 +155,9 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             {{-- col-md-6: Ocupa la mitad del ancho en pantallas medianas y grandes (2 columnas) --}}
 
             <div class="col-12 col-md-6 mb-4"> {{-- mb-4 añade margen inferior entre filas --}}
-                <a href="{{ route('visitas.index') }}" class="dashboard-link">
+                <a href="{{ route('dashboard.visitas.agro') }}" class="dashboard-link">
                     <div class="dashboard-card p-4">
-                        <div class="dashboard-title">Listado de Visitas</div><br>
+                        <div class="dashboard-title">Dashboard Visitas</div><br>
                         <img class="logo" src="{{ asset('images/visitas.webp') }}" style="border-radius: 30px" alt="Listado de Visitas"><br>
                         <!-- HTML !-->
                     <button class="button-33" role="button">Ir a Visitas</button>

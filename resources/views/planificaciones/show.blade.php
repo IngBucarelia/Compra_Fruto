@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" style="background-color: whitesmoke; padding: 20px;">
+<div class="container" style="max-width: 1100px !important; background-color: whitesmoke; padding: 20px;">
     <h2>Detalle de Planificación</h2>
 
     <div class="card">

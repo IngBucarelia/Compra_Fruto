@@ -28,39 +28,68 @@
     <div class="resumen-cards mb-4">
       <div class="row">
         <!-- Datos Personales -->
-        <div class="col-md-6 mb-3" v-if="datosPersonales">
-          <div class="card h-100">
-            <div class="card-header bg-success text-white py-2 text-center">
-              <h6 class="mb-0">
-                <i class="fas fa-user me-1"></i>Datos Personales
-              </h6>
-            </div>
-            <div class="card-body p-3">
-              <p class="mb-1 text-white"><small><strong>Productor:</strong> {{ datosPersonales.telefono }}</small></p>
-              <p class="mb-1 text-white"><small><strong>Nivel Estudio:</strong> {{ datosPersonales.nivel_estudio }}</small></p>
-              <p class="mb-0 text-white"><small><strong>Reside:</strong> {{ datosPersonales.reside_predio }}</small></p>
-            </div>
-          </div>
-        </div>
+<div class="col-md-6 mb-3" v-if="datosPersonales">
+  <div class="card h-100">
+    <div class="card-header bg-success text-white py-2 text-center">
+      <h6 class="mb-0">
+        <i class="fas fa-user me-1"></i>Datos Personales
+      </h6>
+    </div>
+    <div class="card-body p-3 text-white">
+      <p class="mb-1"><small><strong>Teléfono:</strong> {{ datosPersonales.telefono || 'No registrado' }}</small></p>
+      <p class="mb-1"><small><strong>Sexo:</strong> {{ datosPersonales.sexo || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>RNP:</strong> {{ datosPersonales.rnp || 'No especificado' }}</small></p>
+      <p class="mb-1" v-if="datosPersonales.rnp === 'SI'">
+        <small><strong>Número RNP:</strong> {{ datosPersonales.numero_rnp || 'No especificado' }}</small>
+      </p>
+      <p class="mb-1"><small><strong>Fedepalma:</strong> {{ datosPersonales.fedepalma || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Alfabetizado:</strong> {{ datosPersonales.alfabetizado || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Nivel Estudio:</strong> {{ datosPersonales.nivel_estudio || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Otras Líneas:</strong> {{ datosPersonales.otras_lineas || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Fecha Nacimiento:</strong> {{ datosPersonales.fecha_nacimiento || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Grupo Poblacional:</strong> {{ datosPersonales.grupo_poblacional || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Reside Predio:</strong> {{ datosPersonales.reside_predio || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Administra Cultivo:</strong> {{ datosPersonales.administra_cultivo || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Supervisa Cultivo:</strong> {{ datosPersonales.supervisa_cultivo || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Realiza Cultivo:</strong> {{ datosPersonales.realiza_cultivo || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Años Palmicultura:</strong> {{ datosPersonales.anios_palmicultura || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Internet:</strong> {{ datosPersonales.internet || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Tipo Persona:</strong> {{ datosPersonales.tipo_persona || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Red Social:</strong> {{ datosPersonales.red_social || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Régimen Salud:</strong> {{ datosPersonales.regimen_salud || 'No especificado' }}</small></p>
+      <p class="mb-1"><small><strong>Oferta Mercantil:</strong> {{ datosPersonales.oferta_mercantil || 'No especificado' }}</small></p>
+      <p class="mb-0"><small><strong>Hace Cuánto:</strong> {{ datosPersonales.hace_cuanto || 'No especificado' }}</small></p>
+    </div>
+  </div>
+</div>
 
-        <!-- Miembros del Hogar -->
-        <div class="col-md-6 mb-3" v-if="miembrosHogar.length > 0">
-          <div class="card h-100">
-            <div class="card-header bg-primary text-white py-2 text-center">
-              <h6 class="mb-0">
-                <i class="fas fa-users me-1"></i>Miembros ({{ miembrosHogar.length }})
-              </h6>
-            </div>
-            <div class="card-body p-3">
-              <p class="mb-1 text-white" v-for="miembro in miembrosHogar.slice(0, 2)" :key="miembro.local_id">
-                <small>{{ miembro.nombre }} - {{ miembro.parentezco }}</small>
-              </p>
-              <p class="mb-0 text-white" v-if="miembrosHogar.length > 2">
-                <small>+{{ miembrosHogar.length - 2 }} más...</small>
-              </p>
-            </div>
-          </div>
-        </div>
+<!-- Miembros del Hogar -->
+<div class="col-md-6 mb-3" v-if="miembrosHogar.length > 0">
+  <div class="card h-100">
+    <div class="card-header bg-primary text-white py-2 text-center">
+      <h6 class="mb-0">
+        <i class="fas fa-users me-1"></i>Miembros del Hogar ({{ miembrosHogar.length }})
+      </h6>
+    </div>
+    <div class="card-body p-3 text-white">
+      <div
+        v-for="(miembro, index) in miembrosHogar"
+        :key="miembro.local_id || index"
+        class="mb-3 border-bottom border-light pb-2"
+      >
+        <p class="mb-1"><small><strong>Nombre:</strong> {{ miembro.nombre || 'No registrado' }}</small></p>
+        <p class="mb-1"><small><strong>Documento:</strong> {{ miembro.documento || 'No especificado' }}</small></p>
+        <p class="mb-1"><small><strong>Sexo:</strong> {{ miembro.sexo || 'No especificado' }}</small></p>
+        <p class="mb-1"><small><strong>Parentezco:</strong> {{ miembro.parentezco || 'No especificado' }}</small></p>
+        <p class="mb-1"><small><strong>Reside Predio:</strong> {{ miembro.reside_predio || 'No especificado' }}</small></p>
+        <p class="mb-1"><small><strong>Sabe Leer:</strong> {{ miembro.sabe_leer || 'No especificado' }}</small></p>
+        <p class="mb-1"><small><strong>Nivel Estudio:</strong> {{ miembro.nivel_estudio || 'No especificado' }}</small></p>
+        <p class="mb-0"><small><strong>Participa Labores:</strong> {{ miembro.participa_labores || 'No especificado' }}</small></p>
+      </div>
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
 
@@ -90,41 +119,62 @@
     </div>
 
     <!-- Datos Guardados del Predio -->
-    <div v-if="datosPredio" class="datos-guardados-card mb-4">
-      <div class="card">
-        <div class="card-header bg-success text-white text-center">
-          <h5 class="mb-0">
-            <i class="fas fa-check-circle me-2"></i>Datos del Predio Guardados
-          </h5>
+<div v-if="datosPredio" class="datos-guardados-card mb-4">
+  <div class="card">
+    <div class="card-header bg-success text-white text-center">
+      <h5 class="mb-0">
+        <i class="fas fa-check-circle me-2"></i>Datos del Predio Guardados
+      </h5>
+    </div>
+    <div class="card-body text-white">
+      <div class="row">
+        <!-- Columna 1 -->
+        <div class="col-md-4">
+          <p><strong>Visita Social ID:</strong> {{ datosPredio.visita_social_id }}</p>
+          <p><strong>Plantación ID:</strong> {{ datosPredio.plantacion_id }}</p>
+          <p><strong>Nombre de la Finca:</strong> {{ datosPredio.nombre_finca }}</p>
+          <p>
+            <strong>Forma de Tenencia:</strong>
+            {{ Array.isArray(datosPredio.forma_tenencia)
+              ? datosPredio.forma_tenencia.join(', ')
+              : datosPredio.forma_tenencia }}
+          </p>
         </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-4">
-              <p><strong class="text-white">Forma Tenencia:</strong> 
-                <span class="text-white">
-                  {{ Array.isArray(datosPredio.forma_tenencia) 
-                      ? datosPredio.forma_tenencia.join(', ') 
-                      : datosPredio.forma_tenencia }}
-                </span>
-              </p>
-              <p><strong class="text-white">Registro ICA:</strong> <span class="text-white">{{ datosPredio.registrado_ica }}</span></p>
-                          </div>
-            <div class="col-md-4">
-              <p><strong class="text-white">Vive en Predio:</strong> <span class="text-white">{{ datosPredio.vive_predio }}</span></p>
-              <p><strong class="text-white">Infraestructura:</strong> <span class="text-white">{{ datosPredio.infraestructura_predio }}</span></p>
-            </div>
-            <div class="col-md-4">
-              <p><strong class="text-white">Vías:</strong> <span class="text-white">{{ Array.isArray(datosPredio.infraestructura_vial) ? datosPredio.infraestructura_vial.join(', ') : datosPredio.infraestructura_vial }}</span></p>
-            </div>
-          </div>
-          <div class="text-center">
-            <button @click="eliminarDatos" class="btn btn-danger btn-sm mt-3">
-              <i class="fas fa-trash me-1"></i>Eliminar Datos
-            </button>
-          </div>
+
+        <!-- Columna 2 -->
+        <div class="col-md-4">
+          <p><strong>Municipio:</strong> {{ datosPredio.municipio }}</p>
+          <p><strong>Vereda:</strong> {{ datosPredio.vereda }}</p>
+          <p><strong>Registrado ICA:</strong> {{ datosPredio.registrado_ica }}</p>
+          <p><strong>Vive en el Predio:</strong> {{ datosPredio.vive_predio }}</p>
+        </div>
+
+        <!-- Columna 3 -->
+        <div class="col-md-4">
+          <p>
+            <strong>Infraestructura Vial:</strong>
+            {{ Array.isArray(datosPredio.infraestructura_vial)
+              ? datosPredio.infraestructura_vial.join(', ')
+              : datosPredio.infraestructura_vial }}
+          </p>
+          <p>
+            <strong>Infraestructura del Predio:</strong>
+            {{ Array.isArray(datosPredio.infraestructura_predio)
+              ? datosPredio.infraestructura_predio.join(', ')
+              : datosPredio.infraestructura_predio }}
+          </p>
         </div>
       </div>
+
+      <div class="text-center mt-3">
+        <button @click="eliminarDatos" class="btn btn-danger btn-sm">
+          <i class="fas fa-trash me-1"></i>Eliminar Datos
+        </button>
+      </div>
     </div>
+  </div>
+</div>
+
 
     <!-- Formulario de Datos del Predio -->
     <div class="form-card">

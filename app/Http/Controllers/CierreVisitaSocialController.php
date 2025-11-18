@@ -117,7 +117,7 @@ public function store(Request $request)
         
         if ($visita) {
             // Actualizar estado directamente
-            $visita->estado = 'finalizado';
+            $visita->estado = 'finalizada';
             $visita->save();
             
             Log::info('Estado de visita actualizado a finalizado:', ['visita_id' => $visita->id]);

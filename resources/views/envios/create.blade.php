@@ -1,7 +1,50 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<style>
+    @media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    .grid-3 { grid-template-columns: repeat(2,1fr);}
+
+    .grid-3 { grid-template-columns: 1fr; }
+    .btn-circle {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9em;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .input-group .form-control {
+        margin-bottom: 10px;
+    }
+     .container {
+        margin-left: -70px;
+        width: 125%;
+    
+
+    }
+
+        .dashboard-content {
+            max-width: 100%;
+        }
+        .dashboard-card {
+            margin-bottom: 15px;
+        }
+
+        .card{
+        width: 100%;
+    }
+}
+</style>
+<div class="container">
     <div class="card shadow">
         <div class="card-header bg-white">
             <h5 class="mb-0 text-success"><i class="fas fa-plus-circle me-2"></i>Planificar Envío</h5>

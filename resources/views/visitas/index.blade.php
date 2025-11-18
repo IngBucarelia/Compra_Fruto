@@ -295,7 +295,18 @@
             </div>
         </div>
         @endif
-    </div>
+    </div><br><br><br>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-success">
+        <i class="fas fa-seedling me-2"></i> Visitas Agronómicas Activas
+    </h4>
+     @if(Auth::check() && in_array(Auth::user()->rol, [1]))
+    <a href="{{ route('visitas.eliminadas') }}" class="btn btn-outline-danger">
+        <i class="fas fa-trash-alt"></i> Ver Eliminadas
+    </a>
+    @endif
+</div>
+
 </div>
 
 <style>

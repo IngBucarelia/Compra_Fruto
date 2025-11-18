@@ -144,9 +144,7 @@
                     </a>
                 </div>
             </div>
-            <a href="{{ route('visitas_social.detalleSocial', $visita->id) }}" class="btn btn-info btn-lg">
-                                    <i class="fas fa-search me-2"></i>Ver Detalle Completo
-                                </a>
+            
             <!-- Card de Navegación entre Secciones Sociales -->
             @if ($visita->estado !== 'finalizada')
                 @if ($visita->estado === 'pendiente')

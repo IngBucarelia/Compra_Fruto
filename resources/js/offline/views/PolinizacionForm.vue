@@ -194,7 +194,10 @@ export default {
       return this.formulariosPolinizacion.some(form => 
         form.fecha && form.n_pases && form.ciclos_ronda && form.ana && form.tipo_ana && form.talco
       );
-    }
+    },
+    tieneAreasHibridas() {
+    return this.areasInfo.some(area => area.variedad && area.variedad.toLowerCase() === 'hibrido');
+  }
   },
   methods: {
     nuevoFormularioPolinizacion() {
@@ -227,9 +230,13 @@ export default {
         this.areasInfo = allAreas.filter(area => area.visita_id == this.visitaId);
         
         // Verificar si hay áreas híbridas
-        this.tieneAreasHibridas = this.areasInfo.some(area => 
-          area.material && area.material.toLowerCase().includes('híbrido')
-        );
+        // Verificar si hay áreas híbridas (acepta con o sin tilde, mayúsculas, etc.)
+        this.tieneAreasHibridas = this.areasInfo.some(area => {
+          if (!area.material) return false;
+          const mat = area.material.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // elimina tildes
+          return mat.includes('hibrido'); // busca sin importar tilde o mayúsculas
+        });
+
         
         // Cargar todas las fertilizaciones
         const allFertilizaciones = await getAllDataFromStore('fertilizacion');

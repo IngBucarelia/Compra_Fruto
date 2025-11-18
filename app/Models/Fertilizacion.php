@@ -21,8 +21,7 @@ class Fertilizacion extends Model
         return $this->belongsTo(Visita::class);
     }
     public function fertilizantes()
-        {
-            return $this->hasMany(FertilizanteFertilizacion::class, 'local_id', 'local_id');
-        }
-
+    {
+        return $this->hasMany(FertilizanteFertilizacion::class, 'fertilizacion_id', 'id');
+    }
 }

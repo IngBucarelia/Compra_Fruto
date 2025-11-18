@@ -29,12 +29,28 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold text-success">Proveedor:</label>
-                            <select id="proveedor_id" name="proveedor_id" class="form-control" required>
+                            
+                            <!-- Input de búsqueda -->
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" id="buscarProveedor" class="form-control" 
+                                    placeholder="Buscar proveedor..." oninput="filtrarProveedores()">
+                            </div>
+                            
+                            <!-- Select con altura fija y scroll -->
+                            <select id="proveedor_id" name="proveedor_id" class="form-control" 
+                                    size="8" style="height: auto; min-height: 200px;" required>
                                 <option value="">Seleccione proveedor</option>
                                 @foreach($proveedores as $proveedor)
                                     <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor_nombre }}</option>
                                 @endforeach
                             </select>
+                            
+                            <small class="text-muted" id="contadorProveedores">
+                                {{ count($proveedores) }} proveedores disponibles
+                            </small>
                         </div>
 
                         <div class="mb-3">
@@ -67,11 +83,11 @@
                                         ['Inicial', 'flag', 'text-primary'],
                                         ['Seguimiento', 'sync-alt', 'text-info'],
                                         ['Capacitacion', 'chalkboard-teacher', 'text-warning'],
-                                        ['Poa', 'chart-line', 'text-success'],
+                                        ['POA', 'chart-line', 'text-success'],
                                         ['Estudio Credito', 'file-invoice-dollar', 'text-danger'],
                                         ['Inclusion a Pequeños', 'hands-helping', 'text-info'],
                                         ['Solidaridad', 'heart', 'text-danger'],
-                                        ['Aps', 'clipboard-check', 'text-success']
+                                        ['APS', 'clipboard-check', 'text-success']
                                     ];
                                 @endphp
 
@@ -347,5 +363,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function filtrarProveedores() {
+    const buscar = document.getElementById('buscarProveedor').value.toLowerCase();
+    const select = document.getElementById('proveedor_id');
+    const options = select.getElementsByTagName('option');
+    let contador = 0;
+    
+    for (let i = 0; i < options.length; i++) {
+        const texto = options[i].textContent.toLowerCase();
+        if (texto.includes(buscar) || options[i].value === "") {
+            options[i].style.display = '';
+            contador++;
+        } else {
+            options[i].style.display = 'none';
+        }
+    }
+    
+    document.getElementById('contadorProveedores').textContent = 
+        (contador - 1) + ' proveedores encontrados'; // Restamos la opción vacía
+}
 </script>
 @endsection

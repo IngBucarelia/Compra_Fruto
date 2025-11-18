@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <form action="{{ route('redireccion_seccion_social', $visita->id) }}" method="GET" class="mt-4">
-            <label for="seccion" class="form-label fw-bold text-success">📋 Ir a sección:</label>
+            <label for="seccion" class="form-label fw-bold text" style="color: whitesmoke">📋 Ir a sección:</label>
             <div class="input-group">
                 <select id="seccion" name="seccion" class="form-select" required>
                     <option value="">Seleccione una sección</option>
@@ -16,10 +16,10 @@
                         <option value="organizacion_social">👥 Organización Social</option>
                     @endif
                 </select>
-                <button type="submit" class="btn btn-success">Ir</button>
+                <button type="submit" class="btn btn" style="color: whitesmoke">Ir</button>
             </div>
         </form>
-    <h3 class="text-success fw-bold mb-4">➕ Registrar Fuerza Laboral</h3>
+    <h3 class="text fw-bold mb-4" style="color: whitesmoke">➕ Registrar Fuerza Laboral</h3>
 
     <form action="{{ route('fuerza_laboral.store', $visita->id) }}" method="POST" class="card p-4 shadow-sm border-0 rounded-3 bg-light">
         @csrf

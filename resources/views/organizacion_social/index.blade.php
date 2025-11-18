@@ -22,183 +22,223 @@
             </div>
         </form><br><br>
 
-        {{-- ✅ Acordeón de Datos Personales --}}
-    @if($datosPersonales)
-    <div class="accordion-container mb-4">
-        <div class="accordion-card">
-            <div class="accordion-header" onclick="toggleAccordion(this, 'personal')">
-                <h3 class="accordion-title">
-                    👤 Datos Personales del Productor
-                    <span class="accordion-icon" id="icon-personal">▼</span>
-                </h3>
-            </div>
-            <div class="accordion-content" id="content-personal">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>📞 Teléfono:</strong> {{ $datosPersonales->telefono ?? 'No especificado' }}</p>
-                        <p><strong>🚻 Sexo:</strong> {{ $datosPersonales->sexo ?? 'No especificado' }}</p>
-                        <p><strong>📚 Nivel de Estudio:</strong> {{ $datosPersonales->nivel_estudio ?? 'No especificado' }}</p>
-                        <p><strong>🎂 Fecha Nacimiento:</strong> {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>🌴 Años en Palmicultura:</strong> {{ $datosPersonales->anios_palmicultura ?? '0' }} años</p>
-                        <p><strong>🏥 Régimen Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
-                        <p><strong>🏠 Reside en Predio:</strong> {{ $datosPersonales->reside_predio ? 'Sí' : 'No' }}</p>
-                        <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
-                    </div>
+       {{-- ✅ Acordeón de Datos Personales --}}
+        @if($datosPersonales)
+        <div class="accordion-container mb-4">
+            <div class="accordion-card">
+                <div class="accordion-header" onclick="toggleAccordion(this, 'personal')">
+                    <h3 class="accordion-title">
+                        👤 Datos Personales del Productor
+                        <span class="accordion-icon" id="icon-personal">▼</span>
+                    </h3>
                 </div>
-                @if($datosPersonales->rnp || $datosPersonales->fedepalma)
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <p><strong>📄 Registros:</strong></p>
-                        <ul>
-                            @if($datosPersonales->rnp)
-                                <li>RNP: {{ $datosPersonales->rnp }}</li>
-                            @endif
-                            @if($datosPersonales->fedepalma)
-                                <li>Fedepalma: {{ $datosPersonales->fedepalma }}</li>
-                            @endif
-                        </ul>
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-    @endif
-
-    {{-- ✅ Acordeón de Miembros del Hogar --}}
-    @if($miembros && $miembros->count() > 0)
-    <div class="accordion-container mb-4">
-        <div class="accordion-card">
-            <div class="accordion-header" onclick="toggleAccordion(this, 'miembros')">
-                <h3 class="accordion-title">
-                    👨‍👩‍👧‍👦 Miembros del Hogar ({{ $miembros->count() }})
-                    <span class="accordion-icon" id="icon-miembros">▼</span>
-                </h3>
-            </div>
-            <div class="accordion-content" id="content-miembros">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Documento</th>
-                                <th>Sexo</th>
-                                <th>Parentezco</th>
-                                <th>Reside</th>
-                                <th>Estudio</th>
-                                <th>Participa Labores</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($miembros as $miembro)
-                            <tr>
-                                <td>{{ $miembro->nombre }}</td>
-                                <td>{{ $miembro->documento ?? 'N/A' }}</td>
-                                <td>{{ $miembro->sexo ?? 'N/A' }}</td>
-                                <td>{{ $miembro->parentezco ?? 'N/A' }}</td>
-                                <td>{{ $miembro->reside_predio ? 'Sí' : 'No' }}</td>
-                                <td>{{ $miembro->nivel_estudio ?? 'N/A' }}</td>
-                                <td>{{ $miembro->participa_labores ? 'Sí' : 'No' }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    {{-- ✅ Acordeón de Datos del Predio --}}
-    @if($datosPredio && $datosPredio->count() > 0)
-    <div class="accordion-container mb-4">
-        <div class="accordion-card">
-            <div class="accordion-header" onclick="toggleAccordion(this, 'predio')">
-                <h3 class="accordion-title">
-                    🏡 Datos del Predio ({{ $datosPredio->count() }} plantaciones)
-                    <span class="accordion-icon" id="icon-predio">▼</span>
-                </h3>
-            </div>
-            <div class="accordion-content" id="content-predio">
-                @foreach($datosPredio as $dato)
-                <div class="card mb-3">
-                    <div class="card-header bg-light">
-                        <strong>🌱 Plantación:</strong> {{ $dato->plantacion->nombre ?? 'N/A' }}
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>🏡 Nombre finca:</strong> {{ $dato->nombre_finca }}</p>
-                                <p><strong>📜 Forma Tenencia:</strong> {{ $dato->forma_tenencia }}</p>
-                                <p><strong>🌍 Municipio:</strong> {{ $dato->municipio }}</p>
-                                <p><strong>🏘️ Vereda:</strong> {{ $dato->vereda }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>📋 Registro ICA:</strong> {{ $dato->registrado_ica ? 'Sí' : 'No' }}</p>
-                                <p><strong>👤 Vive en predio:</strong> {{ $dato->vive_predio ? 'Sí' : 'No' }}</p>
-                                <p><strong>🏠 Infraestructura:</strong> {{ $dato->infraestructura_predio }}</p>
-                            </div>
+                <div class="accordion-content" id="content-personal">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>📞 Teléfono:</strong> {{ $datosPersonales->telefono ?? 'No especificado' }}</p>
+                            <p><strong>🚻 Sexo:</strong> {{ $datosPersonales->sexo ?? 'No especificado' }}</p>
+                            <p><strong>📚 Nivel de Estudio:</strong> {{ $datosPersonales->nivel_estudio ?? 'No especificado' }}</p>
+                            <p><strong>🎂 Fecha Nacimiento:</strong> {{ $datosPersonales->fecha_nacimiento ? \Carbon\Carbon::parse($datosPersonales->fecha_nacimiento)->format('d/m/Y') : 'No especificado' }}</p>
+                            <p><strong>🏠 Reside en Predio:</strong> {{ $datosPersonales->reside_predio ? 'Sí' : 'No' }}</p>
+                            <p><strong>💻 Internet:</strong> {{ $datosPersonales->internet ?? 'No especificado' }}</p>
+                            <p><strong>💊 Régimen de Salud:</strong> {{ $datosPersonales->regimen_salud ?? 'No especificado' }}</p>
                         </div>
-                        
-                        {{-- Infraestructura vial y servicios --}}
-                        @php
-                            $infraestructuraVial = [];
-                            if (!empty($dato->infraestructura_vial)) {
-                                $decodedVial = json_decode($dato->infraestructura_vial, true);
-                                $infraestructuraVial = is_array($decodedVial) ? $decodedVial : [$dato->infraestructura_vial];
-                            }
-
-                            $serviciosPublicos = [];
-                            if (!empty($dato->servicios_publicos)) {
-                                $decodedServicios = json_decode($dato->servicios_publicos, true);
-                                $serviciosPublicos = is_array($decodedServicios) ? $decodedServicios : [$dato->servicios_publicos];
-                            }
-                        @endphp
-
-                        @if(!empty($infraestructuraVial) || !empty($serviciosPublicos))
-                        <div class="row mt-3">
-                            @if(!empty($infraestructuraVial))
-                            <div class="col-md-6">
-                                <p><strong>🛣️ Infraestructura Vial:</strong></p>
-                                <ul>
-                                    @php
-                                            $infraestructura = json_decode($dato->infraestructura_vial, true);
-                                        @endphp
-
-
-                                        @if(is_array($infraestructura) && count($infraestructura) > 0)
-                                            @foreach($infraestructura as $vial)
-                                                <span class="badge bg-success">{{ $vial }}</span>
-                                            @endforeach
-                                        @else
-                                            <p class="text-muted">Dato de predio no registrado</p>
-                                        @endif
-                                </ul>
-                            </div>
+                        <div class="col-md-6">
+                            <p><strong>🌴 Años en Palmicultura:</strong> {{ $datosPersonales->anios_palmicultura ?? 'No especificado' }}</p>
+                            <p><strong>🧾 Grupo Poblacional:</strong> {{ $datosPersonales->grupo_poblacional ?? 'No especificado' }}</p>
+                            <p><strong>🧍 Tipo de Persona:</strong> {{ $datosPersonales->tipo_persona ?? 'No especificado' }}</p>
+                            <p><strong>📡 Red Social:</strong> {{ $datosPersonales->red_social ?? 'No especificado' }}</p>
+                            <p><strong>🧾 Oferta Mercantil Firmada:</strong> {{ $datosPersonales->oferta_mercantil ?? 'No especificado' }}</p>
+                            @if(($datosPersonales->oferta_mercantil ?? '') === 'SI')
+                                <p><strong>📅 Hace cuánto:</strong> {{ $datosPersonales->hace_cuanto ?? 'No especificado' }}</p>
                             @endif
-                            @if(!empty($serviciosPublicos))
-                            <div class="col-md-6">
-                                <p><strong>⚡ Servicios Públicos:</strong></p>
-                                <ul>
-                                    @foreach($serviciosPublicos as $servicio)
-                                        @if(!empty($servicio))
-                                            <li>{{ $servicio }}</li>
+                        </div>
+                    </div>
+
+                    {{-- Registros adicionales --}}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <p><strong>📄 Registros:</strong></p>
+                            <ul>
+                                <li>RNP: {{ $datosPersonales->rnp ?? 'No especificado' }}</li>
+                                <li>Número RNP: {{ $datosPersonales->numero_rnp ?? 'No especificado' }}</li>
+                                <li>Fedepalma: {{ $datosPersonales->fedepalma ?? 'No especificado' }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+
+        {{-- ✅ Acordeón de Miembros del Hogar --}}
+        @if($miembros && $miembros->count() > 0)
+        <div class="accordion-container mb-4">
+            <div class="accordion-card">
+                <div class="accordion-header" onclick="toggleAccordion(this, 'miembros')">
+                    <h3 class="accordion-title">
+                        👨‍👩‍👧‍👦 Miembros del Hogar ({{ $miembros->count() }})
+                        <span class="accordion-icon" id="icon-miembros">▼</span>
+                    </h3>
+                </div>
+                <div class="accordion-content" id="content-miembros">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-success">
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Documento</th>
+                                    <th>Sexo</th>
+                                    <th>Parentezco</th>
+                                    <th>Reside en Predio</th>
+                                    <th>Sabe Leer</th>
+                                    <th>Nivel Estudio</th>
+                                    <th>Participa Labores</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($miembros as $miembro)
+                                <tr>
+                                    <td>{{ $miembro->nombre }}</td>
+                                    <td>{{ $miembro->documento ?? 'N/A' }}</td>
+                                    <td>{{ $miembro->sexo ?? 'N/A' }}</td>
+                                    <td>{{ $miembro->parentezco ?? 'N/A' }}</td>
+                                    <td>{{ $miembro->reside_predio ? 'Sí' : 'No' }}</td>
+                                    <td>{{ $miembro->sabe_leer ? 'Sí' : 'No' }}</td>
+                                    <td>{{ $miembro->nivel_estudio ?? 'N/A' }}</td>
+                                    <td>{{ $miembro->participa_labores ? 'Sí' : 'No' }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+
+        {{-- ✅ Acordeón de Datos del Predio --}}
+        @if($datosPredio && $datosPredio->count() > 0)
+        <div class="accordion-container mb-4">
+            <div class="accordion-card">
+                <div class="accordion-header" onclick="toggleAccordion(this, 'predio')">
+                    <h3 class="accordion-title">
+                        🏡 Datos del Predio ({{ $datosPredio->count() }})
+                        <span class="accordion-icon" id="icon-predio">▼</span>
+                    </h3>
+                </div>
+                <div class="accordion-content" id="content-predio">
+                    @foreach($datosPredio as $dato)
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <strong>🌱 Plantación:</strong> {{ optional($dato->plantacion)->nombre ?? 'N/A' }}
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>🏠 Nombre Finca:</strong> {{ $dato->nombre_finca ?? 'No especificado' }}</p>
+
+                                    {{-- Forma de tenencia (array / json / string) --}}
+                                    @php
+                                        $formaTenencia = $dato->forma_tenencia;
+                                        $formaTenenciaArr = [];
+                                        if(is_array($formaTenencia)) {
+                                            $formaTenenciaArr = $formaTenencia;
+                                        } elseif(is_string($formaTenencia) && strlen($formaTenencia)) {
+                                            $decoded = json_decode($formaTenencia, true);
+                                            if(is_array($decoded)) {
+                                                $formaTenenciaArr = $decoded;
+                                            } else {
+                                                // fallback: split comma-separated string
+                                                $formaTenenciaArr = array_filter(array_map('trim', explode(',', $formaTenencia)));
+                                            }
+                                        }
+                                    @endphp
+
+                                    <p><strong>📜 Forma de Tenencia:</strong>
+                                        @if(!empty($formaTenenciaArr))
+                                            {{ implode(', ', $formaTenenciaArr) }}
+                                        @else
+                                            {{ $dato->forma_tenencia ?? 'No especificado' }}
+                                        @endif
+                                    </p>
+
+                                    <p><strong>🌍 Municipio:</strong> {{ $dato->municipio ?? 'No especificado' }}</p>
+                                    <p><strong>🏘️ Vereda:</strong> {{ $dato->vereda ?? 'No especificado' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>📋 Registro ICA:</strong> {{ $dato->registrado_ica ? 'Sí' : 'No' }}</p>
+                                    <p><strong>👤 Vive en Predio:</strong> {{ $dato->vive_predio ? 'Sí' : 'No' }}</p>
+                                    <p><strong>🏗️ Infraestructura del Predio:</strong> {{ $dato->infraestructura_predio ?? 'No especificado' }}</p>
+                                </div>
+                            </div>
+
+                            {{-- Infraestructura Vial --}}
+                            @php
+                                $infraestructura = $dato->infraestructura_vial;
+                                $infraestructuraArr = [];
+                                if(is_array($infraestructura)) {
+                                    $infraestructuraArr = $infraestructura;
+                                } elseif(is_string($infraestructura) && strlen($infraestructura)) {
+                                    $decoded = json_decode($infraestructura, true);
+                                    if(is_array($decoded)) {
+                                        $infraestructuraArr = $decoded;
+                                    } else {
+                                        $infraestructuraArr = array_filter(array_map('trim', explode(',', $infraestructura)));
+                                    }
+                                }
+                            @endphp
+
+                            @if(!empty($infraestructuraArr))
+                                <div class="mt-3">
+                                    <p class="mb-1"><strong>🛣️ Infraestructura Vial:</strong></p>
+                                    @foreach($infraestructuraArr as $vial)
+                                        @if(!empty($vial))
+                                            <span class="badge bg-success me-1 mb-1">{{ $vial }}</span>
                                         @endif
                                     @endforeach
-                                </ul>
-                            </div>
+                                </div>
                             @endif
+
+                            {{-- Servicios Públicos --}}
+                            @php
+                                $servicios = $dato->servicios_publicos ?? null;
+                                $serviciosArr = [];
+                                if(is_array($servicios)) {
+                                    $serviciosArr = $servicios;
+                                } elseif(is_string($servicios) && strlen($servicios)) {
+                                    $decodedS = json_decode($servicios, true);
+                                    if(is_array($decodedS)) {
+                                        $serviciosArr = $decodedS;
+                                    } else {
+                                        $serviciosArr = array_filter(array_map('trim', explode(',', $servicios)));
+                                    }
+                                }
+                            @endphp
+
+                            @if(!empty($serviciosArr))
+                                <div class="mt-2">
+                                    <p class="mb-1"><strong>⚡ Servicios Públicos:</strong></p>
+                                    <ul>
+                                        @foreach($serviciosArr as $serv)
+                                            @if(!empty($serv))
+                                                <li>{{ $serv }}</li>
+                                            @endif
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                         </div>
-                        @endif
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
             </div>
         </div>
-    </div>
-    @endif
+        @endif
+
 
         {{-- ✅ Acordeón de Fuerza Laboral --}}
         @if($fuerzaLaboral && $fuerzaLaboral->count() > 0)
@@ -219,48 +259,52 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><strong>👥 Total Trabajadores:</strong> {{ $fuerza->num_trabajadores }}</p>
-                                    <p><strong>👨 Hombres:</strong> {{ $fuerza->num_hombres }}</p>
-                                    <p><strong>👩 Mujeres:</strong> {{ $fuerza->num_mujeres }}</p>
-                                    <p><strong>📝 Contrato formal:</strong> {{ $fuerza->contrato_formal ? 'Sí' : 'No' }}</p>
+                                    <p><strong>👥 Total Trabajadores:</strong> {{ $fuerza->num_trabajadores ?? 0 }}</p>
+                                    <p><strong>👨 Hombres:</strong> {{ $fuerza->num_hombres ?? 0 }}</p>
+                                    <p><strong>👩 Mujeres:</strong> {{ $fuerza->num_mujeres ?? 0 }}</p>
+                                    <p><strong>📝 Contrato formal:</strong> {{ $fuerza->contrato_formal ?? 'No especificado' }}</p>
+                                    <p><strong>🧾 Tipo Contrato:</strong> {{ $fuerza->tipo_contrato ?? 'No especificado' }}</p>
+                                    <p><strong>📄 Contrato Firmado:</strong> {{ $fuerza->contrato_firmado ?? 'No especificado' }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>🏥 Seguridad social:</strong> {{ $fuerza->seguridad_social ? 'Sí' : 'No' }}</p>
-                                    <p><strong>🛡️ SG-SST:</strong> {{ $fuerza->sg_sst ? 'Sí' : 'No' }}</p>
-                                    <p><strong>👕 Dotación:</strong> {{ $fuerza->dotacion ? 'Sí' : 'No' }}</p>
+                                    <p><strong>🏥 Seguridad Social:</strong> {{ $fuerza->seguridad_social ?? 'No especificado' }}</p>
+                                    <p><strong>🛡️ SG-SST:</strong> {{ $fuerza->sg_sst ?? 'No especificado' }}</p>
+                                    <p><strong>⚕️ Exámenes Médicos:</strong> {{ $fuerza->examenes_medicos ?? 'No especificado' }}</p>
+                                    <p><strong>🧍 Trabajadores Migrantes:</strong> {{ $fuerza->trabajadores_migrantes ?? 'No especificado' }}</p>
+                                    <p><strong>📑 Comprobantes Pago:</strong> {{ $fuerza->comprobantes_pago ?? 'No especificado' }}</p>
+                                    <p><strong>👕 Dotación:</strong> {{ $fuerza->dotacion ?? 'No especificado' }}</p>
                                 </div>
                             </div>
-                            
-                            {{-- Forma de contratación - CORREGIDO --}}
+
+                            {{-- Forma de contratación (normalize) --}}
                             @php
-                                $formaContratacion = [];
-                                if (!empty($fuerza->forma_contratacion)) {
-                                    // Si ya es array, usarlo directamente
-                                    if (is_array($fuerza->forma_contratacion)) {
-                                        $formaContratacion = $fuerza->forma_contratacion;
-                                    } 
-                                    // Si es string, intentar decodificar JSON
-                                    elseif (is_string($fuerza->forma_contratacion)) {
-                                        $decodedContratacion = json_decode($fuerza->forma_contratacion, true);
-                                        $formaContratacion = is_array($decodedContratacion) ? $decodedContratacion : [$fuerza->forma_contratacion];
+                                $forma = $fuerza->forma_contratacion ?? null;
+                                $formaArr = [];
+                                if(is_array($forma)) {
+                                    $formaArr = $forma;
+                                } elseif(is_string($forma) && strlen($forma)) {
+                                    $decodedF = json_decode($forma, true);
+                                    if(is_array($decodedF)) {
+                                        $formaArr = $decodedF;
+                                    } else {
+                                        $formaArr = array_filter(array_map('trim', explode(',', $forma)));
                                     }
                                 }
                             @endphp
 
-                            @if(!empty($formaContratacion))
-                            <div class="row mt-2">
-                                <div class="col-12">
-                                    <p class="fw-bold mb-1">📋 Forma de contratación:</p>
-                                    <ul class="list-unstyled">
-                                        @foreach($formaContratacion as $contratacion)
-                                            @if(!empty($contratacion))
-                                                <li>• {{ $contratacion }}</li>
+                            @if(!empty($formaArr))
+                                <div class="mt-3">
+                                    <p class="mb-1 fw-bold">📋 Forma de Contratación:</p>
+                                    <ul>
+                                        @foreach($formaArr as $item)
+                                            @if(!empty($item))
+                                                <li>{{ $item }}</li>
                                             @endif
                                         @endforeach
                                     </ul>
                                 </div>
-                            </div>
                             @endif
+
                         </div>
                     </div>
                     @endforeach
@@ -268,6 +312,7 @@
             </div>
         </div>
         @endif
+
 
         <h3 class="text-success fw-bold mb-4">👁 Detalle Organización Social</h3>
 
@@ -381,6 +426,12 @@
             @else
                 <a href="{{ route('organizacion_social.index', $visita->id) }}" class="btn btn-secondary">⬅ Volver a la lista</a>
             @endif
+        </div><br><br>
+        <div class="mb-4" style="margin-left: 50px">
+            <a href="{{ route('cierre-visitas-social.create', $visita->id) }}" class="btn btn-primary">
+                ✅ Ir A Cierre de Visita
+            </a>
+           
         </div>
     </div>
 </div>

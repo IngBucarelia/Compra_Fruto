@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AuditoriaHelper;
 use App\Models\DatoPredioSocial;
 use App\Models\DatosPersonalesSocial;
 use App\Models\PlanificacionSocial;
@@ -26,13 +27,16 @@ class VisitaSocialController extends Controller
     }
 
     public function index(Request $request)
-    {
-        $buscar = $request->input('buscar');
+{
+    $buscar = $request->input('buscar');
 
-        $visitas = VisitaSocial::with(['proveedor', 'tecnico', 'plantacion'])
-            ->when($buscar, function ($query) use ($buscar) {
-                return $query->where(function ($q) use ($buscar) {
-                    $q->where('tipo_visita', 'like', "%$buscar%")
+    $visitas = VisitaSocial::with(['proveedor', 'tecnico', 'plantacion'])
+        // Filtra solo los estados válidos
+        ->whereIn('estado', ['pendiente', 'en_ejecucion', 'finalizada'])
+        // Aplica búsqueda si hay texto
+        ->when($buscar, function ($query) use ($buscar) {
+            return $query->where(function ($q) use ($buscar) {
+                $q->where('tipo_visita', 'like', "%$buscar%")
                     ->orWhere('ubicacion', 'like', "%$buscar%")
                     ->orWhereHas('proveedor', function ($q) use ($buscar) {
                         $q->where('proveedor_nombre', 'like', "%$buscar%");
@@ -43,13 +47,14 @@ class VisitaSocialController extends Controller
                     ->orWhereHas('plantacion', function ($q) use ($buscar) {
                         $q->where('nombre', 'like', "%$buscar%");
                     });
-                });
-            })
-            ->latest()
-            ->paginate(10);
+            });
+        })
+        ->latest()
+        ->paginate(10);
 
-        return view('visitas_social.index', compact('visitas', 'buscar'));
-    }
+    return view('visitas_social.index', compact('visitas', 'buscar'));
+}
+
    public function iniciar(VisitaSocial $visita)
 {
     try {
@@ -78,7 +83,7 @@ class VisitaSocialController extends Controller
 
     public function create()
     {
-        $tecnicos = User::where('rol', 2)->get(); // ⚡ ejemplo: rol 3 = técnico social
+        $tecnicos = User::where('rol', 3)->get(); // ⚡ ejemplo: rol 3 = técnico social
         $proveedores = Proveedor::all();
         return view('visitas_social.create', compact('tecnicos', 'proveedores'));
     }
@@ -173,6 +178,13 @@ class VisitaSocialController extends Controller
             DB::commit();
 
             Log::info('=== VISITA SOCIAL CREADA EXITOSAMENTE ===');
+            
+            AuditoriaHelper::registrar(
+                'create',
+                'Visita Social',
+                $visita->id,
+                'Se creó una nueva visita Social al proveedor ID ' . $request->proveedor_id
+            );
 
             return redirect()->route('visitas_social.indexSocial')
                 ->with('success', 'Visita social y planificación creadas exitosamente.');
@@ -194,6 +206,35 @@ class VisitaSocialController extends Controller
                 ->with('error', 'Error al crear la visita social: ' . $e->getMessage());
         }
     }
+
+
+    public function eliminadas(Request $request)
+        {
+            $buscar = $request->input('buscar');
+
+            $visitas = \App\Models\VisitaSocial::with(['proveedor', 'tecnico', 'plantacion'])
+                ->where('estado', 'eliminada')
+                ->when($buscar, function ($query) use ($buscar) {
+                    return $query->where(function ($q) use ($buscar) {
+                        $q->where('tipo_visita', 'like', "%$buscar%")
+                            ->orWhere('ubicacion', 'like', "%$buscar%")
+                            ->orWhereHas('proveedor', function ($q) use ($buscar) {
+                                $q->where('proveedor_nombre', 'like', "%$buscar%");
+                            })
+                            ->orWhereHas('tecnico', function ($q) use ($buscar) {
+                                $q->where('name', 'like', "%$buscar%");
+                            })
+                            ->orWhereHas('plantacion', function ($q) use ($buscar) {
+                                $q->where('nombre', 'like', "%$buscar%");
+                            });
+                    });
+                })
+                ->latest()
+                ->paginate(10);
+
+            return view('visitas_social.eliminadas', compact('visitas', 'buscar'));
+        }
+
 
 
 
@@ -239,7 +280,7 @@ public function edit($id)
         $visita = VisitaSocial::with(['proveedor', 'plantacion', 'tecnico'])->findOrFail($id);
         
         $proveedores = Proveedor::all();
-        $tecnicos = User::where('rol', 2)->get(); // Usando rol = 2 como en create
+        $tecnicos = User::where('rol', 3)->get(); // Usando rol = 2 como en create
         
         return view('visitas_social.edit', compact('visita', 'proveedores', 'tecnicos'));
         
@@ -285,7 +326,12 @@ public function update(Request $request, $id)
         }
 
         DB::commit();
-
+        AuditoriaHelper::registrar(
+                'edit',
+                'Visita Social',
+                $visita->id,
+                'Se edito una visita Social al proveedor ID ' . $request->proveedor_id
+            );
         return redirect()->route('visitas_social.indexSocial')
             ->with('success', 'Visita social actualizada exitosamente.');
 
@@ -305,12 +351,30 @@ public function update(Request $request, $id)
             ->with('error', 'Error al actualizar la visita: ' . $e->getMessage());
     }
 }
-    public function destroy($id)
+   public function destroy($id)
     {
-        $visita = VisitaSocial::findOrFail($id);
-        $visita->delete();
+        try {
+            $visita = \App\Models\VisitaSocial::findOrFail($id);
+            
+            // Cambiamos el estado en lugar de eliminar
+            $visita->estado = 'eliminada';
+            $visita->save();
 
-        return redirect()->route('visitas_social.indexSocial')->with('success', 'Visita eliminada.');
+            // Registrar en auditoría
+            \App\Helpers\AuditoriaHelper::registrar(
+                'delete',
+                'Visita Social',
+                $visita->id,
+                'Se eliminó una visita social.'
+            );
+
+            return redirect()->route('visitas_social.indexSocial')
+                ->with('success', 'La visita social fue marcada como eliminada correctamente.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('visitas_social.indexSocial')
+                ->with('error', 'Error al eliminar la visita social: ' . $e->getMessage());
+        }
     }
 
    public function exportarPDF($id)

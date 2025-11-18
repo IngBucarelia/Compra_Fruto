@@ -202,7 +202,17 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
                     </div>
                 </a>
             </div>
-
+            <div class="col-12 col-md-6 mb-4"> {{-- mb-4 añade margen inferior entre filas --}}
+                <a href="{{ route('envios.index') }}" class="dashboard-link">
+                    <div class="dashboard-card p-4">
+                        <div class="dashboard-title">Zona de Envios</div><br>
+                        <img class="logo" src="{{ asset('images/agronomico.webp') }}" style="border-radius: 30px" alt="Listado de Visitas"><br>
+                        <!-- HTML !-->
+                    <button class="button-33" role="button">Ir a Envios</button>
+                    </div>
+                    
+                </a>
+            </div>
             
             
             <div class="col-12 mt-4 d-md-none">

@@ -185,6 +185,8 @@ class FertilizacionController extends Controller
                 $fertilizacion->detalles()->create([
                     'fertilizante' => $detalle['nombre'], // Asumo que la columna se llama 'fertilizante'
                     'cantidad' => $detalle['cantidad'],
+                    'fecha_aplicacion' => $detalle['fecha_aplicacion'] ?? null,
+                    'unidad_medida' => $detalle['unidad_medida'] ?? null
                 ]);
             }
 

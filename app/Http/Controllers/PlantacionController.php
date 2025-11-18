@@ -103,15 +103,6 @@ class PlantacionController extends Controller
      */
     public function import(Request $request)
     {
-        $request->validate([
-            'csv_file' => 'required|mimes:csv,txt|max:2048',
-        ]);
-
-        try {
-            Excel::import(new PlantacionesImport, $request->file('csv_file'));
-            return back()->with('status', 'Plantaciones importadas exitosamente.');
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Hubo un problema al importar el archivo. Revisa el formato y el ID de proveedor.']);
-        }
+       
     }
 }

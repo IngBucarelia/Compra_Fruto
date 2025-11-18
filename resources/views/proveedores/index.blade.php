@@ -158,8 +158,8 @@
                                 Mostrando {{ $proveedores->firstItem() }} - {{ $proveedores->lastItem() }} de {{ $proveedores->total() }} registros
                             </div>
                             <div>
-    {{ $proveedores->links('vendor.pagination.bootstrap-5') }}
-</div>
+                            {{ $proveedores->links('vendor.pagination.bootstrap-5') }}
+                        </div>
                         </div>
                     </div>
                     @endif
@@ -168,6 +168,11 @@
 
             <!-- Botón Cancelar -->
             <div class="text-end mt-3">
+             @if(Auth::check() && in_array(Auth::user()->rol, [1]))    
+        <a href="{{ route('proveedores.eliminados') }}" class="btn btn-danger">
+            Ver eliminados
+        </a>
+        @endif
                 <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
                     <i class="fas fa-arrow-left me-2"></i>Volver
                 </button>

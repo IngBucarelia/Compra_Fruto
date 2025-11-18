@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" style="max-width: 1100px !important">
     <!-- Header con Estadísticas -->
     <div class="row mb-4">
         <div class="col-12">
