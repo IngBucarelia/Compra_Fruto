@@ -2,6 +2,9 @@
 
 @section('content')
 <style>
+      body{
+        background-image: url('{{ asset('images/fondo_envios.png') }}'); 
+    }
     @media (max-width: 768px) {
     .card-body {
         padding: 1rem;

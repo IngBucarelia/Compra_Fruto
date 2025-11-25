@@ -322,6 +322,9 @@
 </div>
 
 <style>
+    body{
+        background-image: url('{{ asset('images/fondo_social.png') }}'); 
+    }
 .container-fluid {
     max-width: 110%;
     margin: 0 auto;

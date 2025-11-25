@@ -171,7 +171,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             {{-- col-12: Ocupa todo el ancho en pantallas extra-pequeñas y pequeñas (móvil) --}}
             {{-- col-md-6: Ocupa la mitad del ancho en pantallas medianas y grandes (2 columnas) --}}
 
-            <div class="col-12 col-md-6 mb-4"> {{-- mb-4 añade margen inferior entre filas --}}
+            <div class="col-12 col-md-6 mb-4">
                 <a href="{{ route('visitasHome') }}" class="dashboard-link">
                     <div class="dashboard-card p-4">
                         <div class="dashboard-title">Componente Agronómico</div><br>
@@ -194,19 +194,19 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
             </div>
 
             <div class="col-12 col-md-6 mb-4">
-                <a href="{{ route('visitas_social.homeSocial') }}" class="dashboard-link"> {{-- ✅ ASUMO que tienes una ruta 'plantaciones.index' --}}
-                    <div class="dashboard-card p-4">
+                <a href="{{ route('visitasHomeAmbiental') }}" class="dashboard-link"> 
+                     <div class="dashboard-card p-4">
                         <div class="dashboard-title">Componente Ambiental</div><br>
-                        <img class="logo" src="{{ asset('images/ambiental.webp') }}" style="border-radius: 30px" alt="Listado de Plantaciones">
+                        <img class="logo" src="{{ asset('images/ambiental_home.png') }}" style="border-radius: 30px" alt="Listado de Plantaciones">
                         <br><button class="button-33" role="button">Ir a Componente Ambiental</button>
                     </div>
                 </a>
             </div>
-            <div class="col-12 col-md-6 mb-4"> {{-- mb-4 añade margen inferior entre filas --}}
+            <div class="col-12 col-md-6 mb-4"> 
                 <a href="{{ route('envios.index') }}" class="dashboard-link">
                     <div class="dashboard-card p-4">
                         <div class="dashboard-title">Zona de Envios</div><br>
-                        <img class="logo" src="{{ asset('images/agronomico.webp') }}" style="border-radius: 30px" alt="Listado de Visitas"><br>
+                        <img class="logo" src="{{ asset('images/envios_home.png') }}" style="border-radius: 30px" alt="Listado de Visitas"><br>
                         <!-- HTML !-->
                     <button class="button-33" role="button">Ir a Envios</button>
                     </div>

@@ -14,7 +14,7 @@ class VisitaSocial extends Model
         'tecnico_campo',
         'proveedor_id',
         'plantacion_id',
-        'ubicacion',
+        'ubicacion', 
         'tipo_visita',
         'recibio_visita',
         'estado',

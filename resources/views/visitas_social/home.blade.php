@@ -2,7 +2,9 @@
 
 @section('content')
 <style>
-   
+    body{
+        background-image: url('{{ asset('images/fondo_social.png') }}'); 
+    }
     .dashboard-container {
         background-color: #909176be; /* Color de fondo del contenedor principal */
         border-radius: 20px;

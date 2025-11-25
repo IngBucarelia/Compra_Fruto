@@ -2,6 +2,9 @@
 
 @section('content')
 <style>
+      body{
+        background-image: url('{{ asset('images/fondo_envios.png') }}'); 
+    }
 .firma-canvas { background:#fff; width:100%; max-width:400px; height:160px; border:1px solid #ccc; }
 .img-thumb { border-radius:8px; box-shadow:0 0 6px rgba(0,0,0,0.12); width:100%; height:auto; }
 @media (max-width: 768px) {

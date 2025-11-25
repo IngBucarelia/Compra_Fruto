@@ -2,6 +2,9 @@
 
 @section('content')
 <style>
+    body{
+        background-image: url('{{ asset('images/fondo_agronomico.png') }}'); 
+    }
    
     .dashboard-container {
         background-color: #909176be; /* Color de fondo del contenedor principal */
@@ -144,7 +147,7 @@ text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
 
 <div class="container dashboard-container">
     <div class="dashboard-content">
-        <div class="dashboard-header">
+        <div class="dashboard-header" style="color: #1d4119">
             Area de visitas Componente Agronomico<br> En Sesion :  {{ auth()->user()->name }}
         </div>
 

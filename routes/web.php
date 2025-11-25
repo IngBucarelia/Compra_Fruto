@@ -32,7 +32,31 @@ use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\DashboardPlantacionController;
 use App\Http\Controllers\DashboardVisitaSocialController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\VisitaAmbientalController;
+use App\Http\Controllers\AguaCaptacionLegalController;
+use App\Http\Controllers\AguaUsoEficienteController;
+use App\Http\Controllers\SueloConservacionController;
+use App\Http\Controllers\EnergiaManejoController;
+use App\Http\Controllers\GobernanzaHidricaController;
+use App\Http\Controllers\EmisionesGeiController;
+use App\Http\Controllers\ResiduosManejoController;
+use App\Http\Controllers\SustanciasManejoController;
+use App\Http\Controllers\VertimientosManejoController;
+use App\Http\Controllers\HmpManejoController;
+use App\Http\Controllers\AvcControlController;
+use App\Http\Controllers\EcosistemaProteccionController;
+use App\Http\Controllers\AvcNoReemplazoController;
+use App\Http\Controllers\DeforestacionControlController;
+use App\Http\Controllers\ManejoSustanciaController;
+use App\Http\Controllers\ManejoVertimientosController;
+use App\Http\Controllers\PlantacionAVCController;
+use App\Http\Controllers\PlantacionEcosistemaController;
+use App\Http\Controllers\PlantacionHmpController;
+use App\Http\Controllers\PnoReemplazoNoDeforestacionController;
+use App\Http\Controllers\SustanciasQuimicasBiologicasController;
+use App\Http\Controllers\VertimientoManejoController;
+use App\Models\ManejoResiduo;
+use App\Models\VisitaAmbiental;
 
 // Redirección por defecto al login
 Route::redirect('/', '/login');
@@ -411,6 +435,8 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
     Route::get('/dashboard/visitas-agro', [DashboardController::class, 'visitasAgro'])
     ->name('dashboard.visitas.agro');
     Route::get('/dashboard/visitas-social', [DashboardVisitaSocialController::class, 'index'])->name('dashboard.visitas.social');
+    Route::get('/dashboard/visitas-ambiental', [DashboardVisitaSocialController::class, 'index'])->name('dashboard.visitas.social');
+
 
 
     // Endpoints AJAX para datos filtrados
@@ -433,5 +459,197 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
         Route::resource('usuarios', UserController::class);
     });
 
+// Zona de visitas ambientales 
 
+    Route::resource('visitasAmbientales', VisitaAmbientalController::class);
+    Route::get('/visitas/home/Ambiental', [VisitaAmbientalController::class, 'home'])->name('visitasHomeAmbiental');
+    Route::put('/visitas_ambiental/{id}/iniciar', [VisitaAmbientalController::class, 'iniciarVisita'])
+    ->name('visitas_ambiental.iniciar');
+    Route::get('/visitas-ambiental/{visita}/redirigir', [VisitaAmbientalController::class, 'redirigirSeccion'])
+    ->name('redireccion_componente_ambiental');
+
+    // Rutas para componentes (create, store, edit, update, destroy)
+    Route::get('visitas/{id}/agua-captacion/create', [AguaCaptacionLegalController::class,'create'])->name('aguaCaptacion.create');
+    Route::post('visitas/{id}/agua-captacion', [AguaCaptacionLegalController::class,'store'])->name('aguaCaptacion.store');
+    Route::get('visitas/{id}/agua-captacion/edit', [AguaCaptacionLegalController::class,'edit'])->name('aguaCaptacion.edit');
+    Route::put('visitas/{id}/agua-captacion', [AguaCaptacionLegalController::class,'update'])->name('aguaCaptacion.update');
+    Route::delete('visitas/{id}/agua-captacion', [AguaCaptacionLegalController::class,'destroy'])->name('aguaCaptacion.destroy');
+    //componente uso eficiente 
+    Route::resource('agua_uso_eficiente', AguaUsoEficienteController::class);
+        Route::get('visitas/{id}/agua-uso-eficiente/create', [AguaUsoEficienteController::class,'create'])->name('agua_uso_eficiente.create');
+
+    // componente suelo conservacion 
+
+    // Suelo Conservación
+    Route::get('/suelo-conservacion/create/{visitaAmbientalId}', [SueloConservacionController::class, 'create'])->name('suelo_conservacion.create');
+    Route::post('/suelo-conservacion/store', [SueloConservacionController::class, 'store'])->name('suelo_conservacion.store');
+
+    Route::get('/suelo-conservacion/{id}/edit', [SueloConservacionController::class, 'edit'])->name('suelo_conservacion.edit');
+    Route::put('/suelo-conservacion/{id}', [SueloConservacionController::class, 'update'])->name('suelo_conservacion.update');
+
+        // Zona de visitas ambientales 
+    Route::resource('visitasAmbientales', VisitaAmbientalController::class);
+    Route::get('/visitas/home/Ambiental', [VisitaAmbientalController::class, 'home'])->name('visitasHomeAmbiental');
+
+    // Rutas para componentes (create, store, edit, update, destroy)
+
+    // ==================== AGUA - CAPTACIÓN LEGAL ====================
+    Route::get('visitas/{id}/agua-captacion/create', [AguaCaptacionLegalController::class,'create'])->name('aguaCaptacion.create');
+    Route::post('visitas/{id}/agua-captacion', [AguaCaptacionLegalController::class,'store'])->name('aguaCaptacion.store');
+    Route::get('visitas/{id}/agua-captacion/edit', [AguaCaptacionLegalController::class,'edit'])->name('aguaCaptacion.edit');
+    Route::put('visitas/{id}/agua-captacion', [AguaCaptacionLegalController::class,'update'])->name('aguaCaptacion.update');
+    Route::delete('visitas/{id}/agua-captacion', [AguaCaptacionLegalController::class,'destroy'])->name('aguaCaptacion.destroy');
+
+    // ==================== AGUA - USO EFICIENTE ====================
+
+    Route::get('visitas/agua-uso/create', [AguaUsoEficienteController::class,'create'])->name('aguaUso.create');
+    Route::post('visitas/{id}/agua-uso', [AguaUsoEficienteController::class,'store'])->name('aguaUso.store');
+    Route::get('visitas/{id}/agua-uso/edit', [AguaUsoEficienteController::class,'edit'])->name('aguaUso.edit');
+    Route::put('visitas/{id}/agua-uso', [AguaUsoEficienteController::class,'update'])->name('aguaUso.update');
+    Route::delete('visitas/{id}/agua-uso', [AguaUsoEficienteController::class,'destroy'])->name('aguaUso.destroy');
+
+    // Suelo Conservación
+    Route::get('/suelo-conservacion/create/{visitaAmbientalId}', [SueloConservacionController::class, 'create'])->name('suelo_conservacion.create');
+    Route::post('/suelo-conservacion/store', [SueloConservacionController::class, 'store'])->name('suelo_conservacion.store');
+
+    Route::get('/suelo-conservacion/{id}/edit', [SueloConservacionController::class, 'edit'])->name('suelo_conservacion.edit');
+    Route::put('/suelo-conservacion/{id}', [SueloConservacionController::class, 'update'])->name('suelo_conservacion.update');
+
+
+    // ==================== ENERGÍA ====================
+    Route::get('ambiental/energia/{visitaId}/create', [EnergiaManejoController::class, 'create'])->name('energia.create');
+    Route::post('ambiental/energia/store', [EnergiaManejoController::class, 'store'])->name('energia.store');
+    Route::get('ambiental/energia/{id}/edit', [EnergiaManejoController::class, 'edit'])->name('energia.edit');
+    Route::put('ambiental/energia/{id}', [EnergiaManejoController::class, 'update'])->name('energia.update');
+    Route::delete('ambiental/energia/{id}', [EnergiaManejoController::class, 'destroy'])->name('energia.destroy');
+
+
+   // Gobernanza Hídrica
+    Route::get('/ambiental/gobernanza/{visita}/create', [GobernanzaHidricaController::class, 'create'])->name('gobernanza.create');
+    Route::post('/ambiental/gobernanza/{visita}', [GobernanzaHidricaController::class, 'store'])->name('gobernanza.store');
+    Route::get('/ambiental/gobernanza/{visita}/edit', [GobernanzaHidricaController::class, 'edit'])->name('gobernanza.edit');
+    Route::put('/ambiental/gobernanza/{visita}', [GobernanzaHidricaController::class, 'update'])->name('gobernanza.update');
+
+
+
+    // Emisiones GEI
+    Route::get('/ambiental/emisiones-gei/{visitaId}/create', [App\Http\Controllers\EmisionesGeiController::class, 'create'])
+        ->name('emisiones_gei.create');
+
+    Route::post('/ambiental/emisiones-gei/store', [App\Http\Controllers\EmisionesGeiController::class, 'store'])
+        ->name('emisionesGei.store');
+
+
+
+    // Manejo de residuos
+    Route::get('/ambiental/residuos/{visitaId}/create', 
+        [App\Http\Controllers\ResiduosManejoController::class, 'create'])
+        ->name('residuos.create');
+
+    Route::post('/ambiental/residuos/store', 
+        [App\Http\Controllers\ResiduosManejoController::class, 'store'])
+        ->name('residuos.store');
+
+    Route::get('/ambiental/residuos/{id}/edit', 
+        [App\Http\Controllers\ResiduosManejoController::class, 'edit'])
+        ->name('residuos.edit');
+
+    Route::put('/ambiental/residuos/{id}', 
+        [App\Http\Controllers\ResiduosManejoController::class, 'update'])
+        ->name('residuos.update');
+
+    Route::delete('/ambiental/residuos/{id}', 
+        [App\Http\Controllers\ResiduosManejoController::class, 'destroy'])
+        ->name('residuos.destroy');
+
+    // Sustancias químicas y biológicas
+    Route::get('/sustancias/create/{visitaId}', [SustanciasQuimicasBiologicasController::class, 'create'])->name('sustancias.create');
+    Route::post('/sustancias/store', [SustanciasQuimicasBiologicasController::class, 'store'])->name('sustancias.store');
+
+    Route::get('/sustancias/{id}/edit', [SustanciasQuimicasBiologicasController::class, 'edit'])->name('sustancias.edit');
+    Route::put('/sustancias/{id}', [SustanciasQuimicasBiologicasController::class, 'update'])->name('sustancias.update');
+
+    Route::delete('/sustancias/{id}', [SustanciasQuimicasBiologicasController::class, 'destroy'])->name('sustancias.destroy');
+
+    // Vertimientos
+    Route::get('/vertimientos/create/{visitaId}', [ManejoVertimientosController::class, 'create'])->name('vertimientos.create');
+    Route::post('/vertimientos/store', [ManejoVertimientosController::class, 'store'])->name('vertimientos.store');
+
+    Route::get('/vertimientos/{id}/edit', [ManejoVertimientosController::class, 'edit'])->name('vertimientos.edit');
+    Route::put('/vertimientos/{id}', [ManejoVertimientosController::class, 'update'])->name('vertimientos.update');
+
+    Route::delete('/vertimientos/{id}', [ManejoVertimientosController::class, 'destroy'])->name('vertimientos.destroy');
+
+
+    // ==================== SUSTANCIAS - MANEJO ====================
+    Route::get('visitas/{id}/sustancias-manejo/create', [SustanciasManejoController::class, 'create'])->name('sustancias-manejo.create');
+    Route::post('visitas/{id}/sustancias-manejo', [SustanciasManejoController::class, 'store'])->name('sustancias-manejo.store');
+    Route::get('visitas/{id}/sustancias-manejo/edit', [SustanciasManejoController::class, 'edit'])->name('sustancias-manejo.edit');
+    Route::put('visitas/{id}/sustancias-manejo', [SustanciasManejoController::class, 'update'])->name('sustancias-manejo.update');
+    Route::delete('visitas/{id}/sustancias-manejo', [SustanciasManejoController::class, 'destroy'])->name('sustancias-manejo.destroy');
+    //manejo sustancias 
+    // create con visitaId
+    Route::get('ambiental/manejo-sustancias/{visitaId}/create',
+        [ManejoSustanciaController::class,'create'])->name('manejoSustancias.create');
+    Route::post('ambiental/manejo-sustancias/store',
+        [ManejoSustanciaController::class,'store'])->name('manejoSustancias.store');
+    Route::get('ambiental/manejo-sustancias/{id}/edit',
+        [ManejoSustanciaController::class,'edit'])->name('manejoSustancias.edit');
+    Route::put('ambiental/manejo-sustancias/{id}',
+        [ManejoSustanciaController::class,'update'])->name('manejoSustancias.update');
+
+    // vertimineto manejo 
+
+    Route::get('ambiental/vertimientos/{visitaId}/create',
+        [VertimientoManejoController::class,'create'])->name('vertimientos.create');
+    Route::post('ambiental/vertimientos/store',
+        [VertimientoManejoController::class,'store'])->name('vertimientos.store');
+    Route::get('ambiental/vertimientos/{id}/edit',
+        [VertimientoManejoController::class,'edit'])->name('vertimientos.edit');
+    Route::put('ambiental/vertimientos/{id}',
+        [VertimientoManejoController::class,'update'])->name('vertimientos.update');
+
+
+    // Plantación HMP
+    Route::get('plantacion-hmp/create/{visita}', [PlantacionHmpController::class, 'create'])->name('plantacion_hmp.create');
+    Route::post('plantacion-hmp/store', [PlantacionHmpController::class, 'store'])->name('plantacion_hmp.store');
+
+    Route::get('plantacion-hmp/{id}/edit', [PlantacionHmpController::class, 'edit'])->name('plantacion_hmp.edit');
+    Route::put('plantacion-hmp/{id}', [PlantacionHmpController::class, 'update'])->name('plantacion_hmp.update');
+
+    Route::get('plantacion-hmp/{id}', [PlantacionHmpController::class, 'show'])->name('plantacion_hmp.show');
+
+    Route::delete('plantacion-hmp/{id}', [PlantacionHmpController::class, 'destroy'])->name('plantacion_hmp.destroy');
+
+    // PLANTACION AVC
+    Route::get('visita-ambiental/{visitaId}/plantacion-avc', [PlantacionAVCController::class, 'index'])->name('plantacion_avc.index');
+    Route::get('visita-ambiental/{visitaId}/plantacion-avc/create', [PlantacionAVCController::class, 'create'])->name('plantacion_avc.create');
+    Route::post('plantacion-avc/store', [PlantacionAVCController::class, 'store'])->name('plantacion_avc.store');
+    Route::get('plantacion-avc/{id}/edit', [PlantacionAVCController::class, 'edit'])->name('plantacion_avc.edit');
+    Route::put('plantacion-avc/{id}', [PlantacionAVCController::class, 'update'])->name('plantacion_avc.update');
+    Route::delete('plantacion-avc/{id}', [PlantacionAVCController::class, 'destroy'])->name('plantacion_avc.destroy');
+
+
+    // PLANTACIÓN PROTECCIÓN DE ECOSISTEMAS
+    Route::get('visita-ambiental/{visitaId}/ecosistemas', [PlantacionEcosistemaController::class, 'index'])->name('plantacion_ecosistemas.index');
+    Route::get('visita-ambiental/{visitaId}/ecosistemas/create', [PlantacionEcosistemaController::class, 'create'])->name('plantacion_ecosistemas.create');
+    Route::post('ecosistemas/store', [PlantacionEcosistemaController::class, 'store'])->name('plantacion_ecosistemas.store');
+    Route::get('ecosistemas/{id}/edit', [PlantacionEcosistemaController::class, 'edit'])->name('plantacion_ecosistemas.edit');
+    Route::put('ecosistemas/{id}', [PlantacionEcosistemaController::class, 'update'])->name('plantacion_ecosistemas.update');
+    Route::delete('ecosistemas/{id}', [PlantacionEcosistemaController::class, 'destroy'])->name('plantacion_ecosistemas.destroy');
+
+
+    // no remplazo y no deforestacion 
+    Route::get('pno-reemplazo/create/{visitaId}', [PnoReemplazoNoDeforestacionController::class, 'create'])->name('pno_reemplazo.create');
+    Route::post('pno-reemplazo/store', [PnoReemplazoNoDeforestacionController::class, 'store'])->name('pno_reemplazo.store');
+
+    Route::get('pno-reemplazo/{id}/edit', [PnoReemplazoNoDeforestacionController::class, 'edit'])->name('pno_reemplazo.edit');
+    Route::put('pno-reemplazo/{id}', [PnoReemplazoNoDeforestacionController::class, 'update'])->name('pno_reemplazo.update');
+
+    Route::delete('pno-reemplazo/{id}', [PnoReemplazoNoDeforestacionController::class, 'destroy'])->name('pno_reemplazo.destroy');
+
+
+
+
+    
 });

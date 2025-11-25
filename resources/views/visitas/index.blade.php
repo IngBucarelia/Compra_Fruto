@@ -310,6 +310,9 @@
 </div>
 
 <style>
+     body{
+        background-image: url('{{ asset('images/fondo_agronomico.png') }}'); 
+    }
 .card {
     border-radius: 15px;
     overflow: hidden;
