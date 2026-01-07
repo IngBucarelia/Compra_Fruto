@@ -120,7 +120,7 @@
                                     <li><strong>Material:</strong> {{ $area->material }}</li>
                                     <li><strong>Estado:</strong> {{ $area->estado }}</li>
                                     <li><strong>Año siembra:</strong> {{ $area->anio_siembra }}</li>
-                                    <li><strong>Área (m²):</strong> {{ $area->area }}</li>
+                                    <li><strong></strong> {{ $area->area }}</li>
                                     <li><strong>Orden Plantis:</strong> {{ $area->orden_plantis_numero }}</li>
                                     <li><strong>Estado orden Plantis:</strong> {{ $area->estado_oren_plantis }}</li>
                                     <li><strong>Área total finca (hectáreas):</strong> {{ $area->area_total_finca_hectareas }}</li>
@@ -267,6 +267,7 @@
                                                     <li>
                                                         {{ $enf->nombre_enfermedad }} - 
                                                         <strong>Estado:</strong> {{ $enf->estado ?? '-' }}%
+                                                        
                                                     </li>
                                                 @endforeach
                                             </ul>
@@ -282,6 +283,7 @@
                                                     <li>
                                                         {{ $pla->nombre_plaga }} - 
                                                         <strong>Estado:</strong> {{ $pla->estado ?? '-' }}
+                                                        <strong>Instar:</strong> {{ $pla->instar ?? '-' }}
                                                     </li>
                                                 @endforeach
                                             </ul>

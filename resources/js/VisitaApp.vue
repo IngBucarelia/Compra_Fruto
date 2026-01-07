@@ -41,10 +41,7 @@
                 <input type="number" v-model="form.area" class="form-control" required />
               </div>
 
-              <div class="mb-3">
-                <label>Orden plantis número</label>
-                <input type="number" v-model="form.orden_plantis_numero" class="form-control" />
-              </div>
+              
 
               <div class="mb-3">
                 <label>d</label>

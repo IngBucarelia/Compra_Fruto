@@ -49,6 +49,8 @@ class SanidadController extends Controller
             'plagas' => 'nullable|array',
             'plagas.*.nombre' => 'required|string|max:255',
             'plagas.*.estado' => 'nullable|string|max:255',
+            'plagas.*.instar'  => 'nullable|string|max:255',
+
 
             'trampas' => 'nullable|array',
             'trampas.*.ciclos' => 'nullable|string|max:255',
@@ -75,6 +77,7 @@ class SanidadController extends Controller
                     $sanidad->plagas()->create([
                         'nombre_plaga' => $pla['nombre'],
                         'estado' => $pla['estado'] ?? null,
+                        'instar' => $pla['instar'] ?? null,
                     ]);
                 }
             }
@@ -245,6 +248,8 @@ class SanidadController extends Controller
                 $sanidad->plagas()->create([
                     'nombre_plaga' => $pla['nombre'],
                     'estado' => $pla['estado'] ?? null,
+                    'instar' => $pla['instar'] ?? null,
+
                 ]);
             }
 

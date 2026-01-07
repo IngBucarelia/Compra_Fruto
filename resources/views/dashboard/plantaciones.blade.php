@@ -59,6 +59,9 @@
                             <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i>PDF</a></li>
                         </ul>
                     </div>
+                    <a href="{{ route('plantaciones.create') }}" class="btn btn-info">
+                                                    <i class="fas fa-plus me-2"></i>Crear Plantación
+                                                </a>
                 </div>
             </div>
         </div>

@@ -202,7 +202,7 @@
                                                 <i class="fas fa-user"></i>
                                             </div>
                                             <div>
-                                                <strong>{{ $v->tecnico->nombre ?? '-' }}</strong>
+                                                <strong>{{ $v->tecnico->name ?? '-' }}</strong>
                                                 <br>
                                                 <small class="text-muted">Técnico</small>
                                             </div>

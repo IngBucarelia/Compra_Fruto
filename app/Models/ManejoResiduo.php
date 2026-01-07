@@ -13,17 +13,30 @@ class ManejoResiduo extends Model
 
     protected $fillable = [
         'visita_ambiental_id',
-        'capacitacion_personal',
-        'conoce_clasificacion_residuos',
-        'certificados_respel',
+
+        'personas_manipulan',
+
+        'capacita_personal',
+        'personas_capacitadas',
+        'porcentaje_capacitadas',
+
+        'conoce_diferencias',
+
+        'certificado_final_respel',
+        'peso_respel',
+        'imagen_certificado_respel',
+
         'manifiesto_transporte_respel',
+        'imagen_manifiesto_respel',
+
         'puntos_ecologicos',
-        'entrega_residuos_transportador_autorizado',
-        'disposicion_final_empresa_autorizada',
-        'acciones_minimizacion_impactos',
-        'certificado_disposicion_final',
-        'aprovechables_gestionados',
-        'pesa_registra_cantidades',
+        'entrega_transportador_aut',
+        'disposicion_empresa_aut',
+        'acciones_minimizar_impacto',
+        'certificado_relleno_sanitario',
+        'residuos_aprovechables_gestion',
+        'pesa_y_registra',
+
         'observaciones',
     ];
 

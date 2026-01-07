@@ -10,20 +10,42 @@ class SustanciasQuimicasBiologicasController extends Controller
 {
     public function create($visitaId)
     {
-        return view('sustancias.create', compact('visitaId'));
+         $visita = VisitaAmbiental::with([
+            'aguaCaptacionLegal',
+            'aguaUsoEficiente',
+            'sueloConservacion'
+        ])->findOrFail($visitaId);
+        
+        return view('sustancias.create', [
+            'visita' => $visita,  // Pasar $visita, no $visitaId
+            'visitaId' => $visita->id
+        ]);
+        
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'visita_ambiental_id' => 'required|exists:visita_ambientals,id'
+        $data = $request->validate([
+            'visita_ambiental_id' => 'required|exists:visita_ambientals,id',
+            'cuenta_poes' => 'required|boolean',
+            'personal_capacitado' => 'required|boolean',
+            'almacenamiento_adecuado' => 'required|boolean',
+            'imagen_poes' => 'nullable|image|max:4096',
+            'observaciones' => 'nullable|string',
         ]);
 
-        SustanciasQuimicasBiologicas::create($request->all());
+        if ($request->hasFile('imagen_poes')) {
+            $data['imagen_poes'] = $request->file('imagen_poes')
+                ->store('sustancias/poes', 'public');
+        }
 
-        return redirect()->route('visitasAmbientales.show', $request->visita_ambiental_id)
-                         ->with('success', 'Registro guardado correctamente.');
+        SustanciasQuimicasBiologicas::create($data);
+
+        return redirect()
+            ->route('vertimientos.create', $request->visita_ambiental_id)
+            ->with('success', 'Registro guardado correctamente.');
     }
+
 
     public function edit($id)
     {

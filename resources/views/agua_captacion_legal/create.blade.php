@@ -47,7 +47,7 @@
     }
 </style>
 
-<div class="container offline-form-container">
+<div class="container offline-form-container" style="width:85%">
 
     {{-- Mensajes --}}
     @if(session('success'))
@@ -90,20 +90,20 @@
                                     <div class="input-group input-group-lg">
                                         <select id="componente" name="seccion" class="form-select" required
                                                 style="border-radius: 10px 0 0 10px; border: 2px solid #e9ecef;">
-                                            <option value="">Seleccione un componente</option>
+                                           <option value="inicio">🏠 Inicio de Visita</option>
                                             <option value="agua_captacion_legal">💧 Agua - Captación Legal</option>
                                             <option value="agua_uso_eficiente">🚰 Agua - Uso Eficiente</option>
                                             <option value="suelo_conservacion">🌱 Suelo - Conservación</option>
-                                            <option value="energia">⚡ Energía</option>
+                                            <option value="energia_manejo">⚡ Energía - Manejo</option>
                                             <option value="gobernanza_hidrica">🤝 Gobernanza Hídrica</option>
-                                            <option value="emisiones_gei">🏭 Emisiones GEI</option>
+                                            <option value="emisiones_gei">🌍 Emisiones GEI</option>
                                             <option value="residuos_manejo">🗑️ Residuos - Manejo</option>
-                                            <option value="sustancias_manejo">🧪 Sustancias - Manejo</option>
-                                            <option value="vertimientos_manejo">💦 Vertimientos - Manejo</option>
-                                            <option value="hmp_manejo">☣️ HMP - Manejo</option>
-                                            <option value="avc_control">🛡️ AVC - Control</option>
-                                            <option value="ecosistema_proteccion">🌳 Ecosistema - Protección</option>
-                                            <option value="avc_no_reemplazo">🚫 AVC - No Reemplazo 🌲 No Deforestación</option>
+                                            <option value="sustancias_quimicas_biologicas">⚗️ Sustancias Químicas/Biológicas</option>
+                                            <option value="vertimiento_manejo">💦 Vertimiento - Manejo</option>
+                                            <option value="plantacion_hmp">🌳 Plantación HMP</option>
+                                            <option value="plantacion_avc">🦜 Plantación AVC</option>
+                                            <option value="plantacion_ecosistemas">🌿 Plantación Ecosistemas</option>
+                                            <option value="cierre_visita">✅ Cierre de Visita</option>
                                            
                                         </select>
                                         <button type="submit" class="btn btn-success" 
@@ -152,53 +152,87 @@
             <div class="card-header-green">Registrar — Agua: Captación Legal</div>
             <div class="p-3">
                 <form action="{{ route('aguaCaptacion.store', $visita->id) }}" method="POST">
-                    @csrf
+    @csrf
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="permiso_concesion" id="permiso_concesion" class="form-check-input" value="1" {{ old('permiso_concesion') ? 'checked' : '' }}>
-                        <label for="permiso_concesion" class="form-check-label">Cuenta con el permiso de concesión actualizado de acuerdo al volumen requerido</label>
-                    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="permiso_concesion" class="form-label fw-bold">Cuenta con el permiso de concesión actualizado de acuerdo al volumen requerido</label>
+                <select name="permiso_concesion" id="permiso_concesion" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('permiso_concesion') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('permiso_concesion') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="permiso_ocupacion_cauce" id="permiso_ocupacion_cauce" class="form-check-input" value="1" {{ old('permiso_ocupacion_cauce') ? 'checked' : '' }}>
-                        <label for="permiso_ocupacion_cauce" class="form-check-label">Cuenta con el permiso de ocupación de cauce</label>
-                    </div>
+            <div class="mb-3">
+                <label for="permiso_ocupacion_cauce" class="form-label fw-bold">Cuenta con el permiso de ocupación de cauce</label>
+                <select name="permiso_ocupacion_cauce" id="permiso_ocupacion_cauce" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('permiso_ocupacion_cauce') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('permiso_ocupacion_cauce') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="permisos_captacion" id="permisos_captacion" class="form-check-input" value="1" {{ old('permisos_captacion') ? 'checked' : '' }}>
-                        <label for="permisos_captacion" class="form-check-label">Cuenta con los permisos que autoricen la(s) captación(es)</label>
-                    </div>
+            <div class="mb-3">
+                <label for="permisos_captacion" class="form-label fw-bold">Cuenta con los permisos que autoricen la(s) captación(es)</label>
+                <select name="permisos_captacion" id="permisos_captacion" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('permisos_captacion') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('permisos_captacion') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="registro_agua" id="registro_agua" class="form-check-input" value="1" {{ old('registro_agua') ? 'checked' : '' }}>
-                        <label for="registro_agua" class="form-check-label">Cuenta con un registro de agua que evidencie el cumplimiento del volumen concesionado</label>
-                    </div>
+            <div class="mb-3">
+                <label for="registro_agua" class="form-label fw-bold">Cuenta con un registro de agua que evidencie el cumplimiento del volumen concesionado</label>
+                <select name="registro_agua" id="registro_agua" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('registro_agua') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('registro_agua') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
+        </div>
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="cumple_manejo_construccion" id="cumple_manejo_construccion" class="form-check-input" value="1" {{ old('cumple_manejo_construccion') ? 'checked' : '' }}>
-                        <label for="cumple_manejo_construccion" class="form-check-label">Cumple con la obligación de manejo, construcción y distribución requerida en el permiso</label>
-                    </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="cumple_manejo_construccion" class="form-label fw-bold">Cumple con la obligación de manejo, construcción y distribución requerida en el permiso</label>
+                <select name="cumple_manejo_construccion" id="cumple_manejo_construccion" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('cumple_manejo_construccion') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('cumple_manejo_construccion') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="gestion_permiso_ocupacion" id="gestion_permiso_ocupacion" class="form-check-input" value="1" {{ old('gestion_permiso_ocupacion') ? 'checked' : '' }}>
-                        <label for="gestion_permiso_ocupacion" class="form-check-label">Ha realizado la gestión para la obtención de permisos de ocupación de cauce</label>
-                    </div>
+            <div class="mb-3">
+                <label for="gestion_permiso_ocupacion" class="form-label fw-bold">Ha realizado la gestión para la obtención de permisos de ocupación de cauce</label>
+                <select name="gestion_permiso_ocupacion" id="gestion_permiso_ocupacion" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('gestion_permiso_ocupacion') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('gestion_permiso_ocupacion') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
 
-                    <div class="mb-2 form-check">
-                        <input type="checkbox" name="gestion_permiso_captacion" id="gestion_permiso_captacion" class="form-check-input" value="1" {{ old('gestion_permiso_captacion') ? 'checked' : '' }}>
-                        <label for="gestion_permiso_captacion" class="form-check-label">Ha realizado la gestión para la obtención de permisos que autoricen la(s) captación(es)</label>
-                    </div>
+            <div class="mb-3">
+                <label for="gestion_permiso_captacion" class="form-label fw-bold">Ha realizado la gestión para la obtención de permisos que autoricen la(s) captación(es)</label>
+                <select name="gestion_permiso_captacion" id="gestion_permiso_captacion" class="form-select">
+                    <option value="">Seleccione...</option>
+                    <option value="1" {{ old('gestion_permiso_captacion') == '1' ? 'selected' : '' }}>Sí</option>
+                    <option value="0" {{ old('gestion_permiso_captacion') == '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
-                    <div class="mb-3">
-                        <label for="observaciones" class="form-label fw-bold">Observaciones</label>
-                        <textarea name="observaciones" id="observaciones" rows="3" class="form-control">{{ old('observaciones') }}</textarea>
-                    </div>
+    <div class="mb-3">
+        <label for="observaciones" class="form-label fw-bold">Observaciones</label>
+        <textarea name="observaciones" id="observaciones" rows="3" class="form-control">{{ old('observaciones') }}</textarea>
+    </div>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ route('visitasAmbientales.show', $visita->id) }}" class="btn btn-secondary">⬅️ Volver</a>
-                        <button type="submit" class="btn btn-success">Guardar componente</button>
-                    </div>
-                </form>
+    <div class="d-flex justify-content-between">
+        <a href="{{ route('visitasAmbientales.show', $visita->id) }}" class="btn btn-secondary">⬅️ Volver</a>
+        <button type="submit" class="btn btn-success">Guardar componente</button>
+    </div>
+</form>
             </div>
         </div>
     @endif

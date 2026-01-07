@@ -64,31 +64,114 @@ class SocialSyncController extends Controller
             'participa_labores' => 'nullable|boolean'
         ];
 
-        return $this->handleSyncRequest($request, MiembroHogar::class, $rules);
+    return $this->handleSyncRequest($request, MiembroHogar::class, $rules);
     }
 
     /**
      * Sincronizar datos del predio social (soporta lote o registro único).
      */
-    public function syncDatosPredio(Request $request)
-    {
-        $rules = [
-            'visita_social_id' => 'required|exists:visita_socials,id',
-            'nombre_finca' => 'nullable|string|max:255',
-            'forma_tenencia' => 'nullable|string|max:100',
-            'municipio' => 'nullable|string|max:100',
-            'vereda' => 'nullable|string|max:100',
-            'registrado_ica' => 'nullable|boolean',
-            'vive_predio' => 'nullable|boolean',
-            'infraestructura_predio' => 'nullable|string|max:255',
-            'infraestructura_vial' => 'nullable|array',
-            'servicios_publicos' => 'nullable|array',
-            'observaciones' => 'nullable|string'
-        ];
-        $jsonFields = ['infraestructura_vial', 'servicios_publicos'];
 
-        return $this->handleSyncRequest($request, DatoPredioSocial::class, $rules, $jsonFields);
-    }
+    
+    public function syncDatosPredio(Request $request)
+        {
+            $rules = [
+                'visita_social_id' => 'required|exists:visita_socials,id',
+                'nombre_finca' => 'nullable|string|max:255',
+                'forma_tenencia' => 'nullable', // ELIMINA TODA VALIDACIÓN
+                'municipio' => 'nullable|string|max:100',
+                'vereda' => 'nullable|string|max:100',
+                'registrado_ica' => 'nullable|boolean',
+                'vive_predio' => 'nullable|boolean',
+                'infraestructura_predio' => 'nullable|string|max:255',
+                'infraestructura_vial' => 'nullable|array',
+                'servicios_publicos' => 'nullable|array',
+                'observaciones' => 'nullable|string'
+            ];
+            $jsonFields = ['infraestructura_vial', 'servicios_publicos'];
+
+            // Primero validar sin forma_tenencia
+            $validator = Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validación fallida: ' . $validator->errors()->first()
+                ], 422);
+            }
+
+            $data = $validator->validated();
+            
+            // Ahora manejar forma_tenencia manualmente
+            if ($request->has('forma_tenencia')) {
+                if (is_array($request->forma_tenencia)) {
+                    // Si es array, convertir a string separado por comas
+                    $data['forma_tenencia'] = implode(', ', $request->forma_tenencia);
+                } else {
+                    // Si ya es string, usarlo directamente
+                    $data['forma_tenencia'] = $request->forma_tenencia;
+                }
+            }
+
+            // Crear nueva request con los datos procesados
+            $newRequest = new Request($data);
+            
+            return $this->handleSyncRequest($newRequest, DatoPredioSocial::class, [], $jsonFields);
+        }
+        // Método alternativo que convierte array a string
+        protected function handleSyncRequestConArrayConversion(Request $request, string $modelClass, array $rules, array $jsonFields = [])
+        {
+            DB::beginTransaction();
+            
+            try {
+                $data = $request->all();
+                
+                // 1. Armonizar la estructura de datos
+                if (isset($data['submissions']) && is_array($data['submissions'])) {
+                    $submissions = $data['submissions'];
+                } else if (is_array($data) && array_keys($data) === range(0, count($data) - 1) && count($data) > 0) {
+                    $submissions = $data;
+                } else {
+                    $submissions = [$data];
+                }
+                
+                $results = [];
+                $sincronizados = 0;
+                $entityName = class_basename($modelClass);
+
+                // 2. Procesar cada registro
+                foreach ($submissions as $submission) {
+                    // CONVERTIR forma_tenencia de array a string antes de procesar
+                    if (isset($submission['forma_tenencia']) && is_array($submission['forma_tenencia'])) {
+                        $submission['forma_tenencia'] = implode(', ', $submission['forma_tenencia']);
+                    }
+                    
+                    $result = $this->processSubmission($submission, $modelClass, $rules, $jsonFields, self::ID_MAPPING);
+                    $results[] = $result;
+                    
+                    if ($result['success']) {
+                        $sincronizados++;
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Datos de {$entityName} sincronizados correctamente",
+                    'sincronizados' => $sincronizados,
+                    'total' => count($results),
+                    'results' => $results
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error("Error en sincronización de {$modelClass}: " . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => "Error al sincronizar datos de {$entityName}: " . $e->getMessage()
+                ], 500);
+            }
+        }
 
     /**
      * Sincronizar fuerza laboral social (soporta lote o registro único).

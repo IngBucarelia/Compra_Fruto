@@ -46,7 +46,13 @@ use App\Http\Controllers\HmpManejoController;
 use App\Http\Controllers\AvcControlController;
 use App\Http\Controllers\EcosistemaProteccionController;
 use App\Http\Controllers\AvcNoReemplazoController;
+use App\Http\Controllers\CierreVisitaAmbientalController;
 use App\Http\Controllers\DeforestacionControlController;
+use App\Http\Controllers\EvaluacionIbtController;
+use App\Http\Controllers\EvaluacionIbtFinalizarController;
+use App\Http\Controllers\IbtCosechaProduccionController;
+use App\Http\Controllers\IbtEstablecimientoCultivoController;
+use App\Http\Controllers\IbtLaboresCulturalesController;
 use App\Http\Controllers\ManejoSustanciaController;
 use App\Http\Controllers\ManejoVertimientosController;
 use App\Http\Controllers\PlantacionAVCController;
@@ -55,8 +61,9 @@ use App\Http\Controllers\PlantacionHmpController;
 use App\Http\Controllers\PnoReemplazoNoDeforestacionController;
 use App\Http\Controllers\SustanciasQuimicasBiologicasController;
 use App\Http\Controllers\VertimientoManejoController;
-use App\Models\ManejoResiduo;
-use App\Models\VisitaAmbiental;
+
+use App\Http\Controllers\IbtManejoNutricionalController;
+use App\Http\Controllers\IbtManejoSanitarioController;
 
 // Redirección por defecto al login
 Route::redirect('/', '/login');
@@ -430,10 +437,7 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
 
     Route::get('/dashboard/visitas-agro', [DashboardController::class, 'visitasAgro'])
     ->name('dashboard.visitas_agro')
-    ->middleware('auth');
-
-    Route::get('/dashboard/visitas-agro', [DashboardController::class, 'visitasAgro'])
-    ->name('dashboard.visitas.agro');
+    ->middleware('auth'); 
     Route::get('/dashboard/visitas-social', [DashboardVisitaSocialController::class, 'index'])->name('dashboard.visitas.social');
     Route::get('/dashboard/visitas-ambiental', [DashboardVisitaSocialController::class, 'index'])->name('dashboard.visitas.social');
 
@@ -458,6 +462,26 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
     Route::middleware(['auth'])->group(function () {
         Route::resource('usuarios', UserController::class);
     });
+
+
+    Route::prefix('dashboard')->group(function () {
+
+    // Vista principal del dashboard agronómico
+    Route::get('/visitas-agro', 
+        [DashboardController::class, 'visitasAgro']
+    )->name('dashboard.visitas.agro');
+
+    // Datos principales (estado, proveedor, plantación, KPIs)
+    Route::get('/visitas-agro/data', 
+        [DashboardController::class, 'dataVisitasAgro']
+    )->name('dashboard.visitas.agro.data');
+
+    // Datos de módulos técnicos
+    Route::get('/visitas-agro/data-modulos', 
+        [DashboardController::class, 'dataModulos']
+    )->name('dashboard.visitas.agro.data.modulos');
+
+});
 
 // Zona de visitas ambientales 
 
@@ -571,14 +595,6 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
 
     Route::delete('/sustancias/{id}', [SustanciasQuimicasBiologicasController::class, 'destroy'])->name('sustancias.destroy');
 
-    // Vertimientos
-    Route::get('/vertimientos/create/{visitaId}', [ManejoVertimientosController::class, 'create'])->name('vertimientos.create');
-    Route::post('/vertimientos/store', [ManejoVertimientosController::class, 'store'])->name('vertimientos.store');
-
-    Route::get('/vertimientos/{id}/edit', [ManejoVertimientosController::class, 'edit'])->name('vertimientos.edit');
-    Route::put('/vertimientos/{id}', [ManejoVertimientosController::class, 'update'])->name('vertimientos.update');
-
-    Route::delete('/vertimientos/{id}', [ManejoVertimientosController::class, 'destroy'])->name('vertimientos.destroy');
 
 
     // ==================== SUSTANCIAS - MANEJO ====================
@@ -588,6 +604,26 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
     Route::put('visitas/{id}/sustancias-manejo', [SustanciasManejoController::class, 'update'])->name('sustancias-manejo.update');
     Route::delete('visitas/{id}/sustancias-manejo', [SustanciasManejoController::class, 'destroy'])->name('sustancias-manejo.destroy');
     //manejo sustancias 
+
+
+    // Rutas para componente Ambiental - manteniendo tu estructura actual
+Route::get('/ambiental', [VisitaAmbientalController::class, 'index'])->name('visitasHomeAmbiental');
+
+// Si quieres seguir el mismo patrón que Social, sería:
+Route::prefix('ambiental')->name('visitas_ambiental.')->group(function () {
+    Route::get('/home', [VisitaAmbientalController::class, 'index'])->name('homeAmbiental');
+    Route::get('/create', [VisitaAmbientalController::class, 'create'])->name('create');
+    Route::post('/store', [VisitaAmbientalController::class, 'store'])->name('store');
+    Route::get('/{visita}/edit', [VisitaAmbientalController::class, 'edit'])->name('edit');
+    Route::put('/{visita}', [VisitaAmbientalController::class, 'update'])->name('update');
+    Route::delete('/{visita}', [VisitaAmbientalController::class, 'destroy'])->name('destroy');
+    
+    // Para importaciones
+    Route::get('/import', [VisitaAmbientalController::class, 'showImportForm'])->name('import.form');
+    Route::post('/import', [VisitaAmbientalController::class, 'import'])->name('import');
+    Route::get('/full-import', [VisitaAmbientalController::class, 'showFullImportForm'])->name('full-import.form');
+    Route::post('/full-import', [VisitaAmbientalController::class, 'fullImport'])->name('full-import');
+});
     // create con visitaId
     Route::get('ambiental/manejo-sustancias/{visitaId}/create',
         [ManejoSustanciaController::class,'create'])->name('manejoSustancias.create');
@@ -649,7 +685,184 @@ Route::get('/visitas-social/{visita}/redirigir', [App\Http\Controllers\VisitaSoc
     Route::delete('pno-reemplazo/{id}', [PnoReemplazoNoDeforestacionController::class, 'destroy'])->name('pno_reemplazo.destroy');
 
 
+// ************************************************ Rutas del ibt****************************************************************
 
 
-    
+    Route::prefix('evaluaciones-ibt')->group(function () {
+        Route::get('/', [EvaluacionIbtController::class, 'index'])->name('evaluaciones-ibt.index');
+        Route::get('/create', [EvaluacionIbtController::class, 'create'])->name('evaluaciones-ibt.create');
+        Route::post('/', [EvaluacionIbtController::class, 'store'])->name('evaluaciones-ibt.store');
+        Route::get('/{id}', [EvaluacionIbtController::class, 'show'])->name('evaluaciones-ibt.show');
+        Route::get('/{id}/edit', [EvaluacionIbtController::class, 'edit'])->name('evaluaciones-ibt.edit');
+        Route::put('/{id}', [EvaluacionIbtController::class, 'update'])->name('evaluaciones-ibt.update');
+        Route::delete('/{id}', [EvaluacionIbtController::class, 'destroy'])->name('evaluaciones-ibt.destroy');
+        
+        // Exportaciones
+        Route::get('/{id}/exportar-pdf', [EvaluacionIbtController::class, 'exportarPDF'])->name('evaluaciones-ibt.exportar-pdf');
+        Route::get('/{id}/exportar-excel', [EvaluacionIbtController::class, 'exportarExcel'])->name('evaluaciones-ibt.exportar-excel');
+        
+        // Dashboard
+        Route::get('/dashboard', [EvaluacionIbtController::class, 'dashboard'])->name('evaluaciones-ibt.dashboard');
+    });
+
+    Route::get(
+        '/evaluaciones-ibt/plantaciones-por-proveedor/{proveedor}',
+        [App\Http\Controllers\EvaluacionIbtController::class, 'plantacionesPorProveedor']
+    )->name('evaluaciones-ibt.plantaciones-por-proveedor');
+
+    //*********************establecimiento de cultivo rutas************************ 
+
+        Route::prefix('ibt')->name('ibt.')->group(function () {
+
+            Route::get(
+                'evaluaciones/{evaluacion}/establecimiento-cultivo',
+                [IbtEstablecimientoCultivoController::class, 'redirect']
+            )->name('establecimiento_cultivo.redirect');
+
+            Route::get(
+                'establecimiento-cultivo/create/{evaluacion}',
+                [IbtEstablecimientoCultivoController::class, 'create']
+            )->name('establecimiento_cultivo.create');
+
+            Route::get(
+                'ibt/establecimiento-cultivo/{registro}/edit',
+                [IbtEstablecimientoCultivoController::class, 'edit']
+            )->name('establecimiento_cultivo.edit');
+
+            Route::post(
+                'establecimiento-cultivo',
+                [IbtEstablecimientoCultivoController::class, 'store']
+            )->name('establecimiento_cultivo.store');
+
+            Route::put(
+                'establecimiento-cultivo/{establecimiento}',
+                [IbtEstablecimientoCultivoController::class, 'update']
+            )->name('establecimiento_cultivo.update');
+        });
+
+        Route::prefix('ibt')->name('ibt.')->group(function () {
+
+            Route::get(
+                'labores-culturales/create/{evaluacion}',
+                [IbtLaboresCulturalesController::class, 'create']
+            )->name('labores_culturales.create');
+
+            Route::post(
+                'labores-culturales',
+                [IbtLaboresCulturalesController::class, 'store']
+            )->name('labores_culturales.store');
+
+            Route::get(
+                'labores-culturales/{registro}/edit',
+                [IbtLaboresCulturalesController::class, 'edit']
+            )->name('labores_culturales.edit');
+
+            Route::put(
+                'labores-culturales/{registro}',
+                [IbtLaboresCulturalesController::class, 'update']
+            )->name('labores_culturales.update');
+        });
+
+        Route::prefix('ibt/manejo-nutricional')->name('ibt.manejo_nutricional.')->group(function () {
+
+            // Crear (si NO existe registro)
+            Route::get('/create/{evaluacion}', 
+                [IbtManejoNutricionalController::class, 'create']
+            )->name('create');
+
+            // Guardar
+            Route::post('/store', 
+                [IbtManejoNutricionalController::class, 'store']
+            )->name('store');
+
+            // Editar (si YA existe registro)
+            Route::get('/edit/{id}', 
+                [IbtManejoNutricionalController::class, 'edit']
+            )->name('edit');
+
+            // Actualizar
+            Route::put('/update/{id}', 
+                [IbtManejoNutricionalController::class, 'update']
+            )->name('update');
+        });
+
+        Route::prefix('ibt')->name('ibt.')->group(function () {
+
+            Route::get('manejo-sanitario/create/{evaluacion}',
+                [IbtManejoSanitarioController::class,'create']
+            )->name('manejo_sanitario.create');
+
+            Route::post('manejo-sanitario',
+                [IbtManejoSanitarioController::class,'store']
+            )->name('manejo_sanitario.store');
+
+            Route::get('manejo-sanitario/{id}/edit',
+                [IbtManejoSanitarioController::class,'edit']
+            )->name('manejo_sanitario.edit');
+
+            Route::put('manejo-sanitario/{id}',
+                [IbtManejoSanitarioController::class,'update']
+            )->name('manejo_sanitario.update');
+        });
+
+
+        Route::prefix('ibt')->name('ibt.')->group(function () {
+
+            Route::get('cosecha-produccion/create/{evaluacion}',
+                [IbtCosechaProduccionController::class,'create']
+            )->name('cosecha_produccion.create');
+
+            Route::post('cosecha-produccion',
+                [IbtCosechaProduccionController::class,'store']
+            )->name('cosecha_produccion.store');
+
+            Route::get('cosecha-produccion/{id}/edit',
+                [IbtCosechaProduccionController::class,'edit']
+            )->name('cosecha_produccion.edit');
+
+            Route::put('cosecha-produccion/{id}',
+                [IbtCosechaProduccionController::class,'update']
+            )->name('cosecha_produccion.update');
+        });
+
+        Route::put(
+                'evaluaciones-ibt/{id}/finalizar',
+                [EvaluacionIbtFinalizarController::class, 'finalizar']
+            )->name('evaluaciones-ibt.finalizar');
+
+            Route::get(
+                'evaluaciones-ibt/{id}/editar-calificacion',
+                [EvaluacionIbtFinalizarController::class, 'editar']
+            )->name('evaluaciones-ibt.editar-calificacion');
+
+            Route::put(
+                'evaluaciones-ibt/{id}/actualizar-calificacion',
+                [EvaluacionIbtFinalizarController::class, 'actualizar']
+            )->name('evaluaciones-ibt.actualizar-calificacion');
+            // En routes/web.php
+            Route::post('/pnoremplazo_nodeforestacion/store', [PnoReemplazoNoDeforestacionController::class, 'store'])
+                 ->name('pnoremplazo_nodeforestacion.store');
+
+
+
+//************************************ */ Cierre de Visita Ambiental *********************************************************
+
+            Route::resource('cierre-visitas-ambiental', CierreVisitaAmbientalController::class)->only(['create', 'store']);
+            Route::get('cierre-visitas-ambiental/create/{visita}', [CierreVisitaAmbientalController::class, 'create'])->name('cierre-visitas-ambiental.create');
+            Route::post('cierre-visitas-ambiental/store', [CierreVisitaAmbientalController::class, 'store'])->name('cierre-visitas-ambiental.store');
+            // Detalle completo de visita ambiental
+            Route::get('/visitas-ambiental/{id}/detalle', [VisitaAmbientalController::class, 'detalle'])
+                ->name('visitas_ambiental.detalle');
+
+                // En routes/web.php
+            Route::get('/visitas-ambiental/{id}/exportar-pdf', [VisitaAmbientalController::class, 'exportarPDF'])
+                ->name('visitas_ambiental.exportar.pdf');
+                
+            Route::get('/visitas-ambiental/{id}/exportar-excel', [VisitaAmbientalController::class, 'exportarExcel'])
+                ->name('visitas_ambiental.exportar.excel');
+
+
+
+
+
 });

@@ -16,17 +16,59 @@ class PlantacionAVCController extends Controller
         return view('plantacion_avc.index', compact('visita', 'registros'));
     }
 
+
     public function create($visitaId)
-    {
-        $visita = VisitaAmbiental::findOrFail($visitaId);
-        return view('plantacion_avc.create', compact('visita'));
-    }
+{
+    $visita = VisitaAmbiental::with([
+        'aguaCaptacionLegal',
+        'aguaUsoEficiente',
+        'sueloConservacion',
+        'energiaManejo',
+        'gobernanzaHidrica',
+        'emisionesGei',
+        'residuosManejo',
+        'sustanciasQuimicasBiologicas',
+        'vertimientoManejo',  // o 'vertimientosManejo' dependiendo de cuál uses
+        'hmpManejo'  // AÑADIR ESTA RELACIÓN
+    ])->findOrFail($visitaId);
+    
+    // Obtener área total usando el Service
+    $areaTotalFinca = \App\Services\AreaService::obtenerAreaTotalFinca($visita);
+    
+    return view('plantacion_avc.create', [
+        'visita' => $visita,
+        'areaTotalFinca' => $areaTotalFinca
+    ]);
+}
 
     public function store(Request $request)
     {
-        PlantacionAVC::create($request->all());
-        return redirect()->route('visitasAmbientales.show', $request->visita_ambiental_id)
-                         ->with('success', 'Registro guardado correctamente');
+        $validated = $request->validate([
+            'visita_ambiental_id' => 'required|exists:visita_ambientals,id',
+            'registros_avistamientos' => 'required|in:si,no',
+            'identifica_avc_arc' => 'required|in:si,no',
+            'especies_identificadas' => 'nullable|string|required_if:identifica_avc_arc,si',
+            'fecha_identificacion' => 'nullable|date|required_if:identifica_avc_arc,si',
+            'ubicacion_identificacion' => 'nullable|string|max:255',
+            'tipo_identificacion' => 'nullable|array',
+            'tipo_identificacion.*' => 'in:avistamiento_directo,rastros_huellas,monitoreo_camaras',
+            'implementa_medidas_manejo' => 'required|in:si,no',
+            'observaciones' => 'nullable|string'
+        ]);
+        
+        // Si no identifica AVC/ARC, limpiar campos relacionados
+        if ($request->identifica_avc_arc === 'no') {
+            $validated['especies_identificadas'] = null;
+            $validated['fecha_identificacion'] = null;
+            $validated['ubicacion_identificacion'] = null;
+            $validated['tipo_identificacion'] = null;
+        }
+        
+        PlantacionAvc::create($validated);
+        
+        return redirect()
+            ->route('pno_reemplazo.create', $request->visita_ambiental_id)
+            ->with('success', 'Información de AVC guardada correctamente');
     }
 
     public function edit($id)

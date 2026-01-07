@@ -36,9 +36,10 @@ class PolinizacionController extends Controller
             'fecha' => 'required|date',
             'n_pases' => 'required|integer',
             'ciclos_ronda' => 'required|integer',
-            'ana' => 'required|numeric',
+            'ana' => 'required|string',
             'tipo_ana' => 'required|in:solido,liquido',
-            'talco' => 'required|numeric',
+            'nombre_ana' =>'nullable|string',
+            'talco' => 'required|string',
         ]);
 
         Polinizacion::create($data);
@@ -100,39 +101,51 @@ class PolinizacionController extends Controller
          
 
 
-       public function syncOffline(Request $request)
-    {
-        $data = $request->json()->all();
-        Log::info('Datos recibidos para sincronizar Polinización:', $data);
+      public function syncOffline(Request $request)
+        {
+            $data = $request->json()->all();
+            Log::info('Datos recibidos para sincronizar Polinización:', $data);
 
-        try {
-            $request->validate([
-                'visita_id' => 'required|integer',
-                'n_pases' => 'required|integer',
-                'ciclos_ronda' => 'required|integer',
-                'ana' => 'required|numeric',
-                'tipo_ana' => 'required|string',
-                'talco' => 'required|numeric',
-                // 'indexeddb_id' => 'nullable|string',
-            ]);
+            try {
+                $request->validate([
+                    'visita_id' => 'required|integer',
+                    'fecha' => 'required|date',
+                    'n_pases' => 'required|integer',
+                    'ciclos_ronda' => 'required|integer',
+                    'ana' => 'required|numeric',
+                    'tipo_ana' => 'required|string',
+                    'nombre_ana' => 'required|string', // ⬅️ AGREGAR ESTA LÍNEA
+                    'talco' => 'required|numeric',
+                ]);
 
-            // Asumiendo que solo hay un registro de Polinización por Visita.
-            // Si puede haber múltiples, necesitarías una clave única adicional.
-            Polinizacion::updateOrCreate(
-                ['visita_id' => $data['visita_id']],
-                $data
-            );
+                // Asegurarse de que nombre_ana esté presente
+                if (!isset($data['nombre_ana']) || empty($data['nombre_ana'])) {
+                    $data['nombre_ana'] = 'Sin especificar'; // Valor por defecto
+                }
 
-            Log::info('Registro de Polinización sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
-            return response()->json(['message' => 'Polinización sincronizada con éxito.']);
+                Polinizacion::updateOrCreate(
+                    ['visita_id' => $data['visita_id']],
+                    [
+                        'fecha' => $data['fecha'],
+                        'n_pases' => $data['n_pases'],
+                        'ciclos_ronda' => $data['ciclos_ronda'],
+                        'ana' => $data['ana'],
+                        'tipo_ana' => $data['tipo_ana'],
+                        'nombre_ana' => $data['nombre_ana'], // ⬅️ INCLUIR EXPLÍCITAMENTE
+                        'talco' => $data['talco'],
+                    ]
+                );
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error("Error de validación al sincronizar Polinización: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
-            return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            Log::error("Error inesperado al sincronizar Polinización: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Error interno del servidor al sincronizar Polinización.', 'error' => $e->getMessage()], 500);
+                Log::info('Registro de Polinización sincronizado con éxito.', ['visita_id' => $data['visita_id']]);
+                return response()->json(['message' => 'Polinización sincronizada con éxito.']);
+
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error("Error de validación al sincronizar Polinización: " . $e->getMessage(), ['errors' => $e->errors(), 'data' => $data]);
+                return response()->json(['message' => 'Error de validación.', 'errors' => $e->errors()], 422);
+            } catch (\Exception $e) {
+                Log::error("Error inesperado al sincronizar Polinización: " . $e->getMessage(), ['data' => $data, 'trace' => $e->getTraceAsString()]);
+                return response()->json(['message' => 'Error interno del servidor al sincronizar Polinización.', 'error' => $e->getMessage()], 500);
+            }
         }
-    }
 
 }

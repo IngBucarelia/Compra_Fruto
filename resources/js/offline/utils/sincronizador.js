@@ -50,56 +50,50 @@ export async function sincronizarDatosOffline() {
 
         // En la función sincronizarDatosOffline, modificar la parte de áreas:
         if (storeName === 'area') {
-        try {
-            // Prepara los datos en el formato que espera el backend
-            const registrosParaEnviar = registros.map(registro => {
-            return {
-                formName: 'area',
-                formData: {
+            try {
+                const registrosParaEnviar = registros.map(registro => ({
                 ...registro,
-                // Asegurar que los campos condicionales sean null si aplica_orden_plantis es false
-                orden_plantis_numero: registro.aplica_orden_plantis ? registro.orden_plantis_numero : null,
-                estado_oren_plantis: registro.aplica_orden_plantis ? registro.estado_oren_plantis : null,
-                numero_plantas_orden_plantis: registro.aplica_orden_plantis ? registro.numero_plantas_orden_plantis : null
+                indexeddb_id: registro.local_id || registro.id,
+                // asegurar tipos
+                area: registro.area ? Number(registro.area) : null,
+                area_total_finca_hectareas: registro.area_total_finca_hectareas ? Number(registro.area_total_finca_hectareas) : null,
+                numero_palmas_total_finca: registro.numero_palmas_total_finca ? Number(registro.numero_palmas_total_finca) : null,
+                ciclos_cosecha: registro.ciclos_cosecha ? Number(registro.ciclos_cosecha) : null,
+                produccion_toneladas_por_mes: registro.produccion_toneladas_por_mes ? Number(registro.produccion_toneladas_por_mes) : null,
+                }));
+
+                console.log('📤 Enviando áreas:', registrosParaEnviar);
+
+                const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-                local_id: registro.local_id || registro.id // Usar local_id si existe, sino el id de IndexedDB
-            };
-            });
+                body: JSON.stringify({
+                    submissions: registrosParaEnviar
+                    })
+                });
 
-            console.log(`Enviando áreas:`, registrosParaEnviar);
-            const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ submissions: registrosParaEnviar })
-            });
+                if (!response.ok) {
+                const err = await response.text();
+                throw new Error(err);
+                }
 
-            if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Error al sincronizar áreas: ${errorData.message || 'Error desconocido'}`);
+                const data = await response.json();
+                console.log('✅ Áreas sincronizadas:', data);
+
+                await clearStore(storeName);
+                totalSincronizados += registrosParaEnviar.length;
+
+            } catch (error) {
+                console.error('❌ Error sincronizando áreas:', error);
+                errores.push({ storeName, error: error.message });
             }
 
-            const responseData = await response.json();
-            console.log('Respuesta del servidor:', responseData);
-            
-            // Verificar si todos los envíos fueron exitosos
-            const allSuccess = responseData.results.every(r => r.success);
-            if (allSuccess) {
-            await clearStore(storeName);
-            console.log('Áreas sincronizadas y store limpiado');
-            } else {
-            console.warn('Algunas áreas no se sincronizaron correctamente', responseData.results);
+            continue;
             }
 
-            totalSincronizados += registrosParaEnviar.length;
-        } catch (error) {
-            console.error('Error sincronizando áreas:', error);
-            errores.push({ storeName, error: error.message });
-        }
-        continue;
-        }
 
         // En la función sincronizarDatosOffline, agregar este caso para labores_cultivo:
         if (storeName === 'labores_cultivo') {
@@ -225,16 +219,74 @@ export async function sincronizarDatosOffline() {
             continue;
             }
 
-        // --- Lógica general para otros stores (procesamiento de un registro a la vez) ---
+
+                        // En la función sincronizarDatosOffline, agregar este caso para polinizacion:
+            if (storeName === 'polinizacion') {
+                try {
+                    // Prepara los datos en el formato que espera el backend
+                    const registrosParaEnviar = registros.map(registro => {
+                        const polinizacion = {
+                            visita_id: registro.visita_id,
+                            fecha: registro.fecha,
+                            n_pases: parseInt(registro.n_pases) || 0,
+                            ciclos_ronda: parseInt(registro.ciclos_ronda) || 0,
+                            ana: parseFloat(registro.ana) || 0,
+                            tipo_ana: registro.tipo_ana || '',
+                            nombre_ana: registro.nombre_ana || 'Sin especificar', // ⬅️ CAMPO CRÍTICO
+                            talco: parseFloat(registro.talco) || 0,
+                            indexeddb_id: registro.local_id || registro.id,
+                            created_at: registro.created_at
+                        };
+                        
+                        return polinizacion;
+                    });
+
+                    console.log('Enviando polinizaciones:', registrosParaEnviar);
+
+                    // Enviar cada registro individualmente (según tu backend espera POST individual)
+                    let sincronizados = 0;
+                    for (const pol of registrosParaEnviar) {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify(pol) // Envío individual
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(`Error al sincronizar polinización: ${errorData.message || 'Error desconocido'}`);
+                        }
+
+                        sincronizados++;
+                        console.log('✅ Polinización sincronizada:', pol);
+                    }
+
+                    // Limpiar store solo si todos se sincronizaron
+                    if (sincronizados === registrosParaEnviar.length) {
+                        await clearStore(storeName);
+                        console.log('Polinizaciones sincronizadas y store limpiado');
+                        totalSincronizados += sincronizados;
+                    } else {
+                        console.warn('Algunas polinizaciones no se sincronizaron correctamente');
+                    }
+
+                } catch (error) {
+                    console.error('Error sincronizando polinizaciones:', error);
+                    errores.push({ storeName, error: error.message });
+                }
+                continue; // ⬅️ IMPORTANTE: Saltar la lógica genérica
+            }
+
+        
         let storeErrores = []; // Array para almacenar errores específicos de este store (para decidir si limpiar o no)
         for (const registroOriginal of registros) {
             let registroParaEnviar = { ...registroOriginal }; // ✅ Clonar el registro para no modificar el objeto original de IndexedDB
 
-            // ✅ NUEVA LÓGICA: Asegurar que 'local_id' esté presente para 'sanidad'
-            // Esto es crucial si tu backend de Laravel espera esta clave para identificar los registros.
             if (storeName === 'sanidad' && !registroParaEnviar.local_id) {
                 // Asume que 'registroOriginal' tiene una propiedad 'id' que es la clave de IndexedDB.
-                // Si tu clave de IndexedDB es diferente (ej. 'uuid', 'key'), ajusta 'registroOriginal.id' aquí.
                 registroParaEnviar.enfermedades = (registroParaEnviar.enfermedades || []).map(e => ({
                     nombre: e.nombre || e.nombre_enfermedad || '',
                     estado: e.estado != null ? String(e.estado) : null
@@ -242,7 +294,8 @@ export async function sincronizarDatosOffline() {
 
                 registroParaEnviar.plagas = (registroParaEnviar.plagas || []).map(p => ({
                     nombre: p.nombre || p.nombre_plaga || '',
-                    estado: p.estado != null ? String(p.estado) : null
+                    estado: p.estado != null ? String(p.estado) : null,
+                    instar: p.instar != null ? String(p.instar) : null
                 }));
                 registroParaEnviar.local_id = registroOriginal.id || crypto.randomUUID(); // Fallback a UUID si no hay ID
                 console.log(`[${storeName}] Añadiendo local_id: ${registroParaEnviar.local_id} al registro.`);

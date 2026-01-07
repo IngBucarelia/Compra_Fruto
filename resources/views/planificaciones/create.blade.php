@@ -53,18 +53,13 @@
 
                                 <!-- Proveedor -->
                                 <div class="mb-4">
-                                    <label class="form-label fw-semibold text-success">
-                                        <i class="fas fa-building me-2"></i>Proveedor
-                                    </label>
-                                    <select name="proveedor_id" class="form-select form-select-lg" required id="proveedor_id"
-                                            style="border-left: 4px solid #4e73df;">
-                                        <option value="">Seleccione un proveedor</option>
-                                        @foreach($proveedores as $proveedor)
-                                            <option value="{{ $proveedor->id }}" {{ old('proveedor_id') == $proveedor->id ? 'selected' : '' }}>
-                                                🏢 {{ $proveedor->proveedor_nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <label class="form-label fw-bold text-success">Proveedor:</label>
+                            <select id="proveedor-select" name="proveedor_id" class="form-control" required>
+                                <option value="">Seleccione proveedor</option>
+                                @foreach($proveedores as $proveedor)
+                                    <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor_nombre }}</option>
+                                @endforeach
+                            </select>
                                 </div>
                             </div>
 
@@ -339,5 +334,61 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+
+$('#proveedor-select').on('change', function() {
+        const proveedorId = $(this).val();
+        
+        // Limpiar plantación y ubicación
+        $('#plantacion-select').empty().append('<option value="">Cargando...</option>').trigger('change');
+        ubicacionInput.value = '';
+
+        if (proveedorId) {
+            fetch(`/api/plantaciones/${proveedorId}`)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    $('#plantacion-select').empty().append('<option value="">Seleccione una plantación</option>');
+                    
+                    if (data.length === 0) {
+                        $('#plantacion-select').append('<option value="">No hay plantaciones para este proveedor</option>');
+                        return;
+                    }
+                    
+                    data.forEach(p => {
+                        const option = new Option(
+                            p.nombre + ' - ' + p.vereda,
+                            p.id,
+                            false,
+                            false
+                        );
+                        // Agregar data attribute para la ubicación
+                        $(option).data('ubicacion', p.vereda + ', ' + p.municipio + ', ' + p.departamento);
+                        $('#plantacion-select').append(option);
+                    });
+                    
+                    $('#plantacion-select').trigger('change');
+                })
+                .catch(error => {
+                    console.error('Error cargando plantaciones:', error);
+                    $('#plantacion-select').empty().append('<option value="">Error al cargar plantaciones</option>');
+                });
+        } else {
+            $('#plantacion-select').empty().append('<option value="">Seleccione una plantación</option>');
+        }
+    });
+
+    $(document).ready(function() {
+    // Inicializar Select2 para proveedor
+    $('#proveedor-select').select2({
+        placeholder: "Seleccione proveedor",
+        allowClear: true
+    });
+
+    )}
 </script>
 @endsection

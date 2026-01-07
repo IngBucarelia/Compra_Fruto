@@ -28,7 +28,7 @@ class GobernanzaHidricaController extends Controller
             'observaciones' => $request->observaciones,
         ]);
 
-        return redirect()->route('visitasAmbientales.show', $visitaId)
+        return redirect()->route('emisiones_gei.create', $visitaId)
             ->with('success', 'Componente registrado correctamente.');
     }
 

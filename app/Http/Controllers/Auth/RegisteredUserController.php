@@ -55,7 +55,7 @@ class RegisteredUserController extends Controller
             
             Auditoria::create([
                 'usuario_id' => Auth::id(),
-                'modulo' => 'Usuarios',
+                'tipo_modulo' => 'Usuarios',
                 'tipo_accion' => 'Crear usuario',
                 'descripcion' => "Se creó el usuario {$user->name} ({$user->email})",
             ]);

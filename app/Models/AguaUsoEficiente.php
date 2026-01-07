@@ -14,6 +14,8 @@ class AguaUsoEficiente extends Model
         'mantenimiento_sistemas',
         'uso_informacion_balance',
         'mecanismo_medicion',
+        'consumo_agua',
+        'metodo_medicion',
         'observaciones'
     ];
 

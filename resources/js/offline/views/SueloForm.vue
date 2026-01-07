@@ -4,48 +4,259 @@
 
     <div class="row mb-4">
       <!-- Tarjeta: Áreas -->
-      <div class="col-md-6">
-        <div class="card border-success">
-          <div class="card-header bg-success text-white">
-            📍 Áreas Registradas
-          </div>
-          <div class="card-body"> 
-            <div v-if="areasInfo.length > 0">
-              <div v-for="(area, index) in areasInfo" :key="area.id" class="mb-3 area-card">
-                <h5>Área #{{ index + 1 }}</h5>
-                <ul class="list-group">
-                  <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
-                  <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
-                  <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
-                  <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
-                  <li class="list-group-item"><strong>Área (m²):</strong> {{ area.area }}</li>
+      <div class="accordion mb-4" id="accordionArea">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingArea">
+                <button
+                  style="background-color: darkseagreen !important; color: aliceblue"
+                  class="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseArea"
+                  aria-controls="collapseArea"
+                >
+                  📍 Información del Área(s) guardada localmente
+                </button>
+              </h2>
+              <div
+                id="collapseArea"
+                class="accordion-collapse collapse show"
+                aria-labelledby="headingArea"
+                data-bs-parent="#accordionArea"
+              >
+                <div
+                  class="accordion-body"
+                  style="background-color: rgb(209, 241, 209) !important; color: rgb(31, 32, 34)"
+                >
+                  <!-- ⭐⭐ INFORMACIÓN GENERAL DE LA FINCA ⭐⭐ -->
+                  <div v-if="areasInfo.length > 0" class="mb-4">
+                    <div class="card shadow-sm border-success">
+                      <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                          <i class="fas fa-chart-bar me-2"></i>
+                          Información General de la Finca
+                        </h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="info-box-general mb-3">
+                              <label class="fw-bold">
+                                <i class="fas fa-ruler-combined me-2"></i>
+                                Área Total Finca:
+                              </label>
+                              <div class="info-value">
+                                {{ getInformacionGeneral('area_total_finca_hectareas') }} Ha
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="info-box-general mb-3">
+                              <label class="fw-bold">
+                                <i class="fas fa-tree me-2"></i>
+                                Total de Palmas:
+                              </label>
+                              <div class="info-value">
+                                {{ getInformacionGeneral('numero_palmas_total_finca') }}
+                                <small class="text-muted ms-2">(incluye Orden Plantis)</small>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="info-box-general mb-3">
+                              <label class="fw-bold">
+                                <i class="fas fa-sync-alt me-2"></i>
+                                Ciclos de Cosecha:
+                              </label>
+                              <div class="info-value">
+                                {{ getInformacionGeneral('ciclos_cosecha') }}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="info-box-general mb-3">
+                              <label class="fw-bold">
+                                <i class="fas fa-weight-hanging me-2"></i>
+                                Producción Total:
+                              </label>
+                              <div class="info-value">
+                                {{ getInformacionGeneral('produccion_toneladas_por_mes') }} Ton/Mes
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Desglose del total de palmas -->
+                        <div class="row mt-3 bg-light p-3 rounded">
+                          <div class="col-12">
+                            <h6 class="mb-2">
+                              <i class="fas fa-list-ol me-2"></i>
+                              Desglose del Total de Palmas
+                            </h6>
+                            <div class="row">
+                              <div class="col-md-4">
+                                <small class="d-block">
+                                  <span class="badge bg-info me-2">🌱</span>
+                                  <strong>Desarrollo:</strong> {{ calcularTotalDesarrollo }}
+                                </small>
+                              </div>
+                              <div class="col-md-4">
+                                <small class="d-block">
+                                  <span class="badge bg-success me-2">🌳</span>
+                                  <strong>Producción:</strong> {{ calcularTotalProduccionPalmas }}
+                                </small>
+                              </div>
+                              <div class="col-md-4">
+                                <small class="d-block">
+                                  <span class="badge bg-warning me-2">📋</span>
+                                  <strong>Orden Plantis:</strong> {{ calcularTotalOrdenPlantis }}
+                                </small>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  <li class="list-group-item"><strong>Área Total Finca (Ha):</strong> {{ area.area_total_finca_hectareas || 'N/A' }}</li>
-                  <li class="list-group-item"><strong>N° Palmas Total Finca:</strong> {{ area.numero_palmas_total_finca || 'N/A' }}</li>
+                  <!-- ⭐⭐ ÁREAS INDIVIDUALES ⭐⭐ -->
+                  <div v-if="areasInfo.length > 0">
+                    <h5 class="mb-3 mt-4">
+                      <i class="fas fa-map-marked-alt me-2"></i>
+                      Áreas Individuales ({{ areasInfo.length }})
+                    </h5>
+                    
+                    <div class="row">
+                      <div
+                        v-for="(area, index) in areasInfo"
+                        :key="area.local_id"
+                        class="col-md-6 mb-3"
+                      >
+                        <div class="card h-100 shadow-sm border-primary">
+                          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <div>
+                              <h6 class="mb-0">
+                                <i class="fas fa-seedling me-2"></i>
+                                Área #{{ index + 1 }}
+                              </h6>
+                              <small class="opacity-75">
+                                ID: {{ area.local_id?.substring(0, 8) || 'N/A' }}
+                              </small>
+                            </div>
+                            <span class="badge" :class="getEstadoBadgeClass(area.estado)">
+                              {{ area.estado === 'produccion' ? 'Producción' : 'Desarrollo' }}
+                            </span>
+                          </div>
+                          
+                          <div class="card-body">
+                            <!-- Información básica -->
+                            <div class="row mb-2">
+                              <div class="col-6">
+                                <small class="text-muted d-block">Variedad</small>
+                                <strong>{{ area.variedad || 'N/A' }}</strong>
+                              </div>
+                              <div class="col-6">
+                                <small class="text-muted d-block">Material</small>
+                                <strong>{{ area.material || 'N/A' }}</strong>
+                              </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                              <div class="col-12">
+                                <small class="text-muted d-block">Año de Siembra</small>
+                                <strong>{{ area.anio_siembra || 'N/A' }}</strong>
+                              </div>
+                            </div>
+                            
+                            <!-- Información específica según estado -->
+                            <div v-if="area.estado === 'desarrollo'" class="bg-info bg-opacity-10 p-2 rounded mb-2">
+                              <h6 class="text-info mb-2">
+                                <i class="fas fa-seedling me-2"></i>
+                                Información de Desarrollo
+                              </h6>
+                              <div class="row">
+                                <div class="col-6">
+                                  <small class="text-muted d-block">Área (Ha)</small>
+                                  <strong>{{ area.area_palmas_desarrollo_hectareas || '0.00' }}</strong>
+                                </div>
+                                <div class="col-6">
+                                  <small class="text-muted d-block">N° Palmas</small>
+                                  <strong>{{ area.numero_palmas_desarrollo || '0' }}</strong>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div v-if="area.estado === 'produccion'" class="bg-success bg-opacity-10 p-2 rounded mb-2">
+                              <h6 class="text-success mb-2">
+                                <i class="fas fa-tree me-2"></i>
+                                Información de Producción
+                              </h6>
+                              <div class="row">
+                                <div class="col-6">
+                                  <small class="text-muted d-block">Área (Ha)</small>
+                                  <strong>{{ area.area_palmas_produccion_hectareas || '0.00' }}</strong>
+                                </div>
+                                <div class="col-6">
+                                  <small class="text-muted d-block">N° Palmas</small>
+                                  <strong>{{ area.numero_palmas_produccion || '0' }}</strong>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Información de Orden Plantis -->
+                            <div v-if="area.aplica_orden_plantis" class="bg-warning bg-opacity-10 p-2 rounded">
+                              <h6 class="text-warning mb-2">
+                                <i class="fas fa-clipboard-check me-2"></i>
+                                Orden Plantis
+                              </h6>
+                              <div class="row">
+                                <div class="col-6">
+                                  <small class="text-muted d-block">N° Orden</small>
+                                  <strong>{{ area.orden_plantis_numero || 'N/A' }}</strong>
+                                </div>
+                                <div class="col-6">
+                                  <small class="text-muted d-block">N° Plantas</small>
+                                  <strong>{{ area.numero_plantas_orden_plantis || '0' }}</strong>
+                                </div>
+                              </div>
+                              <div class="row mt-1">
+                                <div class="col-12">
+                                  <small class="text-muted d-block">Estado</small>
+                                  <span class="badge" :class="getOrdenPlantisBadgeClass(area.estado_oren_plantis)">
+                                    {{ area.estado_oren_plantis === 'produccion' ? 'Producción' : 'Desarrollo' }}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <!-- Estado si no aplica Orden Plantis -->
+                            <div v-else class="text-center mt-2">
+                              <small class="text-muted">
+                                <i class="fas fa-times-circle me-1"></i>
+                                No aplica Orden Plantis
+                              </small>
+                            </div>
+                          </div>
+                          
+                          <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                              <i class="fas fa-calendar me-1"></i>
+                              {{ formatDate(area.fecha_guardado) }}
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  <li class="list-group-item"><strong>Área Palmas Desarrollo (Ha):</strong> {{ area.area_palmas_desarrollo_hectareas || 'N/A' }}</li>
-                  <li class="list-group-item"><strong>N° Palmas Desarrollo:</strong> {{ area.numero_palmas_desarrollo || 'N/A' }}</li>
-                  
-                  <li class="list-group-item"><strong>Área Palmas Producción (Ha):</strong> {{ area.area_palmas_produccion_hectareas || 'N/A' }}</li>
-                  <li class="list-group-item"><strong>N° Palmas Producción:</strong> {{ area.numero_palmas_produccion || 'N/A' }}</li>
-                  
-                  <li class="list-group-item"><strong>Ciclos de Cosecha:</strong> {{ area.ciclos_cosecha || 'N/A' }}</li>
-                  <li class="list-group-item"><strong>Producción (Toneladas/Mes):</strong> {{ area.produccion_toneladas_por_mes || 'N/A' }}</li>
-                  
-                  <li class="list-group-item"><strong>Aplica Orden Plantis:</strong> {{ area.aplica_orden_plantis ? 'Sí' : 'No' }}</li>
-                  
-                  <template v-if="area.aplica_orden_plantis">
-                    <li class="list-group-item"><strong>Orden Plantis N°:</strong> {{ area.orden_plantis_numero || 'N/A' }}</li>
-                    <li class="list-group-item"><strong>Estado Orden Plantis:</strong> {{ area.estado_oren_plantis || 'N/A' }}</li>
-                    <li class="list-group-item"><strong>N° Plantas Orden Plantis:</strong> {{ area.numero_plantas_orden_plantis || 'N/A' }}</li>
-                  </template>
-                </ul>
+                  <p v-else class="text-muted">No se ha registrado área para esta visita.</p>
+                </div>
               </div>
             </div>
-            <p v-else class="text-muted">No hay áreas registradas</p>
           </div>
-        </div>
-      </div>
 
       <!-- Tarjeta: Fertilizaciones -->
       <div class="col-md-6">
@@ -182,7 +393,7 @@
 
       <div class="mb-3">
         <label>Tipo de suelo:</label>
-        <select v-model="form.tipo_suelo" class="form-control" required>
+        <select v-model="form.tipo_suelo" class="form-control"  @change="toggleOtroTipoSuelo">
           <option value="">Seleccione</option>
           <option value="arenoso">Arenoso</option>
           <option value="arcilloso">Arcilloso</option>
@@ -191,6 +402,18 @@
           <option value="franco arenoso">Franco arenoso</option>
           <option value="otro">Otro</option>
         </select>
+        
+        <div v-if="mostrarCampoOtroTipoSuelo" class="mt-2">
+          <input 
+            type="text" 
+            v-model="form.otro_tipo_suelo" 
+            class="form-control" 
+            placeholder="Ingrese el tipo de suelo"
+            @input="actualizarNombreTipoSuelo"
+            required
+          >
+          <small class="text-muted">Escriba el tipo de suelo que no aparece en la lista</small>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary">💾 Guardar Suelo</button>
@@ -198,7 +421,6 @@
     <button type="button" class="btn btn-success" @click="irALaboresCultivo">
       ➡️ Ir a Labores de Cultivo
     </button>
-    <button v-if="canSync" @click="sincronizar" class="btn btn-success mt-3">🔄 Sincronizar</button>
         <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
   </div>
 </template>
@@ -217,8 +439,10 @@ export default {
       form: {
         analisis_foliar: '',
         alanalisis_suelo: '',
-        tipo_suelo: ''
+        tipo_suelo: '',
+        otro_tipo_suelo: ''
       },
+      mostrarCampoOtroTipoSuelo: false,
       canSync: navigator.onLine
     }
   },
@@ -238,7 +462,7 @@ export default {
     
     // 👉 Cargar sanidad (ya con los nuevos campos)
     this.sanidad = await getFormDataByVisita('sanidad', this.visitaId);
-
+    await this.cargarDatosSuelo();
     // Eventos para detectar cambios en la conexión
     window.addEventListener('online', this.updateOnlineStatus);
     window.addEventListener('offline', this.updateOnlineStatus);
@@ -248,6 +472,129 @@ export default {
     window.removeEventListener('offline', this.updateOnlineStatus);
   },
   methods: {
+     getOrdenPlantisBadgeClass(estado) {
+    return estado === 'produccion' ? 'bg-success' : 'bg-info';
+  },
+    getEstadoBadgeClass(estado) {
+    return estado === 'produccion' ? 'bg-success' : 'bg-info';
+  },
+    getInformacionGeneral(campo) {
+    if (this.areasInfo.length > 0) {
+      return this.areasInfo[0][campo] || 'N/A';
+    }
+    return 'N/A';
+  },
+  
+  // ⭐⭐ CALCULAR TOTALES ⭐⭐
+  calcularTotalDesarrollo() {
+    return this.areasInfo.reduce((total, area) => {
+      return total + (parseInt(area.numero_palmas_desarrollo) || 0);
+    }, 0);
+  },
+  
+  calcularTotalProduccionPalmas() {
+    return this.areasInfo.reduce((total, area) => {
+      return total + (parseInt(area.numero_palmas_produccion) || 0);
+    }, 0);
+  },
+  
+  calcularTotalOrdenPlantis() {
+    return this.areasInfo.reduce((total, area) => {
+      if (area.aplica_orden_plantis) {
+        return total + (parseInt(area.numero_plantas_orden_plantis) || 0);
+      }
+      return total;
+    }, 0);
+  },
+
+    toggleOtroTipoSuelo() {
+    if (this.form.tipo_suelo === 'otro') {
+      this.mostrarCampoOtroTipoSuelo = true;
+      this.form.otro_tipo_suelo = '';
+      this.form.tipo_suelo = ''; // Limpiar el select para forzar que use el campo "otro"
+    } else {
+      this.mostrarCampoOtroTipoSuelo = false;
+      this.form.otro_tipo_suelo = '';
+    }
+  },
+  
+  // ⭐⭐ MÉTODO PARA ACTUALIZAR EL NOMBRE DEL TIPO DE SUELO ⭐⭐
+  actualizarNombreTipoSuelo() {
+    if (this.form.otro_tipo_suelo.trim() !== '') {
+      // Cuando se escribe en "otro", automáticamente se asigna como tipo de suelo
+      this.form.tipo_suelo = this.form.otro_tipo_suelo;
+    } else {
+      this.form.tipo_suelo = '';
+    }
+  },
+  
+  // ⭐⭐ MÉTODO MODIFICADO PARA GUARDAR ⭐⭐
+  async guardar() {
+    try {
+      // Validar que si seleccionó "otro", haya ingresado un valor
+      if (this.mostrarCampoOtroTipoSuelo && !this.form.otro_tipo_suelo.trim()) {
+        alert('Por favor ingrese el tipo de suelo en el campo "Otro"');
+        return;
+      }
+      
+      // Crear objeto de datos limpio
+      const data = { 
+        analisis_foliar: this.form.analisis_foliar,
+        alanalisis_suelo: this.form.alanalisis_suelo,
+        tipo_suelo: this.form.tipo_suelo, // Esto puede ser el valor del select o del campo "otro"
+        visita_id: this.visitaId,
+        created_at: new Date().toISOString()
+      };
+      
+      // Si se usó "otro", agregar ese campo también para referencia
+      if (this.mostrarCampoOtroTipoSuelo && this.form.otro_tipo_suelo) {
+        data.otro_tipo_suelo = this.form.otro_tipo_suelo;
+        data.es_tipo_suelo_personalizado = true;
+      }
+      
+      console.log('Guardando datos de suelo:', data);
+      await saveFormData('suelo', data);
+      
+      // Limpiar formulario después de guardar
+      this.form = {
+        analisis_foliar: '',
+        alanalisis_suelo: '',
+        tipo_suelo: '',
+        otro_tipo_suelo: ''
+      };
+      this.mostrarCampoOtroTipoSuelo = false;
+      
+      alert('✅ Datos de suelo guardados correctamente');
+      
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      alert('Error al guardar los datos de suelo: ' + error.message);
+    }
+  },
+  
+  // ⭐⭐ MÉTODO PARA CARGAR DATOS EXISTENTES (si editas) ⭐⭐
+  async cargarDatosSuelo() {
+    try {
+      const datosSuelo = await getFormDataByVisita('suelo', this.visitaId);
+      if (datosSuelo && !Array.isArray(datosSuelo)) {
+        // Si hay datos guardados, cargarlos en el formulario
+        this.form.analisis_foliar = datosSuelo.analisis_foliar || '';
+        this.form.alanalisis_suelo = datosSuelo.alanalisis_suelo || '';
+        
+        // Verificar si es un tipo de suelo personalizado
+        if (datosSuelo.es_tipo_suelo_personalizado && datosSuelo.otro_tipo_suelo) {
+          this.form.tipo_suelo = 'otro';
+          this.form.otro_tipo_suelo = datosSuelo.otro_tipo_suelo;
+          this.mostrarCampoOtroTipoSuelo = true;
+        } else {
+          this.form.tipo_suelo = datosSuelo.tipo_suelo || '';
+          this.mostrarCampoOtroTipoSuelo = false;
+        }
+      }
+    } catch (error) {
+      console.error('Error cargando datos de suelo:', error);
+    }
+  },
     updateOnlineStatus() {
       this.canSync = navigator.onLine;
     },
@@ -260,20 +607,7 @@ export default {
         console.error('Error cargando áreas:', error);
       }
     },
-    async guardar() {
-      try {
-        const data = { 
-          ...this.form, 
-          visita_id: this.visitaId,
-          created_at: new Date().toISOString()
-        };
-        await saveFormData('suelo', data);
-        alert('✅ Datos de suelo guardados correctamente');
-      } catch (error) {
-        console.error('Error al guardar:', error);
-        alert('Error al guardar los datos de suelo');
-      }
-    },
+    
     irALaboresCultivo() {
       this.$router.push(`/labores?visita_id=${this.visitaId}`);
     },
@@ -307,4 +641,60 @@ export default {
 @import '../styles/offline.css';
 
 /* Estilos adicionales específicos para este componente si los necesitas */
+/* Estilos para el campo "Otro" */
+.form-control {
+  margin-bottom: 10px;
+}
+
+.mt-2 {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border-left: 3px solid #ffc107;
+}
+
+.text-muted {
+  font-size: 0.85rem;
+  color: #6c757d;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Estilo para el campo de texto "Otro" */
+input[type="text"].form-control {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 8px 12px;
+  transition: border-color 0.15s ease-in-out;
+}
+
+input[type="text"].form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Estilo para el select */
+select.form-control {
+  cursor: pointer;
+}
+
+/* Estilo para validación */
+input:invalid {
+  border-color: #dc3545;
+}
+
+input:valid {
+  border-color: #28a745;
+}
+
+/* Animación suave para mostrar/ocultar */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
 </style>

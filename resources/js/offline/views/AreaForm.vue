@@ -117,6 +117,56 @@
         </div>
       </div>
     </div>
+    <!-- ===========================
+     CAMPOS GENERALES DE FINCA
+=============================== -->
+    <div class="card mb-4 p-3 bg-white shadow-sm">
+    <h3>Información General de la Finca</h3>
+
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Área Total Finca (Ha)</label>
+          <input type="number" class="form-control" 
+                :value="calcularAreaTotalFinca" 
+                readonly>
+          <small class="text-muted">Suma de todas las áreas (Desarrollo + Producción)</small>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>N° Total de Palmas</label>
+          <input type="number" class="form-control"
+                :value="calcularTotalPalmas"
+                readonly>
+          <small class="text-muted">Suma de todas las palmas (Desarrollo + Producción)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Ciclos de Cosecha</label>
+          <!-- ⭐⭐ CAMBIO: Usar datosGenerales ⭐⭐ -->
+          <input type="number" class="form-control" 
+                 v-model="datosGenerales.ciclos_cosecha">
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Producción Total (Ton/Mes)</label>
+          <!-- ⭐⭐ CAMBIO: Usar datosGenerales ⭐⭐ -->
+          <input type="number" step="0.01"
+                 class="form-control" 
+                 v-model="datosGenerales.produccion_toneladas_por_mes"
+                 >
+        </div>
+      </div>
+    </div>
+  </div>
 
     <!-- Formulario para agregar múltiples áreas -->
     <div class="mb-4">
@@ -188,10 +238,12 @@
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>Estado</label>
-                <select v-model="formArea.estado" class="form-control" required>
+                <select v-model="formArea.estado" class="form-control" required 
+                        @change="actualizarHabilitacionEstado(index)">
                   <option value="desarrollo">Desarrollo</option>
                   <option value="produccion">Producción</option>
                 </select>
+
               </div>
             </div>
           </div>
@@ -203,49 +255,40 @@
                 <input 
                   type="number" 
                   v-model="formArea.anio_siembra" 
-                  @blur="validateYear(index)" 
-                  class="form-control" 
-                  min="1900" 
-                  :max="new Date().getFullYear()" 
                   required 
                   placeholder="Seleccione el año"
                 />
               </div>
             </div>
-            <div class="col-md-6">
+            <!--  <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>Área (m²)</label>
                 <input type="number" step="0.01" v-model="formArea.area" class="form-control" required />
               </div>
-            </div>
+            </div>  -->
           </div>
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group mb-3">
-                <label>Área Total Finca (Ha)</label>
-                <input type="number" step="0.01" v-model="formArea.area_total_finca_hectareas" class="form-control" />
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group mb-3">
-                <label>N° Palmas Total Finca</label>
-                <input type="number" v-model="formArea.numero_palmas_total_finca" class="form-control" />
-              </div>
-            </div>
-          </div>
+         
 
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>Área Palmas Desarrollo (Ha)</label>
-                <input type="number" step="0.01" v-model="formArea.area_palmas_desarrollo_hectareas" class="form-control" />
+                <input type="number" step="0.01"
+                        v-model="formArea.area_palmas_desarrollo_hectareas"
+                        class="form-control"
+                        :disabled="!formArea.habilitarDesarrollo"
+                        @input="actualizarCalculos" />
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>N° Palmas Desarrollo</label>
-                <input type="number" v-model="formArea.numero_palmas_desarrollo" class="form-control" />
+                <input type="number"
+                        v-model="formArea.numero_palmas_desarrollo"
+                        class="form-control"
+                        :disabled="!formArea.habilitarDesarrollo"
+                        @input="actualizarCalculos" />
               </div>
             </div>
           </div>
@@ -254,30 +297,25 @@
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>Área Palmas Producción (Ha)</label>
-                <input type="number" step="0.01" v-model="formArea.area_palmas_produccion_hectareas" class="form-control" />
+                <input type="number" step="0.01"
+                        v-model="formArea.area_palmas_produccion_hectareas"
+                        class="form-control"
+                        :disabled="!formArea.habilitarProduccion" />
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group mb-3">
                 <label>N° Palmas Producción</label>
-                <input type="number" v-model="formArea.numero_palmas_produccion" class="form-control" />
+                <input type="number"
+                      v-model="formArea.numero_palmas_produccion"
+                      class="form-control"
+                      :disabled="!formArea.habilitarProduccion" />
               </div>
             </div>
           </div>
 
           <div class="row">
-            <div class="col-md-6">
-              <div class="form-group mb-3">
-                <label>Ciclos de Cosecha</label>
-                <input type="number" v-model="formArea.ciclos_cosecha" class="form-control" />
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group mb-3">
-                <label>Producción (Toneladas/Mes)</label>
-                <input type="number" step="0.01" v-model="formArea.produccion_toneladas_por_mes" class="form-control" />
-              </div>
-            </div>
+          
           </div>
 
           <div class="form-group mb-3">
@@ -299,7 +337,7 @@
               <div class="col-md-6">
                 <div class="form-group mb-3">
                   <label>Estado Orden Plantis</label>
-                  <select v-model="formArea.estado_oren_plantis" class="form-control">
+                  <select v-model="formArea.estado_orden_plantis"> <!-- ← estado_orden_plantis, no estado_oren_plantis -->
                     <option value="desarrollo">Desarrollo</option>
                     <option value="produccion">Producción</option>
                   </select>
@@ -316,38 +354,168 @@
     </div>
 
     <!-- Áreas ya guardadas -->
-    <div v-if="areasGuardadas.length > 0" class="mb-4 p-3 bg-light rounded">
-      <h3>Áreas Guardadas</h3>
-      <div v-for="(area, index) in areasGuardadas" :key="area.local_id" class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span>Área #{{ index + 1 }}</span>
-          <button @click="eliminarArea(area.local_id)" class="btn btn-sm btn-danger">Eliminar</button>
+
+
+    
+    <div v-if="areasGuardadas.length > 0" class="mb-4">
+  <h3>Información Guardada</h3>
+  
+  <!-- ⭐⭐ 1. TARJETA DE INFORMACIÓN GENERAL ⭐⭐ -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">📊 Información General de la Finca Guardada</h4>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="info-box">
+            <label><i class="fas fa-ruler-combined me-2"></i>Área Total Finca</label>
+            <p class="info-value">{{ areasGuardadas[0]?.area_total_finca_hectareas || '0.00' }} Ha</p>
+          </div>
         </div>
-        <div class="card-body">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Variedad:</strong> {{ area.variedad }}</li>
-            <li class="list-group-item"><strong>Material:</strong> {{ area.material }}</li>
-            <li class="list-group-item"><strong>Estado:</strong> {{ area.estado }}</li>
-            <li class="list-group-item"><strong>Año siembra:</strong> {{ formatDate(area.anio_siembra) }}</li>
-            <li class="list-group-item"><strong>Área (m²):</strong> {{ area.area }}</li>
-            <li class="list-group-item"><strong>Área Total Finca (Ha):</strong> {{ area.area_total_finca_hectareas }}</li>
-            <li class="list-group-item"><strong>N° Palmas Total:</strong> {{ area.numero_palmas_total_finca }}</li>
-            <li class="list-group-item"><strong>Área Palmas Desarrollo (Ha):</strong> {{ area.area_palmas_desarrollo_hectareas }}</li>
-            <li class="list-group-item"><strong>N° Palmas Desarrollo:</strong> {{ area.numero_palmas_desarrollo }}</li>
-            <li class="list-group-item"><strong>Área Palmas Producción (Ha):</strong> {{ area.area_palmas_produccion_hectareas }}</li>
-            <li class="list-group-item"><strong>N° Palmas Producción:</strong> {{ area.numero_palmas_produccion }}</li>
-            <li class="list-group-item"><strong>Ciclos de Cosecha:</strong> {{ area.ciclos_cosecha }}</li>
-            <li class="list-group-item"><strong>Producción (Toneladas/Mes):</strong> {{ area.produccion_toneladas_por_mes }}</li>
-            <li class="list-group-item"><strong>Aplica Orden Plantis:</strong> {{ area.aplica_orden_plantis ? 'Sí' : 'No' }}</li>
-            <template v-if="area.aplica_orden_plantis">
-              <li class="list-group-item"><strong>Orden Plantis N°:</strong> {{ area.orden_plantis_numero }}</li>
-              <li class="list-group-item"><strong>Estado Orden Plantis:</strong> {{ area.estado_oren_plantis }}</li>
-              <li class="list-group-item"><strong>N° Plantas Orden Plantis:</strong> {{ area.numero_plantas_orden_plantis }}</li>
-            </template>
-          </ul>
+        <div class="col-md-6">
+          <div class="info-box">
+            <label><i class="fas fa-tree me-2"></i>Total de Palmas</label>
+            <p class="info-value">{{ areasGuardadas[0]?.numero_palmas_total_finca || '0' }} palmas</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <div class="info-box">
+            <label><i class="fas fa-sync-alt me-2"></i>Ciclos de Cosecha</label>
+            <p class="info-value">{{ areasGuardadas[0]?.ciclos_cosecha || 'No especificado' }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-box">
+            <label><i class="fas fa-weight-hanging me-2"></i>Producción Total</label>
+            <p class="info-value">{{ areasGuardadas[0]?.produccion_toneladas_por_mes || '0.00' }} Ton/Mes</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botón para editar información general -->
+      <div class="mt-3 text-end">
+        <button @click="editarInformacionGeneral" class="btn btn-sm btn-warning">
+          <i class="fas fa-edit me-1"></i> Editar Información General
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ⭐⭐ 2. TARJETAS DE ÁREAS INDIVIDUALES ⭐⭐ -->
+  <h4 class="mt-4 mb-3">🌿 Áreas Individuales Guardadas</h4>
+  
+  <div v-for="(area, index) in areasGuardadas" :key="area.local_id" class="card mb-3 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center bg-light">
+      <div>
+        <span class="fw-bold">Área #{{ index + 1 }}</span>
+        <small class="text-muted ms-2">
+          <i class="fas fa-seedling me-1"></i>{{ area.variedad || 'Sin variedad' }}
+        </small>
+      </div>
+      <button @click="eliminarArea(area.local_id)" class="btn btn-sm btn-danger">
+        <i class="fas fa-trash me-1"></i> Eliminar
+      </button>
+    </div>
+    
+    <div class="card-body">
+      <div class="row">
+        <!-- Columna Izquierda -->
+        <div class="col-md-6">
+          <div class="info-item mb-2">
+            <strong><i class="fas fa-leaf me-2"></i>Material:</strong>
+            <span class="ms-2">{{ area.material || 'No especificado' }}</span>
+          </div>
+          
+          <div class="info-item mb-2">
+            <strong><i class="fas fa-chart-line me-2"></i>Estado:</strong>
+            <span class="ms-2 badge" :class="area.estado === 'produccion' ? 'bg-success' : 'bg-info'">
+              {{ area.estado === 'produccion' ? 'Producción' : 'Desarrollo' }}
+            </span>
+          </div>
+          
+          <div class="info-item mb-2">
+            <strong><i class="fas fa-calendar me-2"></i>Año Siembra:</strong>
+            <span class="ms-2">{{ area.anio_siembra || 'No especificado' }}</span>
+          </div>
+          
+          <div v-if="area.estado === 'desarrollo'" class="info-item mb-2">
+            <strong><i class="fas fa-seedling me-2"></i>Área Desarrollo:</strong>
+            <span class="ms-2">{{ area.area_palmas_desarrollo_hectareas || '0.00' }} Ha</span>
+          </div>
+          
+          <div v-if="area.estado === 'desarrollo'" class="info-item mb-2">
+            <strong><i class="fas fa-trees me-2"></i>Palmas Desarrollo:</strong>
+            <span class="ms-2">{{ area.numero_palmas_desarrollo || '0' }}</span>
+          </div>
+        </div>
+        
+        <!-- Columna Derecha -->
+        <div class="col-md-6">
+          <div v-if="area.estado === 'produccion'" class="info-item mb-2">
+            <strong><i class="fas fa-seedling me-2"></i>Área Producción:</strong>
+            <span class="ms-2">{{ area.area_palmas_produccion_hectareas || '0.00' }} Ha</span>
+          </div>
+          
+          <div v-if="area.estado === 'produccion'" class="info-item mb-2">
+            <strong><i class="fas fa-trees me-2"></i>Palmas Producción:</strong>
+            <span class="ms-2">{{ area.numero_palmas_produccion || '0' }}</span>
+          </div>
+          
+          <div v-if="area.aplica_orden_plantis" class="info-item mb-2">
+            <strong><i class="fas fa-file-alt me-2"></i>Orden Plantis:</strong>
+            <span class="ms-2">#{{ area.orden_plantis_numero || 'N/A' }}</span>
+          </div>
+          
+          <div v-if="area.aplica_orden_plantis" class="info-item mb-2">
+            <strong><i class="fas fa-clipboard-check me-2"></i>Estado Orden:</strong>
+            <span class="ms-2">{{ area.estado_orden_plantis === 'produccion' ? 'Producción' : 'Desarrollo' }}</span>
+          </div>
+          
+          <div v-if="area.aplica_orden_plantis" class="info-item mb-2">
+            <strong><i class="fas fa-leaf me-2"></i>Plantas Orden:</strong>
+            <span class="ms-2">{{ area.numero_plantas_orden_plantis || '0' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Resumen del área -->
+      <div class="mt-3 pt-3 border-top">
+        <div class="row">
+          <div class="col-md-4">
+            <small class="text-muted">
+              <i class="fas fa-hashtag me-1"></i>ID: {{ area.local_id?.substring(0, 8) || 'N/A' }}
+            </small>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted">
+              <i class="fas fa-clock me-1"></i>
+              {{ area.fecha_guardado }}
+            </small>
+          </div>
+          <div class="col-md-4 text-end">
+            <button @click="editarArea(area.local_id)" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-edit me-1"></i> Editar
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
+  
+  <!-- Resumen total -->
+  <div class="card mt-3 bg-light">
+    <div class="card-body text-center">
+      <h5 class="mb-0">
+        <i class="fas fa-clipboard-check me-2 text-success"></i>
+        Total: {{ areasGuardadas.length }} {{ areasGuardadas.length === 1 ? 'área guardada' : 'áreas guardadas' }}
+      </h5>
+    </div>
+  </div>
+</div>
     <p v-else class="text-muted mb-4">No hay áreas guardadas aún.</p>
 
     <div class="button-group mt-4">
@@ -379,17 +547,303 @@ export default {
       visitaId: null,
       visitaInfo: null,
       canSync: navigator.onLine,
+      datosGenerales: {
+        ciclos_cosecha: '',
+        produccion_toneladas_por_mes: ''
+      }
+      
+
     };
   },
   computed: {
     hayFormulariosValidos() {
-      return this.formulariosAreas.some(form => 
-        form.material && form.anio_siembra && form.area
-      );
+    return this.formulariosAreas.some(form => 
+      form.material && form.anio_siembra 
+    );
+  },
+
+  calcularAreaTotalFinca() {
+      return this.formulariosAreas.reduce((total, form) => {
+        const areaDesarrollo = parseFloat(form.area_palmas_desarrollo_hectareas) || 0;
+        const areaProduccion = parseFloat(form.area_palmas_produccion_hectareas) || 0;
+        return total + areaDesarrollo + areaProduccion;
+      }, 0).toFixed(2);
+    },
+
+  calcularAreaTotal() {
+    return this.formulariosAreas.reduce((total, f) => {
+      return total + (parseFloat(f.area) || 0);
+    }, 0).toFixed(2);
+  },
+
+  calcularTotalPalmas() {
+    return this.formulariosAreas.reduce((total, form) => {
+      let totalEsteFormulario = 0;
+      
+      // 1. Sumar palmas de desarrollo
+      const palmasDesarrollo = parseInt(form.numero_palmas_desarrollo) || 0;
+      totalEsteFormulario += palmasDesarrollo;
+      
+      // 2. Sumar palmas de producción
+      const palmasProduccion = parseInt(form.numero_palmas_produccion) || 0;
+      totalEsteFormulario += palmasProduccion;
+      
+      // 3. Sumar plantas de Orden Plantis si aplica
+      if (form.aplica_orden_plantis) {
+        const plantasOrdenPlantis = parseInt(form.numero_plantas_orden_plantis) || 0;
+        totalEsteFormulario += plantasOrdenPlantis;
+        
+        console.log(`Formulario #${this.formulariosAreas.indexOf(form) + 1}:`);
+        console.log(`- Palmas desarrollo: ${palmasDesarrollo}`);
+        console.log(`- Palmas producción: ${palmasProduccion}`);
+        console.log(`- Plantas orden plantis: ${plantasOrdenPlantis}`);
+        console.log(`- Total este formulario: ${totalEsteFormulario}`);
+      }
+      
+      return total + totalEsteFormulario;
+    }, 0);
+  },
+
+  calcularTotalProduccion() {
+    return this.formulariosAreas.reduce((total, f) => {
+      return total + (parseFloat(f.produccion_toneladas_por_mes) || 0);
+    }, 0).toFixed(2);
+  },
+  calcularProduccionTotal() {
+      return this.formulariosAreas.reduce((total, form) => {
+        return total + (parseFloat(form.produccion_toneladas_por_mes) || 0);
+      }, 0).toFixed(2);
     }
   },
   methods: {
     // MÉTODO PARA CARGAR INFORMACIÓN DE LA VISITA
+    actualizarCalculos() {
+      // Este método se llamará desde los @input de los campos relevantes
+      // Los computed properties se actualizarán automáticamente
+    }, 
+
+    cargarDatosParaEditar() {
+    if (this.areasGuardadas.length > 0) {
+      // Cargar datos generales desde la primera área
+      const primeraArea = this.areasGuardadas[0];
+      
+      // Actualizar datosGenerales
+      this.datosGenerales = {
+        ciclos_cosecha: primeraArea.ciclos_cosecha || '',
+        produccion_toneladas_por_mes: primeraArea.produccion_toneladas_por_mes || ''
+      };
+      
+      // Actualizar campos calculados (los computed se actualizan solos)
+      console.log('Datos generales cargados para edición:', this.datosGenerales);
+    }
+  },
+  
+  // ⭐⭐ NUEVO: Editar información general ⭐⭐
+  editarInformacionGeneral() {
+    this.cargarDatosParaEditar();
+    
+    // Hacer scroll a la sección de edición
+    const elemento = document.querySelector('.card.mb-4.p-3.bg-white.shadow-sm');
+    if (elemento) {
+      elemento.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Mostrar mensaje
+    alert('La información general se ha cargado para editar. Modifica los valores y guarda los cambios.');
+  },
+  
+  // ⭐⭐ NUEVO: Editar área específica ⭐⭐
+  async editarArea(localId) {
+    try {
+      // Buscar el área específica
+      const areaAEditar = this.areasGuardadas.find(area => area.local_id === localId);
+      
+      if (!areaAEditar) {
+        alert('Área no encontrada');
+        return;
+      }
+      
+      // Preguntar qué hacer
+      const opcion = confirm(
+        `¿Qué deseas hacer con el Área #${this.areasGuardadas.findIndex(a => a.local_id === localId) + 1}?\n\n` +
+        'Aceptar: Cargar para editar\n' +
+        'Cancelar: Eliminar'
+      );
+      
+      if (opcion) {
+        // Cargar en formulariosAreas para editar
+        this.formulariosAreas = [areaAEditar];
+        
+        // Cargar datos generales
+        this.cargarDatosParaEditar();
+        
+        // Eliminar de areasGuardadas
+        this.areasGuardadas = this.areasGuardadas.filter(area => area.local_id !== localId);
+        
+        // Hacer scroll al formulario
+        setTimeout(() => {
+          const elemento = document.querySelector('.area-form-group');
+          if (elemento) {
+            elemento.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+        
+        alert('Área cargada para editar. Modifica los valores y guarda los cambios.');
+      } else {
+        // Eliminar directamente
+        await this.eliminarArea(localId);
+      }
+    } catch (error) {
+      console.error('Error editando área:', error);
+      alert('Error al editar el área: ' + error.message);
+    }
+  },
+  
+  // Modificar el método guardarAreas para incluir fecha
+  async guardarAreas() {
+      try {
+        const areasValidas = this.formulariosAreas.filter(form => {
+          return form.material && form.material.trim() !== '' && form.anio_siembra;
+        });
+
+        if (areasValidas.length === 0) {
+          alert('Complete al menos un formulario válido');
+          return;
+        }
+
+        for (const form of areasValidas) {
+          const local_id = form.local_id || this.generateUUID();
+          
+          // ⭐⭐ CALCULAR TOTAL DE PALMAS PARA ESTA ÁREA ESPECÍFICA ⭐⭐
+          let totalPalmasEstaArea = 0;
+          
+          // 1. Palmas desarrollo
+          totalPalmasEstaArea += parseInt(form.numero_palmas_desarrollo) || 0;
+          
+          // 2. Palmas producción
+          totalPalmasEstaArea += parseInt(form.numero_palmas_produccion) || 0;
+          
+          // 3. Plantas Orden Plantis (si aplica)
+          if (form.aplica_orden_plantis) {
+            totalPalmasEstaArea += parseInt(form.numero_plantas_orden_plantis) || 0;
+          }
+
+          const areaData = {
+            ...form,
+            local_id,
+            visita_id: this.visitaId,
+            fecha_guardado: new Date().toISOString(),
+            ciclos_cosecha: this.datosGenerales.ciclos_cosecha,
+            produccion_toneladas_por_mes: this.datosGenerales.produccion_toneladas_por_mes,
+            area_total_finca_hectareas: this.calcularAreaTotalFinca,
+            numero_palmas_total_finca: this.calcularTotalPalmas, // ⭐⭐ TOTAL GENERAL DE TODA LA FINCA ⭐⭐
+            // ⭐⭐ NUEVO: Guardar también el total específico de esta área ⭐⭐
+            numero_palmas_esta_area: totalPalmasEstaArea,
+          };
+          
+          // Convertir tipos
+          if (this.datosGenerales.ciclos_cosecha) {
+            areaData.ciclos_cosecha = parseInt(this.datosGenerales.ciclos_cosecha);
+          }
+          
+          if (this.datosGenerales.produccion_toneladas_por_mes) {
+            areaData.produccion_toneladas_por_mes = parseFloat(this.datosGenerales.produccion_toneladas_por_mes);
+          }
+          
+          // Eliminar campos temporales
+          delete areaData.habilitarProduccion;
+          delete areaData.habilitarDesarrollo;
+          delete areaData.mostrarCampoOtroMaterial;
+          delete areaData.otroMaterial;
+          
+          console.log('Guardando área:', {
+            area: areaData.material,
+            palmasDesarrollo: parseInt(form.numero_palmas_desarrollo) || 0,
+            palmasProduccion: parseInt(form.numero_palmas_produccion) || 0,
+            plantasOrdenPlantis: form.aplica_orden_plantis ? (parseInt(form.numero_plantas_orden_plantis) || 0) : 0,
+            totalEstaArea: totalPalmasEstaArea,
+            totalGeneral: this.calcularTotalPalmas
+          });
+          
+          await saveFormData('area', areaData);
+        }
+
+        await this.cargarAreasGuardadas();
+        this.formulariosAreas = [this.nuevoFormularioArea()];
+        
+        // Mostrar resumen detallado
+        console.log('=== RESUMEN DE GUARDADO ===');
+        console.log('Área Total Finca:', this.calcularAreaTotalFinca, 'Ha');
+        console.log('Total Palmas (incluye Orden Plantis):', this.calcularTotalPalmas);
+        
+        alert(`✅ ${areasValidas.length} áreas guardadas correctamente\n` +
+              `🌴 Total de palmas: ${this.calcularTotalPalmas} (incluye plantas de Orden Plantis)`);
+        
+      } catch (error) {
+        console.error('Error guardando áreas:', error);
+        alert('Error al guardar: ' + error.message);
+      }
+    },
+    debugFormulario() {
+    if (this.formulariosAreas.length > 0) {
+      console.log('Estructura del primer formulario:', this.formulariosAreas[0]);
+      console.log('¿Tiene ciclos_cosecha?', 'ciclos_cosecha' in this.formulariosAreas[0]);
+    }},
+
+    actualizarHabilitacionEstado(index) {
+      const form = this.formulariosAreas[index];
+
+      if (form.estado === "produccion") {
+        form.habilitarProduccion = true;
+        form.habilitarDesarrollo = false;
+
+        // Limpiar desarrollo
+        form.area_palmas_desarrollo_hectareas = null;
+        form.numero_palmas_desarrollo = null;
+        
+        // CORRECCIÓN: Habilitar campos de producción si aplica
+        if (!form.produccion_toneladas_por_mes) {
+          // Puedes inicializar con un valor por defecto si quieres
+        }
+      } else {
+        form.habilitarProduccion = false;
+        form.habilitarDesarrollo = true;
+
+        // Limpiar producción
+        form.area_palmas_produccion_hectareas = null;
+        form.numero_palmas_produccion = null;
+        form.produccion_toneladas_por_mes = null;
+        form.ciclos_cosecha = null;
+      }
+      
+      // Actualizar cálculos
+      this.actualizarCalculos();
+    },
+
+  nuevoFormularioArea() {
+      return {
+        variedad: '',
+        material: '',
+        estado: 'desarrollo',
+        anio_siembra: '',
+        orden_plantis_numero: '',
+        estado_orden_plantis: 'desarrollo', 
+        area_total_finca_hectareas: null,
+        numero_palmas_total_finca: null,
+        area_palmas_desarrollo_hectareas: null,
+        numero_palmas_desarrollo: null,
+        area_palmas_produccion_hectareas: null,
+        numero_palmas_produccion: null,
+        aplica_orden_plantis: false,
+        numero_plantas_orden_plantis: null,
+        mostrarCampoOtroMaterial: false,
+        otroMaterial: '',
+        habilitarProduccion: false,
+        habilitarDesarrollo: true
+      };
+    },
+
+    
     async cargarInformacionVisita() {
       try {
         console.log('Cargando información de visita para ID:', this.visitaId);
@@ -476,29 +930,7 @@ export default {
       }
     },
 
-    nuevoFormularioArea() {
-      return {
-        variedad: '',
-        material: '',
-        estado: 'desarrollo',
-        anio_siembra: '',
-        area: '',
-        orden_plantis_numero: '',
-        estado_oren_plantis: 'desarrollo',
-        area_total_finca_hectareas: null,
-        numero_palmas_total_finca: null,
-        area_palmas_desarrollo_hectareas: null,
-        numero_palmas_desarrollo: null,
-        area_palmas_produccion_hectareas: null,
-        numero_palmas_produccion: null,
-        ciclos_cosecha: null,
-        produccion_toneladas_por_mes: null,
-        aplica_orden_plantis: false,
-        numero_plantas_orden_plantis: null,
-        mostrarCampoOtroMaterial: false,
-        otroMaterial: ''
-      };
-    },
+ 
 
     generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -508,15 +940,7 @@ export default {
       });
     },
 
-    validateYear(index) {
-      const year = this.formulariosAreas[index].anio_siembra;
-      const currentYear = new Date().getFullYear();
-      
-      if (year && (year < 1900 || year > currentYear)) {
-        alert('Por favor ingrese un año válido entre 1900 y ' + currentYear);
-        this.formulariosAreas[index].anio_siembra = '';
-      }
-    },
+   
 
     formatDate(dateString) {
       if (!dateString) return 'N/A';
@@ -559,47 +983,69 @@ export default {
     async guardarAreas() {
       try {
         const areasValidas = this.formulariosAreas.filter(form => {
-          const tieneMaterial = form.material && form.material.trim() !== '';
-          const tieneAnioSiembra = form.anio_siembra && form.anio_siembra !== '';
-          const tieneArea = form.area && form.area !== '';
-          return tieneMaterial && tieneAnioSiembra && tieneArea;
+          return form.material && form.material.trim() !== '' && form.anio_siembra;
         });
 
         if (areasValidas.length === 0) {
-          alert('Complete al menos un formulario válido (Material, Año siembra y Área son obligatorios)');
+          alert('Complete al menos un formulario válido');
           return;
         }
 
         for (const form of areasValidas) {
           const local_id = form.local_id || this.generateUUID();
-          const { mostrarCampoOtroMaterial, otroMaterial, ...areaDataParaGuardar } = form;
           
           const areaData = {
-            ...areaDataParaGuardar,
+            ...form,
             local_id,
             visita_id: this.visitaId,
-            aplica_orden_plantis: Boolean(form.aplica_orden_plantis),
-            area: parseFloat(form.area),
-            area_total_finca_hectareas: form.area_total_finca_hectareas ? parseFloat(form.area_total_finca_hectareas) : null,
-            area_palmas_desarrollo_hectareas: form.area_palmas_desarrollo_hectareas ? parseFloat(form.area_palmas_desarrollo_hectareas) : null,
-            area_palmas_produccion_hectareas: form.area_palmas_produccion_hectareas ? parseFloat(form.area_palmas_produccion_hectareas) : null,
-            numero_palmas_total_finca: form.numero_palmas_total_finca ? parseInt(form.numero_palmas_total_finca) : null,
-            numero_palmas_desarrollo: form.numero_palmas_desarrollo ? parseInt(form.numero_palmas_desarrollo) : null,
-            numero_palmas_produccion: form.numero_palmas_produccion ? parseInt(form.numero_palmas_produccion) : null,
-            ciclos_cosecha: form.ciclos_cosecha ? parseInt(form.ciclos_cosecha) : null,
-            produccion_toneladas_por_mes: form.produccion_toneladas_por_mes ? parseFloat(form.produccion_toneladas_por_mes) : null,
-            numero_plantas_orden_plantis: form.numero_plantas_orden_plantis ? parseInt(form.numero_plantas_orden_plantis) : null
+            // ⭐⭐ AÑADIR los datos generales a cada área ⭐⭐
+            ciclos_cosecha: this.datosGenerales.ciclos_cosecha,
+            produccion_toneladas_por_mes: this.datosGenerales.produccion_toneladas_por_mes,
+            area_total_finca_hectareas: this.calcularAreaTotalFinca,
+            numero_palmas_total_finca: this.calcularTotalPalmas,
           };
+          
+          // Convertir tipos
+          if (this.datosGenerales.ciclos_cosecha) {
+            areaData.ciclos_cosecha = parseInt(this.datosGenerales.ciclos_cosecha);
+          }
+          
+          if (this.datosGenerales.produccion_toneladas_por_mes) {
+            areaData.produccion_toneladas_por_mes = parseFloat(this.datosGenerales.produccion_toneladas_por_mes);
+          }
+          
+          // Eliminar campos temporales
+          delete areaData.habilitarProduccion;
+          delete areaData.habilitarDesarrollo;
+          delete areaData.mostrarCampoOtroMaterial;
+          delete areaData.otroMaterial;
           
           await saveFormData('area', areaData);
         }
 
         await this.cargarAreasGuardadas();
         this.formulariosAreas = [this.nuevoFormularioArea()];
+        
+        // ⭐⭐ OPCIONAL: Limpiar datos generales después de guardar ⭐⭐
+        // this.datosGenerales = { ciclos_cosecha: '', produccion_toneladas_por_mes: '' };
+        
         alert(`✅ ${areasValidas.length} áreas guardadas correctamente`);
+        
       } catch (error) {
         console.error('Error guardando áreas:', error);
-        alert('Error al guardar las áreas. Detalle: ' + error.message);
+        alert('Error al guardar: ' + error.message);
+      }
+    },
+
+
+    async cargarDatosGenerales() {
+      if (this.areasGuardadas.length > 0) {
+        // Tomar los datos del primer área guardada
+        const primeraArea = this.areasGuardadas[0];
+        this.datosGenerales = {
+          ciclos_cosecha: primeraArea.ciclos_cosecha || '',
+          produccion_toneladas_por_mes: primeraArea.produccion_toneladas_por_mes || ''
+        };
       }
     },
 
@@ -607,7 +1053,7 @@ export default {
       if (confirm('¿Eliminar esta área permanentemente?')) {
         try {
           const todasAreas = await getAllDataFromStore('area');
-          const areasActualizadas = todasAreas.filter(area => area.id !== localId);
+          const areasActualizadas = todasAreas.filter(area => area.local_id !== localId);
           const { clearStore } = await import('../store/indexeddb');
           await clearStore('area');
           for (const area of areasActualizadas) {
@@ -654,7 +1100,13 @@ export default {
     // Cargar información de la visita y áreas
     await this.cargarInformacionVisita();
     await this.cargarAreasGuardadas();
-    
+
+     if (this.areasGuardadas.length > 0) {
+        await this.cargarDatosGenerales();
+      }
+
+
+    this.debugFormulario();
     window.addEventListener('online', this.updateOnlineStatus);
     window.addEventListener('offline', this.updateOnlineStatus);
   },
@@ -662,7 +1114,123 @@ export default {
   beforeUnmount() {
     window.removeEventListener('online', this.updateOnlineStatus);
     window.removeEventListener('offline', this.updateOnlineStatus);
-  }
+  
+  },
+toggleOtroMaterial(index) {
+    const form = this.formulariosAreas[index];
+
+    if (form.material === 'otro') {
+      this.$set(this.formulariosAreas[index], 'mostrarCampoOtroMaterial', true);
+      this.$set(this.formulariosAreas[index], 'otroMaterial', '');
+    } else {
+      this.$set(this.formulariosAreas[index], 'mostrarCampoOtroMaterial', false);
+      this.$set(this.formulariosAreas[index], 'otroMaterial', '');
+    }
+  },
+
+  actualizarNombreMaterial(index) {
+    const form = this.formulariosAreas[index];
+    if (form.mostrarCampoOtroMaterial) {
+      form.material = form.otroMaterial;
+    }
+  },
+
+
+
+  // ------------------------------
+  // CAMBIO DE ESTADO: PRODUCCIÓN / DESARROLLO
+  // ------------------------------
+  validarEstadoProduccion(index) {
+    const form = this.formulariosAreas[index];
+
+    if (form.estado === 'produccion') {
+      // Campos obligatorios si es producción
+      if (!form.produccion_toneladas_por_mes) {
+        alert('Debe especificar la producción mensual si el estado es Producción.');
+      }
+      if (!form.ciclos_cosecha) {
+        alert('Debe especificar los ciclos de cosecha si el estado es Producción.');
+      }
+    }
+  },
+
+  // ------------------------------
+  // LÓGICA DE ORDEN PLANTIS
+  // ------------------------------
+  validarOrdenPlantis(index) {
+    const form = this.formulariosAreas[index];
+
+    if (form.aplica_orden_plantis) {
+      if (!form.orden_plantis_numero) {
+        alert('Debe especificar el número de Orden Plantis.');
+        return false;
+      }
+      if (!form.estado_oren_plantis) {
+        alert('Debe seleccionar el estado de Orden Plantis.');
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  
+  agregarFormulario() {
+    this.formulariosAreas.push(this.nuevoFormularioArea());
+  },
+
+  eliminarFormulario(index) {
+    this.formulariosAreas.splice(index, 1);
+  },
+
+  // ------------------------------
+  // VALIDACIONES ANTES DE GUARDAR
+  // ------------------------------
+  validarFormulario(index) {
+    const form = this.formulariosAreas[index];
+
+    if (!form.variedad || !form.material || !form.anio_siembra || !form.area) {
+      alert('Todos los campos obligatorios deben estar completos.');
+      return false;
+    }
+
+    if (!this.validarOrdenPlantis(index)) return false;
+
+    return true;
+  },
+
+  guardarAreas() {
+    for (let i = 0; i < this.formulariosAreas.length; i++) {
+      if (!this.validarFormulario(i)) return;
+    }
+
+    // Guardar en IndexedDB...
+    this.formulariosAreas.forEach(form => {
+      form.visita_id = this.visitaId;
+      saveFormData('areas', form);
+    });
+
+    alert('Áreas guardadas correctamente.');
+    this.cargarAreasGuardadas();
+    this.formulariosAreas = [this.nuevoFormularioArea()];
+  },
+
+  async cargarAreasGuardadas() {
+    const data = await getFormDataByVisita('areas', this.visitaId);
+    this.areasGuardadas = data ?? [];
+  },
+
+  irAFertilizacion() {
+    this.$router.push(`/offline/fertilizacion/${this.visitaId}`);
+  },
+
+  // ------------------------------
+  // LÓGICA VISITA (YA EXISTENTE)
+  // ------------------------------
+  async cargarInformacionVisita() { /* lo que ya tienes */ },
+
+  formatDate(date) { /* lo que ya tienes */ }
+
 };
 </script>
 

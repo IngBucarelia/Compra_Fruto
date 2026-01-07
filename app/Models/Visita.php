@@ -45,7 +45,7 @@ public function areas()
 // O si es uno-a-uno (una visita tiene un área)
 public function area()
 {
-    return $this->hasOne(Area::class);
+    return $this->hasMany(Area::class);
 }
 
     public function fertilizaciones()

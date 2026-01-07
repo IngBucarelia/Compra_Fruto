@@ -38,7 +38,8 @@
                                 <option value="1">Administrador</option>
                                 <option value="2">Técnico Campo Agronómico</option>
                                 <option value="3">Técnico Campo Social</option>
-                                <option value="4">Auxiliar Administrativo</option>
+                                <option value="4">Técnico Campo Ambiental </option>
+                                 <option value="5">Auxiliar Administrativo</option>
                             </select>
                         </td>
                     </tr>

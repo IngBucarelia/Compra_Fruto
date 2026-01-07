@@ -13,6 +13,7 @@ class VisitaAmbiental extends Model
         'fecha_visita',
         'tecnico_id', 
         'plantacion_id',
+        'proveedor_id',
         'ubicacion',
         'observaciones',
         'estado',
@@ -94,6 +95,11 @@ class VisitaAmbiental extends Model
         return $this->hasOne(SustanciasManejo::class, 'visita_ambiental_id'); 
     }
     
+    public function vertimientoManejo()
+    {
+        return $this->hasOne(VertimientoManejo::class);
+    }
+
     public function vertimientosManejo()
     {
         return $this->hasOne(VertimientoManejo::class);
@@ -105,11 +111,22 @@ class VisitaAmbiental extends Model
         return $this->hasOne(HmpManejo::class, 'visita_ambiental_id'); 
     }
     
+
+
+    public function plantacionHmp() 
+    { 
+        return $this->hasOne(PlantacionHmp::class, 'visita_ambiental_id'); 
+    }
+
+
     public function avcControl() 
     { 
         return $this->hasOne(AvcControl::class, 'visita_ambiental_id'); 
     }
-    
+     public function plantacionAvc() 
+    { 
+        return $this->hasOne(PlantacionAVC::class, 'visita_ambiental_id'); 
+    }
     public function ecosistemaProteccion() 
     { 
         return $this->hasOne(EcosistemaProteccion::class, 'visita_ambiental_id'); 
@@ -133,6 +150,62 @@ class VisitaAmbiental extends Model
     {
         return $this->hasOne(ManejoVertimientos::class);
     }
+
+    public function obtenerAreaTotalFinca()
+    {
+        if (!$this->plantacion_id) {
+            return 0;
+        }
+        
+        $ultimaVisita = Visita::where('plantacion_id', $this->plantacion_id)
+            ->latest('fecha')
+            ->first();
+            
+        if (!$ultimaVisita) {
+            return 0;
+        }
+        
+        $area = Area::where('visita_id', $ultimaVisita->id)->first();
+        
+        if (!$area) {
+            return 0;
+        }
+        
+        $posiblesCamposArea = [
+            'area_total_finca_hectareas',
+            'area_total_finca',
+            'area_total', 
+            'total_area',
+            'area',
+            'hectareas',
+            'area_hectareas',
+            'area_total_hectareas'
+        ];
+        
+        foreach ($posiblesCamposArea as $campo) {
+            if (isset($area->$campo) && !empty($area->$campo) && $area->$campo > 0) {
+                return (float) $area->$campo;
+            }
+        }
+        
+        return 0;
+    }
+
+    public function pnoReemplazoNodeforestacion()
+    {
+        return $this->hasOne(PnoReemplazoNodeforestacion::class, 'visita_ambiental_id');
+    }
+
+    public function plantacionEcosistema()
+    {
+        return $this->hasOne(PlantacionEcosistema::class, 'visita_ambiental_id');
+    }
+
+    public function cierreVisitaAmbiental()
+    {
+        return $this->hasOne(CierreVisitaAmbiental::class, 'visita_ambiental_id');
+    }
+
 
 
 

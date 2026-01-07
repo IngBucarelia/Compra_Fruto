@@ -2,414 +2,1109 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle de Visita</title>
+    <title>Informe de Visita Técnica</title>
     <style>
-        /* La fuente DejaVu Sans es crucial para que Dompdf muestre caracteres especiales como emojis */
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #222; }
-        h1, h2 { color: #2F4F4F; margin-bottom: 5px; }
-        .section { margin-bottom: 25px; }
-        .section h2 { border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 10px; }
-        table th, table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-        ul { margin: 5px 0 10px 20px; padding: 0; }
-        /* Ajusta el tamaño de las miniaturas de imagen para el PDF */
-        .img-thumb { max-height: 920px; max-width: 720px; margin: 5px; display: inline-block; border: 1px solid #eee; }
-        .firma-img { max-height: 100px; max-width: 200px; margin: 5px; display: block; border: 1px solid #eee; }
-        .title-bar { background: #e0f7fa; padding: 10px; margin-bottom: 15px; border-radius: 5px; }
-        .data-card {
-            background-color: #f0fff0;
-            border: 1px solid #d4edda;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        /* ===== ESTILOS BASE ===== */
+        @page {
+            margin: 0;
+            padding: 0;
         }
-        .data-card h5 {
-            margin-top: 0;
-            margin-bottom: 8px;
+        
+        body { 
+            font-family: DejaVu Sans, sans-serif; 
+            font-size: 13px; /* AUMENTADO */
+            color: #222;
+            margin: 0 !important; /* QUITAR margin: 50px */
+            padding: 0;
+            line-height: 1.5;
+        }
+        
+        /* ===== HEADER FIJADO ===== */
+        .pdf-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 45mm;
+            z-index: 1; 
+            background-color: white;
+        }
+        
+        .header-image {
+           
+            width: 100%;
+            height: 45mm;
+            object-fit: cover;
+            
+        }
+        
+        /* ===== FOOTER FIJADO ===== */
+        .pdf-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25mm;
+            z-index: 1000; /* CAMBIADO de -1000 a 1000 */
+            background-color: white;
+        }
+        
+        .footer-image {
+            width: 100%;
+            height: 25mm;
+            object-fit: cover;
+        }
+        
+        /* ===== MÁRGENES DE CONTENIDO CORREGIDAS ===== */
+        .content {
+             top: 150px;
+            margin: 50mm 20mm 30mm 20mm; /* MÁS MARGEN LATERAL */
+            position: relative;
+            padding-top: 10mm;
+            margin-top: 250px !important; /* ESPACIO EXTRA DEBAJO DEL HEADER */
+        }
+        
+        /* ===== TÍTULOS Y ENCABEZADOS ===== */
+        h1 {
+            font-size: 18px; /* AUMENTADO */
+            font-weight: bold;
+            text-align: center;
             color: #2F4F4F;
+            margin: 0 0 15px 0;
+            font-family: helvetica, sans-serif;
         }
-
+        
+        h2 {
+            font-size: 16px; /* AUMENTADO */
+            font-weight: bold;
+            color: #2F4F4F;
+            margin: 25px 0 15px 0;
+            font-family: helvetica, sans-serif;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 6px;
+        }
+        
+        h3 {
+            font-size: 15px; /* AUMENTADO */
+            font-weight: bold;
+            color: #2F4F4F;
+            margin: 20px 0 12px 0;
+            font-family: helvetica, sans-serif;
+        }
+        
+        h4 {
+            font-size: 14px; /* AUMENTADO */
+            font-weight: bold;
+            color: #2F4F4F;
+            margin: 15px 0 10px 0;
+            font-family: helvetica, sans-serif;
+        }
+        
+        h5 {
+            font-size: 13px; /* AUMENTADO */
+            font-weight: bold;
+            color: #2F4F4F;
+            margin: 12px 0 8px 0;
+            font-family: helvetica, sans-serif;
+        }
+        
+        /* ===== TABLAS ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px; /* AUMENTADO */
+            margin: 10px 0 15px 0;
+            page-break-inside: avoid;
+        }
+        
+        table.grid-table {
+            border: 1px solid #ccc;
+        }
+        
+        table.grid-table th {
+            background-color: #006400;
+            color: white;
+            font-weight: bold;
+            text-align: left;
+            padding: 8px 10px; /* MÁS PADDING */
+            border: 1px solid #ccc;
+            font-size: 12px;
+        }
+        
+        table.grid-table td {
+            padding: 6px 10px; /* MÁS PADDING */
+            border: 1px solid #ccc;
+            vertical-align: top;
+        }
+        
+        table.data-table {
+            border: none;
+            font-size: 12px;
+        }
+        
+        table.data-table tr td:first-child {
+            font-weight: bold;
+            background-color: #f8f9fa;
+            width: 40%;
+            padding: 6px 10px;
+            border-right: 2px solid #e9ecef;
+        }
+        
+        table.data-table tr td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        /* ===== DATA CARDS ===== */
+        .data-card {
+            background-color: #f8fff8;
+            border: 1px solid #d4edda;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .data-card h5 {
+            background-color: #e8f5e9;
+            padding: 8px 12px;
+            margin: -12px -12px 12px -12px;
+            border-radius: 6px 6px 0 0;
+            color: #2F4F4F;
+            font-size: 13px;
+        }
+        
+        /* ===== TITLE BAR ===== */
+        .title-bar {
+            background-color: #e0f7fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #b2ebf2;
+        }
+        
+        .title-bar h1 {
+            margin-top: 0;
+        }
+        
+        /* ===== EMPRESA HEADER ===== */
+        .company-header {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .company-header h3 {
+            font-size: 16px;
+            margin: 8px 0;
+            color: #000;
+        }
+        
+        .company-header h4 {
+            font-size: 14px;
+            margin: 8px 0;
+            color: #000;
+        }
+        
+        .company-header p {
+            font-size: 12px;
+            margin: 8px 0;
+            color: #666;
+        }
+        
+        /* ===== TEXTOS ===== */
+        .intro-text {
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+        
+        .observations {
+            font-size: 12px;
+            font-style: italic;
+            color: #666;
+            margin: 8px 0;
+            padding-left: 15px;
+            border-left: 3px solid #6c757d;
+        }
+        
+        /* ===== IMÁGENES ===== */
         .company-logo {
-            width: 180px; /* Ancho fijo */
-            height: 60px; /* Alto fijo (ajusta según proporciones de tu logo) */
-            object-fit: contain; /* Mantiene las proporciones */
-            margin: 0 auto; /* Centrado horizontal */
-            display: block; /* Para que funcione el margin auto */
+            width: 200px;
+            height: auto;
+            max-height: 70px;
+            display: block;
+            margin: 0 auto 15px auto;
         }
+        
+        .firma-img {
+            max-height: 80px; /* MÁS GRANDE */
+            max-width: 200px; /* MÁS GRANDE */
+            margin: 10px auto;
+            display: block;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+        
+        /* ===== SECCIONES ===== */
+        .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+        
+        .section-break {
+            page-break-before: always;
+            margin-top: 25mm;
+        }
+        
+        /* ===== FIRMAS ===== */
+        .firmas-container {
+            margin-top: 30px;
+            text-align: center;
+            page-break-inside: avoid;
+            padding: 20px;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .firma-item {
+            display: inline-block;
+            margin: 0 40px;
+            text-align: center;
+            vertical-align: top;
+            min-width: 150px;
+        }
+        
+        .firma-line {
+            width: 150px;
+            border-top: 2px solid #000;
+            margin: 8px auto;
+        }
+        
+        .firma-label {
+            font-size: 12px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        /* ===== IMÁGENES DE VISITA - NUEVO DISEÑO ===== */
+        .galeria-imagenes {
+            text-align: center;
+            margin: 20px auto;
+            width: 100%;
+        }
+        
+        .fila-imagenes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .imagen-container {
+            flex: 0 0 auto;
+            text-align: center;
+            margin: 0;
+        }
+        
+        .imagen-visita {
+            max-width: 120mm; /* MÁS GRANDE */
+            max-height: 85mm; /* MÁS GRANDE */
+            width: auto;
+            height: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        
+        .imagen-numero {
+            font-size: 11px;
+            margin-top: 8px;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        /* ===== PAGINACIÓN ===== */
+        .page-number {
+            position: fixed;
+            bottom: 35mm; /* AJUSTADO PARA NO CHOCAR CON FOOTER */
+            right: 25mm;
+            font-size: 11px;
+            color: #666;
+            z-index: 2000;
+            background-color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+        
+        /* ===== UTILIDADES ===== */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-bold { font-weight: bold; }
+        .text-italic { font-style: italic; }
+        .mb-5 { margin-bottom: 5mm; }
+        .mb-10 { margin-bottom: 10mm; }
+        .mt-5 { margin-top: 5mm; }
+        .mt-10 { margin-top: 10mm; }
+        .p-5 { padding: 5mm; }
+        
+        /* ===== SEPARADORES ===== */
+        hr.separador {
+            border: none;
+            border-top: 2px dashed #dee2e6;
+            margin: 20px 0;
+        }
+        
+        /* ===== LISTAS ===== */
+        ul {
+            margin: 8px 0 15px 25px;
+            padding: 0;
+            font-size: 12px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        /* ===== CLASES PARA EVITAR CORTES ===== */
+        .no-break {
+            page-break-inside: avoid;
+        }
+        
+        .break-before {
+            page-break-before: always;
+        }
+        
+        .break-after {
+            page-break-after: always;
+        }
+        
+        /* ===== CLASES PARA MÁRGENES ESPECÍFICOS ===== */
+        .mt-20 { margin-top: 20mm; }
+        .mb-20 { margin-bottom: 20mm; }
+        .pt-10 { padding-top: 10mm; }
+        .pb-10 { padding-bottom: 10mm; }
     </style>
 </head>
 <body>
-    
-
+    {{-- ===== HEADER IMAGE ===== --}}
+    @if(file_exists(public_path('images/header.png')))
+    <div class="pdf-header">
+        <img src="{{ public_path('images/header.png') }}" class="header-image" alt="Header">
+    </div>
+    @else
     <div class="title-bar">
-        <div class="logo-container">
-        <img src="{{ public_path('images/logo2.webp') }}" class="company-logo" alt="Logo de la empresa">
+        <h1>INFORME DE VISITA TÉCNICA</h1>
+        <p style="font-size: 14px; margin: 5px 0 0 0;">Palmas Oleaginosas Bucarelia</p>
     </div>
-        <h1> Detalle completo de la Visita Técnica</h1>
-        <p><strong>Proveedor:</strong> {{ $visita->proveedor->proveedor_nombre }}</p>
-        <p><strong>Plantación:</strong> {{ $visita->plantacion->nombre ?? 'No registrada' }}</p>
-        <p><strong>Responsable de Visita:</strong> {{ $visita->tecnico_campo->name ?? 'No registrada' }}</p>
-        <p><strong>Recibió la Visita :</strong> {{ $visita->recibio_visita ?? 'No registrada' }}</p>
-        <p><strong>Fecha de visita:</strong> {{ $visita->fecha }}</p>
-    </div>
-
-    {{-- Área --}}
-    <div class="section">
-        <h2> Área(s) registrada(s)</h2>
-        @forelse ($visita->areas as $area) {{-- ✅ CAMBIO CLAVE: Iterar sobre la colección 'areas' --}}
-            <div class="data-card">
-                <h5>Área #{{ $loop->index + 1 }} - Material: {{ $area->material }}</h5>
-                <table>
-                    <tr><th>Variedad</th><td>{{ $area->variedad }}</td></tr>
-                    <tr><th>Material</th><td>{{ $area->material }}</td></tr>
-                    <tr><th>Estado</th><td>{{ $area->estado }}</td></tr>
-                    <tr><th>Año de siembra</th><td>{{ $area->anio_siembra }}</td></tr>
-                    <tr><th>Área (m²)</th><td>{{ $area->area }}</td></tr>
-                    <tr><th>Orden Plantis</th><td>{{ $area->orden_plantis_numero }}</td></tr>
-                    <tr><th>Estado Orden Plantis</th><td>{{ $area->estado_oren_plantis }}</td></tr>
-                    <tr><th>Área total finca (ha)</th><td>{{ $area->area_total_finca_hectareas }}</td></tr>
-                    <tr><th>Número de palmas total finca</th><td>{{ $area->numero_palmas_total_finca }}</td></tr>
-                    <tr><th>Área palmas en desarrollo (ha)</th><td>{{ $area->area_palmas_desarrollo_hectareas }}</td></tr>
-                    <tr><th>Número de palmas en desarrollo</th><td>{{ $area->numero_palmas_desarrollo }}</td></tr>
-                    <tr><th>Área palmas en producción (ha)</th><td>{{ $area->area_palmas_produccion_hectareas }}</td></tr>
-                    <tr><th>Número de palmas en producción</th><td>{{ $area->numero_palmas_produccion }}</td></tr>
-                    <tr><th>Ciclos de cosecha</th><td>{{ $area->ciclos_cosecha }}</td></tr>
-                    <tr><th>Producción (toneladas/mes)</th><td>{{ $area->produccion_toneladas_por_mes }}</td></tr>
-                    <tr><th>¿Aplica Orden Plantis?</th><td>{{ $area->aplica_orden_plantis ? 'Sí' : 'No' }}</td></tr>
-                    <tr><th>Número de plantas Orden Plantis</th><td>{{ $area->numero_plantas_orden_plantis }}</td></tr>
-                </table>
-
-            </div>
-        @empty
-            <p>No se registró información de área.</p>
-        @endforelse
-    </div>
-
-    {{-- Fertilizaciones --}}
-    <div class="section">
-        <h2> Fertilizaciones</h2>
-        @forelse ($visita->fertilizaciones as $fert)
-            <div class="data-card">
-                <p><strong>Fecha en que se Aplico:</strong> {{ $fert->fecha_fertilizacion }}</p>
-                <ul>
-                    @foreach ($fert->detalles as $f)
-                        <li>{{ ucfirst($f->fertilizante) }} - {{ $f->cantidad }} kg</li>
-                    @endforeach
-                </ul>
-            </div>
-        @empty
-            <p>No hay fertilizaciones registradas.</p>
-        @endforelse
-    </div>
-
-    {{-- Polinizaciones --}}
-    <div class="section">
-        <h2> Polinizaciones</h2>
-        @forelse ($visita->polinizaciones as $poli)
-            <div class="data-card">
-                <p>
-                     {{ $poli->fecha }} |
-                    Pases: {{ $poli->n_pases }} |
-                    Ronda: {{ $poli->ciclos_ronda }} |
-                    ANA: {{ $poli->ana }} ({{ $poli->tipo_ana }}) |
-                    Talco: {{ $poli->talco }}
-                </p>
-            </div>
-        @empty
-            <p>No hay polinizaciones registradas.</p>
-        @endforelse
-    </div>
-
+    @endif
     
-<div class="section">
-    <h2>Sanidad</h2>
-
-    @if ($visita->sanidades->count() > 0)
-        @foreach ($visita->sanidades as $sanidad)
-            <div class="data-card mb-4">
-                <h4>Sanidad #{{ $loop->index + 1 }}</h4>
-                <table>
-                    {{-- Otros datos generales --}}
-                    <tr>
-                        <th>Otros</th>
-                        <td>{{ $sanidad->otros ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Observaciones</th>
-                        <td>{{ $sanidad->observaciones ?? 'Sin observaciones' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Censo de enfermedades</th>
-                        <td>{{ $sanidad->censo_enfermedades ? 'Sí' : 'No' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Ciclos lectura enfermedades</th>
-                        <td>{{ $sanidad->ciclos_lectura_enfermedades ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Ciclos lectura plagas</th>
-                        <td>{{ $sanidad->ciclos_lectura_plagas ?? '-' }}</td>
-                    </tr>
-                </table>
+    {{-- ===== FOOTER IMAGE ===== --}}
+    @if(file_exists(public_path('images/footer.png')))
+    <div class="pdf-footer">
+        <img src="{{ public_path('images/footer.png') }}" class="footer-image" alt="Footer">
+    </div>
+    @endif
+    
+    {{-- ===== CONTENIDO PRINCIPAL ===== --}}
+    <div class="content">
+        
+        {{-- ===== PÁGINA 1: TÍTULO E INFORMACIÓN GENERAL ===== --}}
+        
+        {{-- Logo de empresa --}}
+        @if(file_exists(public_path('images/logo2.webp')))
+        <div class="text-center mb-10">
+            <img src="{{ public_path('images/logo2.webp') }}"  style="margin-top: -250px !important;" class="company-logo" alt="Logo">
+        <br> <h1 style="margin-top: -150px !important;">INFORME DE VISITA TÉCNICA</h1></div>
+        @endif
+        
+        {{-- Título principal --}}
+       
+        
+        {{-- Tabla de información general --}}
+        <table class="grid-table" style="margin-top: -150px !important;">
+            <thead>
+                <tr>
+                    <th>PROVEEDOR</th>
+                    <th>PLANTACIÓN</th>
+                    <th>UBICACIÓN</th>
+                    <th>TÉCNICO</th>
+                    <th>FECHA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ $visita->proveedor->proveedor_nombre ?? 'No especificado' }}</td>
+                    <td>{{ $visita->plantacion->nombre ?? 'No especificado' }}</td>
+                    <td>{{ $visita->ubicacion ?? 'No especificada' }}</td>
+                    <td>{{ $visita->tecnico_campo->name ?? 'No asignado' }}</td>
+                    <td>{{ $visita->fecha ? \Carbon\Carbon::parse($visita->fecha)->format('d/m/Y') : 'N/A' }}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        {{-- Sección 1: INTRODUCCIÓN --}}
+        <div class="section">
+            <h2>1. INTRODUCCIÓN</h2>
+            <div class="intro-text">
+                Palmas Oleaginosas Bucarelia, en pro de seguir apoyando a sus proveedores de fruto en el fortalecimiento de ser productivos y sostenibles, ha decidido continuar en el año 2025, el convenio con el centro de investigación de Cenipalma, con el fin de generar un impacto positivo en los proveedores de racimo de fruto fresca (RFF) de la compañía. Este convenio tiene como finalidad aumentar la productividad de nuestros proveedores de RFF, basados en una agricultura sostenible y amigable con el medio ambiente. Con este objetivo se continúa con las visitas de acompañamiento técnico, agronómico, social y ambiental, brindando apoyo en las labores relacionadas con estos componentes; así mismo impulsar a los proveedores a la adopción de nuevas tecnologías en sus plantaciones, con el único de fin de alcanzar las metas propuestas y alcanzar la sostenibilidad de sus cultivos.
             </div>
-
-            {{-- Enfermedades nuevas --}}
-            @if ($sanidad->enfermedades && $sanidad->enfermedades->count())
-                <div class="data-card mb-3">
-                    <h4>Enfermedades</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($sanidad->enfermedades as $enf)
-                                <tr>
-                                    <td>{{ $enf->nombre_enfermedad }}</td>
-                                    <td>{{ $enf->estado ?? '-' }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-
-            {{-- Plagas nuevas --}}
-            @if ($sanidad->plagas && $sanidad->plagas->count())
-                <div class="data-card mb-3">
-                    <h4>Plagas</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($sanidad->plagas as $pla)
-                                <tr>
-                                    <td>{{ $pla->nombre_plaga }}</td>
-                                    <td>{{ $pla->estado ?? '-' }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-
-            {{-- Enfermedades legacy --}}
+        </div>
+        
+        {{-- Sección 2: INFORMACIÓN GENERAL DE LA FINCA --}}
+        <div class="section">
+            <h2>2. INFORMACIÓN GENERAL DE LA FINCA</h2>
+            
             @php
-                $legacyEnfermedades = [
-                    'opsophanes' => 'Opsophanes',
-                    'pudricion_cogollo' => 'Pudrición del cogollo',
-                    'raspador' => 'Raspador',
-                    'palmarum' => 'Palmarum',
-                    'strategus' => 'Strategus',
-                    'leptopharsa' => 'Leptopharsa',
-                    'pestalotiopsis' => 'Pestalotiopsis',
-                    'pudricion_basal' => 'Pudrición basal',
-                    'pudricion_estipe' => 'Pudrición estipe',
-                ];
+                $totalPalmas = 0;
+                $palmasDesarrollo = 0;
+                $palmasProduccion = 0;
+                $palmasOrdenPlantis = 0;
+                $produccionTotal = 0;
+                $areaTotal = 0;
+                
+                foreach($visita->areas as $area) {
+                    $totalPalmas += intval($area->numero_palmas_total_finca) ?? 0;
+                    $palmasDesarrollo += intval($area->numero_palmas_desarrollo) ?? 0;
+                    $palmasProduccion += intval($area->numero_palmas_produccion) ?? 0;
+                    
+                    if($area->aplica_orden_plantis) {
+                        $palmasOrdenPlantis += intval($area->numero_plantas_orden_plantis) ?? 0;
+                    }
+                    
+                    $produccionTotal += floatval($area->produccion_toneladas_por_mes) ?? 0;
+                    $areaTotal += floatval($area->area_total_finca_hectareas) ?? 0;
+                }
+                
+                $ciclosCosecha = $visita->areas->first()->ciclos_cosecha ?? 'N/A';
+                $areaTotalDisplay = $areaTotal > 0 ? number_format($areaTotal, 2) . ' Ha' : 'N/A';
+                $produccionTotalDisplay = $produccionTotal > 0 ? number_format($produccionTotal, 2) . ' Ton/Mes' : 'N/A';
             @endphp
-            @if (collect($legacyEnfermedades)->some(fn($_, $key) => $sanidad->$key))
-                <div class="data-card mb-3">
-                    <h4>Enfermedades (legacy)</h4>
-                    <table>
+            
+            <table class="data-table">
+                <tr>
+                    <td>Área Total Finca</td>
+                    <td>{{ $areaTotalDisplay }}</td>
+                </tr>
+                <tr>
+                    <td>Total de Palmas</td>
+                    <td>{{ $totalPalmas }} (incluye Orden Plantis)</td>
+                </tr>
+                <tr>
+                    <td>Ciclos de Cosecha</td>
+                    <td>{{ $ciclosCosecha }}</td>
+                </tr>
+                <tr>
+                    <td>Producción Total</td>
+                    <td>{{ $produccionTotalDisplay }}</td>
+                </tr>
+                <tr>
+                    <td>Palmas en Desarrollo</td>
+                    <td>{{ $palmasDesarrollo }}</td>
+                </tr>
+                <tr>
+                    <td>Palmas en Producción</td>
+                    <td>{{ $palmasProduccion }}</td>
+                </tr>
+                <tr>
+                    <td>Palmas Orden Plantis</td>
+                    <td>{{ $palmasOrdenPlantis }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        {{-- ===== PÁGINA 2: ÁREAS INDIVIDUALES ===== --}}
+        <div class="break-before mt-20"></div>
+        
+        {{-- Encabezado de empresa --}}
+        <div class="company-header" style="margin-top: -150px !important;">
+            <h3>Palmas Oleaginosas</h3>
+            <h4>BUCARELIA S.A.S</h4>
+            <p>Nit. 860.009.787-9</p>
+        </div>
+        
+        {{-- Sección 3: ÁREAS INDIVIDUALES --}}
+        <div class="section">
+            <h2>3. ÁREAS INDIVIDUALES</h2>
+            
+            @forelse ($visita->areas as $index => $area)
+                <div class="data-card no-break">
+                    <h5>Área #{{ $index + 1 }} - {{ $area->variedad ?? 'híbrido' }}</h5>
+                    
+                    <table class="data-table">
+                        <tr>
+                            <td>Variedad</td>
+                            <td>{{ $area->variedad ?? 'híbrido' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Material</td>
+                            <td>{{ $area->material ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Estado</td>
+                            <td>{{ $area->estado == 'produccion' ? 'Producción' : 'Desarrollo' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Año Siembra</td>
+                            <td>{{ $area->anio_siembra ? strval($area->anio_siembra) : '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Área (m²)</td>
+                            <td>{{ $area->area ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Área Total Finca (Ha)</td>
+                            <td>{{ $area->area_total_finca_hectareas ? number_format($area->area_total_finca_hectareas, 2) : 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>N° Palmas Total Finca</td>
+                            <td>{{ $area->numero_palmas_total_finca ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Área Desarrollo (Ha)</td>
+                            <td>{{ $area->area_palmas_desarrollo_hectareas ? number_format($area->area_palmas_desarrollo_hectareas, 2) : 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>N° Palmas Desarrollo</td>
+                            <td>{{ $area->numero_palmas_desarrollo ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Aplica Orden Plantis</td>
+                            <td>
+                                @if($area->aplica_orden_plantis === true || $area->aplica_orden_plantis === 'true' || $area->aplica_orden_plantis === 1 || $area->aplica_orden_plantis === 'si' || $area->aplica_orden_plantis === 'Sí')
+                                    Sí
+                                @elseif($area->aplica_orden_plantis === false || $area->aplica_orden_plantis === 'false' || $area->aplica_orden_plantis === 0 || $area->aplica_orden_plantis === 'no' || $area->aplica_orden_plantis === 'No')
+                                    No
+                                @else
+                                    {{ $area->aplica_orden_plantis ?? 'N/A' }}
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Orden Plantis N°</td>
+                            <td>{{ $area->orden_plantis_numero ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Estado Orden Plantis</td>
+                            <td>{{ $area->estado_oren_plantis ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>N° Plantas Orden Plantis</td>
+                            <td>{{ $area->numero_plantas_orden_plantis ?? 'N/A' }}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                @if(!$loop->last)
+                <hr class="separador">
+                @endif
+                
+            @empty
+                <p>No se registró información de área.</p>
+            @endforelse
+        </div>
+        
+        {{-- ===== PÁGINA 3: NUTRICIÓN ===== --}}
+        <div class="break-before mt-20"></div>
+        
+        {{-- Sección 4: NUTRICIÓN --}}
+        <div class="section" style="margin-top: -150px !important;">
+            <h2>4. NUTRICIÓN EN EL CULTIVO DE PALMA DE ACEITE</h2>
+            
+            <div class="intro-text">
+                En el cultivo de palma de aceite, uno de los componentes más importantes es la nutrición, ya que de ello depende directamente la sostenibilidad productiva del cultivo a corto, mediano y largo plazo. Para alcanzar las metas y rendimientos esperados en producción, es necesario realizar y dar cumplimiento al plan de nutrición. De esta manera también fortalecemos la tolerancia del cultivo a diversos ataques relacionados con plagas y enfermedades y o factores climáticos.
+            </div>
+        </div>
+        
+        {{-- Sección 4.1: FERTILIZACIONES --}}
+        @if($visita->fertilizaciones && $visita->fertilizaciones->count() > 0)
+        <div class="section">
+            <h3>4.1. FERTILIZACIONES APLICADAS</h3>
+            
+            @foreach($visita->fertilizaciones as $index => $fert)
+                <div class="data-card no-break">
+                    <h5>Aplicación #{{ $index + 1 }} - {{ $fert->fecha_fertilizacion ? \Carbon\Carbon::parse($fert->fecha_fertilizacion)->format('d/m/Y') : 'N/A' }}</h5>
+                    
+                    @if($fert->detalles && $fert->detalles->count() > 0)
+                    <table class="grid-table">
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Porcentaje</th>
+                                <th>Fertilizante</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
+                                <th>Fecha Aplicación</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($legacyEnfermedades as $field => $label)
-                                @if ($sanidad->$field)
-                                    <tr>
-                                        <td>{{ $label }}</td>
-                                        <td>{{ $sanidad->$field }}%</td>
-                                    </tr>
-                                @endif
+                            @foreach($fert->detalles as $f)
+                            <tr>
+                                <td>{{ $f->fertilizante ?? $f->nombre ?? 'N/A' }}</td>
+                                <td>{{ $f->cantidad ?? 'N/A' }}</td>
+                                <td>{{ $f->unidad_medida ?? 'N/A' }}</td>
+                                <td>{{ $f->fecha_aplicacion ? \Carbon\Carbon::parse($f->fecha_aplicacion)->format('d/m/Y') : 'N/A' }}</td>
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    @endif
                 </div>
-            @endif
-
-            {{-- Plaga legacy --}}
-            @if ($sanidad->plaga)
-                <div class="data-card mb-3">
-                    <h4>Plaga (legacy)</h4>
-                    <p>{{ $sanidad->plaga }} @if($sanidad->estado_plaga) - ({{ $sanidad->estado_plaga }}) @endif</p>
+            @endforeach
+        </div>
+        @endif
+        
+        {{-- Sección 4.2: POLINIZACIONES --}}
+        @if($visita->polinizaciones && $visita->polinizaciones->count() > 0)
+        <div class="section">
+            <h3>4.2. POLINIZACIONES</h3>
+            
+            @foreach($visita->polinizaciones as $index => $poli)
+                <div class="data-card no-break">
+                    <table class="data-table">
+                        <tr>
+                            <td>Fecha</td>
+                            <td>{{ $poli->fecha ? \Carbon\Carbon::parse($poli->fecha)->format('d/m/Y') : 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>N° Pases</td>
+                            <td>{{ $poli->n_pases ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Ciclos</td>
+                            <td>{{ $poli->ciclos_ronda ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>ANA</td>
+                            <td>{{ $poli->ana ?? 'N/A' }} ({{ $poli->tipo_ana ?? 'N/A' }})</td>
+                        </tr>
+                        <tr>
+                            <td>Talco</td>
+                            <td>{{ $poli->talco ?? 'N/A' }} kg</td>
+                        </tr>
+                    </table>
                 </div>
-            @endif
-
-            {{-- Trampas --}}
-            @if ($sanidad->trampas->count() > 0)
-                <div class="data-card mb-4">
-                    <h4>Datos de Trampas de Palmarum</h4>
-                    <table>
+            @endforeach
+        </div>
+        @endif
+        
+        {{-- ===== PÁGINA 4: SANIDAD ===== --}}
+        <div class="break-before mt-20"></div>
+        
+        {{-- Sección 5: ESTADO SANITARIO --}}
+        @if($visita->sanidades && $visita->sanidades->count() > 0)
+        <div class="section" style="margin-top: -150px !important;">
+            <h2>5. ESTADO SANITARIO</h2>
+            
+            @foreach($visita->sanidades as $sanidad)
+                <div class="data-card no-break">
+                    @php
+                        $sanidadData = [];
+                        if(isset($sanidad->censo_enfermedades)) {
+                            $sanidadData[] = ['Censo de enfermedades', $sanidad->censo_enfermedades ? 'Sí' : 'No'];
+                        }
+                        if(!empty($sanidad->ciclos_lectura_enfermedades)) {
+                            $sanidadData[] = ['Ciclos lectura enfermedades', $sanidad->ciclos_lectura_enfermedades];
+                        }
+                        if(!empty($sanidad->ciclos_lectura_plagas)) {
+                            $sanidadData[] = ['Ciclos lectura plagas', $sanidad->ciclos_lectura_plagas];
+                        }
+                        if(!empty($sanidad->otros)) {
+                            $sanidadData[] = ['Otros', $sanidad->otros];
+                        }
+                    @endphp
+                    
+                    @if(count($sanidadData) > 0)
+                    <table class="data-table">
+                        @foreach($sanidadData as $data)
+                        <tr>
+                            <td>{{ $data[0] }}</td>
+                            <td>{{ $data[1] }}</td>
+                        </tr>
+                        @endforeach
+                    </table>
+                    @endif
+                    
+                    {{-- Enfermedades Detectadas --}}
+                    @if($sanidad->enfermedades && $sanidad->enfermedades->count() > 0)
+                    <h4>Enfermedades Detectadas:</h4>
+                    <table class="grid-table">
                         <thead>
+                            <tr style="background-color: #960000; color: white;">
+                                <th>Nombre</th>
+                                <th>Estado (%)</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sanidad->enfermedades as $enf)
                             <tr>
+                                <td>{{ $enf->nombre_enfermedad ?? '-' }}</td>
+                                <td>{{ $enf->estado ?? '-' }}</td>
+                                <td>{{ $enf->observaciones ?? '-' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    @endif
+                    
+                    {{-- Plagas Detectadas --}}
+                    @if($sanidad->plagas && $sanidad->plagas->count() > 0)
+                    <h4>Plagas Detectadas:</h4>
+                    <table class="grid-table">
+                        <thead>
+                            <tr style="background-color: #960000; color: white;">
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Instar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sanidad->plagas as $pla)
+                            <tr>
+                                <td>{{ $pla->nombre_plaga ?? '-' }}</td>
+                                <td>{{ $pla->estado ?? '-' }}</td>
+                                <td>{{ $pla->instar ?? 'No es Estado Larva ó No Registra Instar' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    @endif
+                    
+                    {{-- Trampas de Palmarum --}}
+                    @if($sanidad->trampas && $sanidad->trampas->count() > 0)
+                    <h4>Trampas de Palmarum:</h4>
+                    <table class="grid-table">
+                        <thead>
+                            <tr style="background-color: #646464; color: white;">
                                 <th>Ciclos</th>
                                 <th>Machos Capturados</th>
                                 <th>Hembras Capturadas</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($sanidad->trampas as $trampa)
-                                <tr>
-                                    <td>{{ $trampa->ciclos ?? '-' }}</td>
-                                    <td>{{ $trampa->machos_capturados ?? '-' }}</td>
-                                    <td>{{ $trampa->hembras_capturadas ?? '-' }}</td>
-                                </tr>
+                            @foreach($sanidad->trampas as $trampa)
+                            <tr>
+                                <td>{{ $trampa->ciclos ?? '-' }}</td>
+                                <td>{{ $trampa->machos_capturados ?? '-' }}</td>
+                                <td>{{ $trampa->hembras_capturadas ?? '-' }}</td>
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    @endif
+                    
+                    {{-- Observaciones de Sanidad --}}
+                    @if(!empty($sanidad->observaciones))
+                    <div class="observations">
+                        <strong>Observaciones de Sanidad:</strong><br>
+                        {{ $sanidad->observaciones }}
+                    </div>
+                    @endif
                 </div>
-            @else
-                <p>No se registraron trampas de Palmarum para esta sanidad.</p>
-            @endif
-
-        @endforeach
-    @else
-        <p>No hay datos de sanidad.</p>
-    @endif
-</div>
-
-
-
-    {{-- Suelo --}}
-    <div class="section">
-        <h2> Análisis de Suelo</h2>
-        @if ($visita->suelo)
-            <div class="data-card">
-                <table>
-                    <tr><th>Análisis Foliar</th><td>{{ ucfirst($visita->suelo->analisis_foliar) }}</td></tr>
-                    <tr><th>Análisis Suelo</th><td>{{ ucfirst($visita->suelo->analisis_suelo) }}</td></tr>
-                    <tr><th>Tipo de Suelo</th><td>{{ ucfirst($visita->suelo->tipo_suelo) }}</td></tr>
-                </table>
-            </div>
-        @else
-            <p>No se registró análisis de suelo.</p>
+            @endforeach
+        </div>
         @endif
-    </div>
-
-    {{-- Labores de Cultivo --}}
-    <div class="section">
-        <h2> Labores de Cultivo</h2>
-        @forelse ($visita->laboresCultivo as $labor) {{-- ✅ CAMBIO CLAVE: Iterar sobre la colección 'laboresCultivo' --}}
-            <div class="data-card">
-                <h5>Labor para: {{ ucfirst($labor->tipo_planta ?? 'N/A') }}</h5>
-                <table>
-                    <tr><th>Observaciones</th><td>{{ $labor->observaciones ?? 'No registradas' }}</td></tr>
-                    @php
-                        $laboresLabels = [
-                            'polinizacion' => 'Polinización',
-                            'limpieza_calle' => 'Limpieza de calle',
-                            'limpieza_plato' => 'Limpieza de plato',
-                            'poda' => 'Poda',
-                            'fertilizacion' => 'Fertilización',
-                            'enmiendas' => 'Enmiendas',
-                            'ubicacion_tusa_fibra' => 'Ubicación tusa/fibra',
-                            'ubicacion_hoja' => 'Ubicación hoja en Barrera',
-                            'lugar_ubicacion_hoja' => 'Ubicación hoja en Plato',
-                            'plantas_nectariferas' => 'Plantas nectaríferas',
-                            'cobertura' => 'Cobertura',
-                            'labor_cosecha' => 'Labor cosecha',
-                            'calidad_fruta' => 'Calidad fruta',
-                            'recoleccion_fruta' => 'Recolección fruta',
-                            'drenajes' => 'Drenajes',
-                        ];
-                    @endphp
-                    @foreach ($laboresLabels as $campo => $label)
-                        @if (isset($labor->$campo))
-                            <tr><th>{{ $label }}</th><td>{{ $labor->$campo }}%</td></tr>
+        
+        {{-- ===== PÁGINA 5: DESCRIPCIÓN Y LABORES ===== --}}
+        <div class="break-before mt-20"></div>
+        
+        {{-- Sección 9: DESCRIPCIÓN DE LA VISITA --}}
+        <div class="section" style="margin-top: -150px !important;">
+            <h2>9. DESCRIPCIÓN DE LA VISITA</h2>
+            
+            @php
+                $fechaVisita = $visita->fecha ? \Carbon\Carbon::parse($visita->fecha)->format('d/m/Y') : 'N/A';
+                $nombreFinca = $visita->plantacion->nombre ?? 'No especificado';
+            @endphp
+            
+            <div class="intro-text">
+                La visita se realizó una visita de campo el {{ $fechaVisita }}, en compañía del administrador y representantes de la unidad de asistencia. La visita se realizó en la plantación {{ $nombreFinca }} con el objetivo de hacer un diagnóstico de las labores del cultivo relacionadas con la cosecha, labores de mantenimiento, y sanidad del cultivo.
+            </div>
+        </div>
+        
+        {{-- Sección 7: LABORES DE CULTIVO --}}
+        @if($visita->laboresCultivo && $visita->laboresCultivo->count() > 0)
+        <div class="section">
+            <h2>7. LABORES DE CULTIVO</h2>
+            
+            @foreach($visita->laboresCultivo as $index => $labor)
+                <div class="data-card no-break">
+                    <table class="data-table">
+                        @if(!empty($labor->tipo_planta))
+                        <tr>
+                            <td>Tipo Planta</td>
+                            <td>{{ $labor->tipo_planta }}</td>
+                        </tr>
                         @endif
-                    @endforeach
-                </table>
-            </div>
-        @empty
-            <p>No se registraron labores.</p>
-        @endforelse
-    </div>
-
-    {{-- Evaluación Cosecha --}}
-    <div class="section">
-        <h2> Evaluación de Cosecha en Campo</h2>
-        @forelse ($visita->evaluacionCosechaCampo as $evaluacion) {{-- ✅ CAMBIO CLAVE: Iterar sobre la colección 'evaluacionCosechaCampo' --}}
-            <div class="data-card">
-                <h5>Evaluación #{{ $loop->index + 1 }} - Variedad: {{ ucfirst($evaluacion->variedad_fruto) }}</h5>
-                <table>
-                    <tr><th>Variedad Fruto</th><td>{{ ucfirst($evaluacion->variedad_fruto) }}</td></tr>
-                    <tr><th>Cantidad Racimos</th><td>{{ $evaluacion->cantidad_racimos }}</td></tr>
-                    <tr><th>Verde</th><td>{{ $evaluacion->verde }}%</td></tr>
-                    <tr><th>Maduro</th><td>{{ $evaluacion->maduro }}%</td></tr>
-                    <tr><th>Sobre Maduro</th><td>{{ $evaluacion->sobremaduro }}%</td></tr>
-                    <tr><th>Pedúnculo</th><td>{{ $evaluacion->pedunculo }}%</td></tr>
-                    @if ($evaluacion->variedad_fruto === 'hibrido') {{-- ✅ NUEVO CAMPO CONDICIONAL --}}
-                        <tr><th>Conformación</th><td>{{ $evaluacion->conformacion ?? 'No especificada' }}</td></tr>
+                        
+                        @if(isset($labor->polinizacion))
+                        <tr>
+                            <td>Polinización</td>
+                            <td>{{ $labor->polinizacion }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->limpieza_calle))
+                        <tr>
+                            <td>Limpieza Calle</td>
+                            <td>{{ $labor->limpieza_calle }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->limpieza_plato))
+                        <tr>
+                            <td>Limpieza Plato</td>
+                            <td>{{ $labor->limpieza_plato }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->poda))
+                        <tr>
+                            <td>Poda</td>
+                            <td>{{ $labor->poda }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->fertilizacion))
+                        <tr>
+                            <td>Fertilización</td>
+                            <td>{{ $labor->fertilizacion }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->enmiendas))
+                        <tr>
+                            <td>Enmiendas</td>
+                            <td>{{ $labor->enmiendas }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->cobertura))
+                        <tr>
+                            <td>Cobertura</td>
+                            <td>{{ $labor->cobertura }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->drenajes))
+                        <tr>
+                            <td>Drenajes</td>
+                            <td>{{ $labor->drenajes }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($labor->plantas_nectariferas))
+                        <tr>
+                            <td>Plantas Nectaríferas</td>
+                            <td>{{ $labor->plantas_nectariferas }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(!empty($labor->labor_cosecha))
+                        <tr>
+                            <td>Labor Cosecha</td>
+                            <td>{{ $labor->labor_cosecha }}</td>
+                        </tr>
+                        @endif
+                        
+                        @if(!empty($labor->calidad_fruta))
+                        <tr>
+                            <td>Calidad Fruta</td>
+                            <td>{{ $labor->calidad_fruta }}</td>
+                        </tr>
+                        @endif
+                    </table>
+                    
+                    @if(!empty($labor->observaciones))
+                    <div class="observations">
+                        <strong>Observaciones:</strong> {{ $labor->observaciones }}
+                    </div>
                     @endif
-                    <tr><th>Observaciones</th><td>{{ $evaluacion->observaciones ?? 'No registradas' }}</td></tr>
-                </table>
+                </div>
+            @endforeach
+        </div>
+        @endif
+        
+        {{-- Sección 8: EVALUACIÓN DE COSECHA --}}
+        @if($visita->evaluacionCosechaCampo && $visita->evaluacionCosechaCampo->count() > 0)
+        <div class="section">
+            <h2>8. EVALUACIÓN DE COSECHA</h2>
+            
+            @foreach($visita->evaluacionCosechaCampo as $index => $evaluacion)
+                <div class="data-card no-break">
+                    <table class="data-table">
+                        @if(!empty($evaluacion->variedad_fruto))
+                        <tr>
+                            <td>Variedad Fruto</td>
+                            <td>{{ $evaluacion->variedad_fruto }}</td>
+                        </tr>
+                        @endif
+                        
+                        @if(!empty($evaluacion->cantidad_racimos))
+                        <tr>
+                            <td>Cantidad Racimos</td>
+                            <td>{{ $evaluacion->cantidad_racimos }}</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($evaluacion->verde))
+                        <tr>
+                            <td>Verde</td>
+                            <td>{{ $evaluacion->verde }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($evaluacion->maduro))
+                        <tr>
+                            <td>Maduro</td>
+                            <td>{{ $evaluacion->maduro }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($evaluacion->sobremaduro))
+                        <tr>
+                            <td>Sobremaduro</td>
+                            <td>{{ $evaluacion->sobremaduro }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(isset($evaluacion->pedunculo))
+                        <tr>
+                            <td>Pedúnculo</td>
+                            <td>{{ $evaluacion->pedunculo }}%</td>
+                        </tr>
+                        @endif
+                        
+                        @if(!empty($evaluacion->conformacion))
+                        <tr>
+                            <td>Conformación</td>
+                            <td>{{ $evaluacion->conformacion }}</td>
+                        </tr>
+                        @endif
+                    </table>
+                    
+                    @if(!empty($evaluacion->observaciones))
+                    <div class="observations">
+                        <strong>Observaciones:</strong> {{ $evaluacion->observaciones }}
+                    </div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+        @endif
+        
+        {{-- ===== PÁGINA 6: CIERRE Y FIRMAS ===== --}}
+        <div class="break-before mt-20"></div>
+        
+        {{-- Sección 10: OBSERVACIONES FINALES --}}
+        @if($visita->cierreVisita && !empty($visita->cierreVisita->observaciones_finales))
+        <div class="section">
+            <h2>10. OBSERVACIONES FINALES</h2>
+            
+            <div class="intro-text">
+                {{ $visita->cierreVisita->observaciones_finales }}
             </div>
-        @empty
-            <p>No se ha registrado evaluación.</p>
-        @endforelse
-    </div>
-
-    {{-- Cierre de Visita --}}
-<div class="section">
-    <h2> Cierre de Visita</h2>
-    @if ($visita->cierreVisita)
-        <div class="data-card">
-            <table>
-                <tr><th>Fecha de Cierre</th><td>{{ $visita->cierreVisita->fecha_cierre ? $visita->cierreVisita->fecha_cierre->format('d/m/Y') : 'N/A' }}</td></tr>
-                <tr><th>Estado de la Visita</th><td>{{ $visita->cierreVisita->estado_visita ?? 'N/A' }}</td></tr>
-                <tr><th>Observaciones Finales</th><td>{{ $visita->cierreVisita->observaciones_finales ?? 'N/A' }}</td></tr>
-                <tr><th>Recomendaciones</th><td>{{ $visita->cierreVisita->recomendaciones ?? 'N/A' }}</td></tr>
-                <tr><th>Finalizada En</th><td>{{ $visita->cierreVisita->finalizada_en ? $visita->cierreVisita->finalizada_en->format('d/m/Y H:i') : 'N/A' }}</td></tr>
-                <tr><th>Responsable cierre</th><td>{{ $visita->tecnico->name ?? 'N/A' }}</td></tr>
-            </table>
-
-            {{-- Firmas --}}
-                @if ($visita->cierreVisita->firma_responsable)
-                    <p><strong>Firma Responsable:</strong></p>
+        </div>
+        @endif
+        
+        {{-- Sección 11: RECOMENDACIONES --}}
+        @if($visita->cierreVisita && !empty($visita->cierreVisita->recomendaciones))
+        <div class="section">
+            <h2>11. RECOMENDACIONES</h2>
+            
+            <div class="intro-text">
+                {{ $visita->cierreVisita->recomendaciones }}
+            </div>
+        </div>
+        @endif
+        
+        {{-- FIRMAS --}}
+        @if($visita->cierreVisita && 
+           (!empty($visita->cierreVisita->firma_responsable) || 
+            !empty($visita->cierreVisita->firma_recibe) || 
+            !empty($visita->cierreVisita->firma_testigo)))
+        <div class="firmas-container no-break">
+            <h3>FIRMAS</h3>
+            
+            <div style="margin-top: 25px;">
+                @if(!empty($visita->cierreVisita->firma_responsable))
+                <div class="firma-item">
+                    <div class="firma-label">Técnico Responsable</div>
                     <img src="{{ $visita->cierreVisita->firma_responsable }}" class="firma-img" alt="Firma Responsable">
+                    <div class="firma-line"></div>
+                </div>
                 @endif
-                @if ($visita->cierreVisita->firma_recibe)
-                    <p><strong>Firma de quien recibe:</strong></p>
+                
+                @if(!empty($visita->cierreVisita->firma_recibe))
+                <div class="firma-item">
+                    <div class="firma-label">Representante Finca</div>
                     <img src="{{ $visita->cierreVisita->firma_recibe }}" class="firma-img" alt="Firma Recibe">
+                    <div class="firma-line"></div>
+                </div>
                 @endif
-                @if ($visita->cierreVisita->firma_testigo)
-                    <p><strong>Firma del testigo:</strong></p>
+                
+                @if(!empty($visita->cierreVisita->firma_testigo))
+                <div class="firma-item">
+                    <div class="firma-label">Testigo</div>
                     <img src="{{ $visita->cierreVisita->firma_testigo }}" class="firma-img" alt="Firma Testigo">
+                    <div class="firma-line"></div>
+                </div>
                 @endif
-
-                {{-- Imágenes finales --}}
-                @if ($visita->cierreVisita && $visita->cierreVisita->imagenes)
-                    @php
-                        $imagenes = is_array($visita->cierreVisita->imagenes) 
-                            ? $visita->cierreVisita->imagenes 
-                            : json_decode($visita->cierreVisita->imagenes, true);
-                    @endphp
-
-                    @if (!empty($imagenes))
-                        <div style="page-break-before: always;">
-                            <p><strong>Tomas Destacadas Durante La Visita:</strong></p><br><br>
-                            @foreach ($imagenes as $img)
-                                <img src="{{ $img }}" style="max-width:250px; max-height:250px; margin:10px;" alt="Imagen de la visita">
-                            @endforeach
-                        </div>
-                    @endif
-                @endif
-
             </div>
-    @else
-        <p>No se ha registrado el cierre.</p>
-    @endif
-</div>
+        </div>
+        @endif
+        
+        {{-- ===== PÁGINA 7: IMÁGENES DE LA VISITA ===== --}}
+        @if($visita->cierreVisita && $visita->cierreVisita->imagenes)
+            @php
+                $imagenes = is_array($visita->cierreVisita->imagenes) 
+                    ? $visita->cierreVisita->imagenes 
+                    : json_decode($visita->cierreVisita->imagenes, true);
+            @endphp
+            
+            @if(!empty($imagenes))
+            <div class="break-before mt-20"></div>
+            
+            <div class="section">
+                <h2 style="text-align: center; border-bottom: none; margin-bottom: 30px;">REGISTRO FOTOGRÁFICO DE LA VISITA</h2>
+                
+                <div class="galeria-imagenes">
+                    @php
+                        $imagenesPorPagina = 2;
+                        $totalImagenes = count($imagenes);
+                    @endphp
+                    
+                    @for($i = 0; $i < $totalImagenes; $i += $imagenesPorPagina)
+                        @if($i > 0)
+                            <div class="break-before mt-20"></div>
+                        @endif
+                        
+                        <div class="fila-imagenes">
+                            @for($j = $i; $j < min($i + $imagenesPorPagina, $totalImagenes); $j++)
+                                <div class="imagen-container">
+                                    <img src="{{ $imagenes[$j] }}" class="imagen-visita" alt="Foto {{ $j + 1 }}">
+                                    <div class="imagen-numero">Foto {{ $j + 1 }}</div>
+                                </div>
+                            @endfor
+                        </div>
+                    @endfor
+                </div>
+            </div>
+            @endif
+        @endif
+        
+    </div> {{-- Cierre del .content --}}
+    
+    {{-- PAGINACIÓN --}}
+    <div class="page-number">
+        Página <span class="pagenum"></span>
+    </div>
 </body>
 </html>

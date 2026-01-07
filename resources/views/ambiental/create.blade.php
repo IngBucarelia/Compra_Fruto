@@ -36,13 +36,15 @@
                                        placeholder="Buscar proveedor..." oninput="filtrarProveedores()">
                             </div>
 
-                            <select id="proveedor_id" name="proveedor_id" class="form-control"
-                                    size="8" style="min-height: 200px" required>
+                            <select id="proveedor_id" class="form-control" size="8" style="min-height: 200px" required>
                                 <option value="">Seleccione proveedor</option>
                                 @foreach($proveedores as $proveedor)
                                     <option value="{{ $proveedor->id }}">{{ $proveedor->proveedor_nombre }}</option>
                                 @endforeach
                             </select>
+
+                            {{-- hidden que envía el id al backend --}}
+                            <input type="text" name="proveedor_id" id="proveedor_id_hidden">
 
                             <small class="text-muted" id="contadorProveedores">
                                 {{ count($proveedores) }} proveedores disponibles
@@ -99,9 +101,8 @@
                                                    name="tipo_visita_ambiental[]"
                                                    value="{{ $valor }}"
                                                    id="tipo_{{ strtolower(str_replace(' ', '_', $valor)) }}">
-
                                             <label class="form-check-label fw-bold"
-                                                   for="tipo_{{ strtolower(str_replace(' ', '_', $valor)) }} }}">
+                                                   for="tipo_{{ strtolower(str_replace(' ', '_', $valor)) }}">
                                                 <i class="fas fa-{{ $icono }} text-success me-2"></i>
                                                 {{ $valor }}
                                             </label>
@@ -148,157 +149,127 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-/**
- * SOLUCIÓN ROBUSTA: 1) Al cargar plantaciones ponemos data-ubicacion en cada <option>.
- *                     2) Al seleccionar plantación usamos ese data-ubicacion (rápido y fiable).
- *                     3) Si no existe data-ubicacion, hacemos fetch a la API como fallback.
- */
-
 (function () {
-    // referencias seguras a elementos (evitan errores si no existen)
     const proveedorEl = document.getElementById('proveedor_id');
+    const proveedorHidden = document.getElementById('proveedor_id_hidden');
     const plantacionEl = document.getElementById('plantacion_id');
     const ubicacionEl = document.getElementById('ubicacion');
     const buscarProveedorEl = document.getElementById('buscarProveedor');
-    const contadorProveedoresEl = document.getElementById('contadorProveedores');
+    const form = document.getElementById('visitaAmbientalForm');
 
-    if (!proveedorEl || !plantacionEl || !ubicacionEl) {
-        console.warn('Formulario ambiental: faltan elementos (proveedor / plantacion / ubicacion).');
-        return;
-    }
-
-    // filtrar proveedores (tu función)
+    // Filtrar proveedores
     window.filtrarProveedores = function() {
         const filtro = buscarProveedorEl.value.toLowerCase();
         let opciones = proveedorEl.querySelectorAll('option');
-        let contador = 0;
         opciones.forEach(op => {
-            if (op.value === '') { op.style.display = ''; return; } // opción vacía siempre visible
-            if (op.textContent.toLowerCase().includes(filtro)) {
-                op.style.display = '';
-                contador++;
-            } else {
-                op.style.display = 'none';
-            }
+            if(op.value === '') { op.style.display = ''; return; }
+            op.style.display = op.textContent.toLowerCase().includes(filtro) ? '' : 'none';
         });
-        if (contadorProveedoresEl) contadorProveedoresEl.textContent = contador + ' proveedores encontrados';
     };
 
-    // cargar plantaciones según proveedor (añadiendo data-ubicacion)
-    proveedorEl.addEventListener('change', async function () {
+    // Al cambiar select, actualizar hidden y cargar plantaciones
+    proveedorEl.addEventListener('change', function() {
+        proveedorHidden.value = this.value;
+
+        // Plantaciones
         const proveedorId = this.value;
         plantacionEl.innerHTML = '<option value="">Cargando plantaciones...</option>';
         ubicacionEl.value = '';
 
-        if (!proveedorId) {
+        if(!proveedorId){
             plantacionEl.innerHTML = '<option value="">Seleccione un proveedor primero</option>';
             return;
         }
 
-        try {
-            const res = await fetch(`/api/plantaciones/${proveedorId}`);
-            if (!res.ok) throw new Error('Respuesta no OK: ' + res.status);
-            const data = await res.json();
-
-            // Esperamos array de plantaciones con { id, nombre, vereda, municipio, departamento } idealmente
-            if (!Array.isArray(data)) {
-                console.error('API /api/plantaciones devolvió formato inesperado:', data);
-                plantacionEl.innerHTML = '<option value="">Error: formato inválido</option>';
-                return;
-            }
-
-            let opciones = '<option value="">Seleccione plantación</option>';
-            data.forEach(p => {
-                // construir ubicacion completa si los campos existen
-                const ubic = [p.vereda, p.municipio, p.departamento].filter(Boolean).join(', ');
-                // guardamos la ubicacion en data-ubicacion para uso rápido al seleccionar
-                opciones += `<option value="${p.id}" data-ubicacion="${ubic}">${p.nombre}${ubic ? ' — ' + ubic : ''}</option>`;
+        fetch(`/api/plantaciones/${proveedorId}`)
+            .then(res => res.json())
+            .then(data => {
+                if(!Array.isArray(data)){
+                    plantacionEl.innerHTML = '<option value="">Error: formato inválido</option>';
+                    return;
+                }
+                let opciones = '<option value="">Seleccione plantación</option>';
+                data.forEach(p => {
+                    const ubic = [p.vereda, p.municipio, p.departamento].filter(Boolean).join(', ');
+                    opciones += `<option value="${p.id}" data-ubicacion="${ubic}">${p.nombre}${ubic ? ' — '+ubic : ''}</option>`;
+                });
+                plantacionEl.innerHTML = opciones;
+            }).catch(err => {
+                console.error('Error cargando plantaciones:', err);
+                plantacionEl.innerHTML = '<option value="">Error al cargar plantaciones</option>';
             });
-
-            plantacionEl.innerHTML = opciones;
-        } catch (err) {
-            console.error('Error cargando plantaciones:', err);
-            plantacionEl.innerHTML = '<option value="">Error al cargar plantaciones</option>';
-        }
     });
 
-    // al seleccionar plantacion: tomar data-ubicacion o pedir fallback
+    // Ubicación según plantación (manteniendo fallback API)
     plantacionEl.addEventListener('change', async function () {
         const selected = this.options[this.selectedIndex];
         const rawUbic = selected ? selected.getAttribute('data-ubicacion') : null;
 
-        if (rawUbic && rawUbic.trim().length) {
-            // use data-ubicacion (rápido, no depende del servidor)
+        if(rawUbic && rawUbic.trim().length){
             ubicacionEl.value = rawUbic;
             return;
         }
 
-        // fallback: si no tenemos data-ubicacion, consultamos la API por la plantación
         const plantacionId = this.value;
-        if (!plantacionId) {
+        if(!plantacionId){
             ubicacionEl.value = '';
             return;
         }
 
         try {
-            // Intentamos dos rutas posibles: /api/plantacion/{id} ó /api/plantaciones/{id}
             const endpoints = [
                 `/api/plantacion/${plantacionId}`,
                 `/api/plantaciones/${plantacionId}`,
             ];
 
             let responseData = null;
-            for (const url of endpoints) {
-                try {
+            for(const url of endpoints){
+                try{
                     const r = await fetch(url);
-                    if (!r.ok) continue;
+                    if(!r.ok) continue;
                     const json = await r.json();
-                    // json puede ser { ubicacion: "..." } o el objeto plantación con vereda/municipio...
-                    if (json.ubicacion) {
+                    if(json.ubicacion){
                         responseData = json.ubicacion;
                         break;
                     }
-                    // si vienen partes separadas:
-                    if (json.vereda || json.municipio || json.departamento) {
-                        responseData = [json.vereda, json.municipio, json.departamento].filter(Boolean).join(', ');
+                    if(json.vereda || json.municipio || json.departamento){
+                        responseData = [json.vereda,json.municipio,json.departamento].filter(Boolean).join(', ');
                         break;
                     }
-                    // si la API devuelve array, tomamos el primero
-                    if (Array.isArray(json) && json.length>0 && (json[0].vereda||json[0].municipio)) {
+                    if(Array.isArray(json) && json.length>0 && (json[0].vereda||json[0].municipio)){
                         const first = json[0];
-                        responseData = [first.vereda, first.municipio, first.departamento].filter(Boolean).join(', ');
+                        responseData = [first.vereda,first.municipio,first.departamento].filter(Boolean).join(', ');
                         break;
                     }
-                } catch (e) {
-                    // ignora, probar siguiente endpoint
+                }catch(e){
                     console.warn('Intento endpoint fallback falló:', url, e);
                 }
             }
 
-            if (responseData) {
-                ubicacionEl.value = responseData;
-                return;
-            } else {
-                console.warn('No se obtuvo ubicación del fallback API para plantación', plantacionId);
-                ubicacionEl.value = '';
-            }
-        } catch (err) {
+            ubicacionEl.value = responseData || '';
+        }catch(err){
             console.error('Error en fallback para obtener ubicación:', err);
             ubicacionEl.value = '';
         }
     });
 
-    // Inicialización: si ya hay proveedor seleccionado al cargar la página (editar), disparar cambio
-    if (proveedorEl.value) {
-        // usar setTimeout para garantizar que el DOM esté listo
-        setTimeout(() => proveedorEl.dispatchEvent(new Event('change')), 50);
+    // Antes de enviar el form, asegurar que el hidden tenga el valor actual del select
+    form.addEventListener('submit', function() {
+        proveedorHidden.value = proveedorEl.value;
+    });
+
+    // Inicializar si ya hay proveedor seleccionado (editar)
+    if(proveedorEl.value){
+        setTimeout(()=>proveedorEl.dispatchEvent(new Event('change')),50);
     }
+
 })();
+
 </script>
 
 <style>
-    body{
-        background-image: url('{{ asset('images/fondo_ambiental.png') }}'); 
-    }
+body{
+    background-image: url('{{ asset('images/fondo_ambiental.png') }}'); 
+}
 </style>
 @endsection

@@ -11,7 +11,11 @@ class EmisionesGei extends Model
     protected $fillable = [
         'visita_ambiental_id',
         'cuantifica_emisiones',
+        'combustible',
+        'distancia',
+        'huella_carbono',
         'implementa_acciones_reduccion',
+        'acciones_reduccion',
         'observaciones'
     ];
 

@@ -12,6 +12,7 @@ class EnergiaManejo extends Model
         'visita_ambiental_id',
         'registro_consumo_combustible',
         'plan_uso_eficiente',
+        'consumo_energia_kwh',
         'seguimiento_indicadores',
         'observaciones',
     ];

@@ -14,6 +14,7 @@ class Polinizacion extends Model
         'ciclos_ronda',
         'ana',
         'tipo_ana',
+        'nombre_ana',
         'talco',
         'fecha',
     ];

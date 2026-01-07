@@ -23,29 +23,49 @@ class AreaController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Request $request)
-    {
-        $visita_id = $request->query('visita_id');
-        
-        $visita = Visita::with([
-            'proveedor', 
-            'area', // Ahora será un solo modelo, no una colección
-            'fertilizaciones.fertilizantes'
-        ])->findOrFail($visita_id);
-        
-        return view('areas.create', compact('visita'));
+public function create(Request $request)
+{
+    $visita_id = $request->query('visita_id');
+
+    // 1. Cargar la visita actual
+    $visita = Visita::with(['proveedor', 'plantacion', 'areas'])
+        ->findOrFail($visita_id);
+
+    // 2. Buscar la visita inmediatamente anterior de la misma plantación
+    $visitaAnterior = Visita::where('plantacion_id', $visita->plantacion_id)
+        ->where('id', '<', $visita->id)
+        ->orderBy('id', 'desc')
+        ->first();
+
+    // 3. Si NO existe visita anterior → colección vacía
+    $areasPenultima = collect();
+    $tieneAreasActuales = $visita->areas->count() > 0;
+    $tieneAreasPrevias = false;
+
+    if ($visitaAnterior) {
+        // 4. Traer TODAS las áreas de la visita anterior
+        $areasPenultima = Area::where('visita_id', $visitaAnterior->id)->get();
+        $tieneAreasPrevias = $areasPenultima->count() > 0;
     }
+
+    return view('areas.create', compact('visita', 'areasPenultima', 'tieneAreasActuales', 'tieneAreasPrevias'));
+}
+
 
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        // Validar la estructura general del request: debe contener un array 'areas'
+        // Validar la estructura general del request
         $request->validate([
             'visita_id' => 'required|exists:visitas,id',
-            'areas' => 'required|array|min:1', // Espera un array de áreas, al menos una
+            'area_total_finca_hectareas' => 'required|numeric|min:0',
+            'numero_palmas_total_finca' => 'required|integer|min:0', 
+            'ciclos_cosecha_total' => 'required|integer|min:0',
+            'produccion_total' => 'required|numeric|min:0',
+            'areas' => 'required|array|min:1',
         ], [
             'areas.required' => 'Debe añadir al menos un formulario de área.',
             'areas.array' => 'Los datos de área deben ser un formato válido.',
@@ -55,50 +75,107 @@ class AreaController extends Controller
         $visitaId = $request->input('visita_id');
         $submittedAreas = $request->input('areas');
 
-        DB::beginTransaction(); // Iniciar una transacción de base de datos
+        // ⭐⭐ RECALCULAR TOTAL DE PALMAS INCLUYENDO ORDEN PLANTIS ⭐⭐
+        $totalPalmasRecalculado = 0;
+        $areasCount = 0;
+        
+        foreach ($submittedAreas as $areaData) {
+            $palmasEstaArea = 0;
+            
+            // 1. Sumar palmas según estado
+            if ($areaData['estado'] === 'desarrollo') {
+                $palmasEstaArea += (int)($areaData['numero_palmas_desarrollo'] ?? 0);
+            } elseif ($areaData['estado'] === 'produccion') {
+                $palmasEstaArea += (int)($areaData['numero_palmas_produccion'] ?? 0);
+            }
+            
+            // 2. Sumar plantas de Orden Plantis si aplica
+            if (isset($areaData['aplica_orden_plantis']) && (bool)$areaData['aplica_orden_plantis']) {
+                $palmasEstaArea += (int)($areaData['numero_plantas_orden_plantis'] ?? 0);
+            }
+            
+            $totalPalmasRecalculado += $palmasEstaArea;
+            $areasCount++;
+            
+            // DEBUG: Ver cálculo por área
+            Log::info("Área #{$areasCount} - Palmas: {$palmasEstaArea}", [
+                'estado' => $areaData['estado'] ?? 'N/A',
+                'desarrollo' => $areaData['numero_palmas_desarrollo'] ?? 0,
+                'produccion' => $areaData['numero_palmas_produccion'] ?? 0,
+                'orden_plantis' => (bool)($areaData['aplica_orden_plantis'] ?? false),
+                'plantas_orden_plantis' => $areaData['numero_plantas_orden_plantis'] ?? 0,
+            ]);
+        }
+        
+        // ⭐⭐ USAR EL TOTAL RECALCULADO (INCLUYE ORDEN PLANTIS) ⭐⭐
+        $resumenData = [
+            'area_total_finca_hectareas' => $request->input('area_total_finca_hectareas'),
+            'numero_palmas_total_finca' => $totalPalmasRecalculado, // ⭐⭐ CAMBIADO: Usar recalculado ⭐⭐
+            'ciclos_cosecha_total' => $request->input('ciclos_cosecha_total'),
+            'produccion_total' => $request->input('produccion_total'),
+        ];
+
+        // ⭐⭐ VERIFICAR SI EL TOTAL DEL FRONTEND COINCIDE CON EL RECALCULADO ⭐⭐
+        $totalFrontend = (int)$request->input('numero_palmas_total_finca');
+        if ($totalFrontend !== $totalPalmasRecalculado) {
+            Log::warning("Discrepancia en total de palmas", [
+                'frontend' => $totalFrontend,
+                'recalculado' => $totalPalmasRecalculado,
+                'diferencia' => $totalPalmasRecalculado - $totalFrontend
+            ]);
+        }
+
+        DB::beginTransaction();
         try {
             foreach ($submittedAreas as $index => $areaData) {
                 $rules = [
-                    'variedad' => 'required',
-                    'material' => 'required',
+                    'variedad' => 'required|string',
+                    'material' => 'required|string',
                     'estado' => 'required|in:desarrollo,produccion',
-                    'anio_siembra' => 'required',
-                    'area' => 'required|numeric|min:0',
+                    'anio_siembra' => 'required|string|max:4|regex:/^\d{4}$/',
+                    
+                    // Campos de compatibilidad (ocultos en el formulario)
+                    'area' => 'nullable|numeric|min:0',
                     'area_total_finca_hectareas' => 'nullable|numeric|min:0',
                     'numero_palmas_total_finca' => 'nullable|integer|min:0',
+                    'ciclos_cosecha' => 'nullable|integer|min:0',
+                    'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
+                    
+                    // Campos condicionales según estado
                     'area_palmas_desarrollo_hectareas' => 'nullable|numeric|min:0',
                     'numero_palmas_desarrollo' => 'nullable|integer|min:0',
                     'area_palmas_produccion_hectareas' => 'nullable|numeric|min:0',
                     'numero_palmas_produccion' => 'nullable|integer|min:0',
-                    'ciclos_cosecha' => 'nullable|integer|min:0',
-                    'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
+                    
                     'aplica_orden_plantis' => 'required|boolean',
-                    'orden_plantis_numero' => 'nullable|integer|min:0',
+                    'orden_plantis_numero' => 'nullable|string',
                     'numero_plantas_orden_plantis' => 'nullable|integer|min:0',
                     'estado_oren_plantis' => 'nullable|in:desarrollo,produccion',
                 ];
 
+                // Validación condicional basada en el estado
+                if ($areaData['estado'] === 'desarrollo') {
+                    $rules['area_palmas_desarrollo_hectareas'] = 'required|numeric|min:0';
+                    $rules['numero_palmas_desarrollo'] = 'required|integer|min:0';
+                } else if ($areaData['estado'] === 'produccion') {
+                    $rules['area_palmas_produccion_hectareas'] = 'required|numeric|min:0';
+                    $rules['numero_palmas_produccion'] = 'required|integer|min:0';
+                }
+
+                // Validación para Orden Plantis
                 if (isset($areaData['aplica_orden_plantis']) && (bool)$areaData['aplica_orden_plantis']) {
-                    $rules['orden_plantis_numero'] = 'nullable|integer|min:0';
                     $rules['numero_plantas_orden_plantis'] = 'required|integer|min:0';
                     $rules['estado_oren_plantis'] = 'required|in:desarrollo,produccion';
                 }
 
                 $messages = [
-                    'areas.*.material.required' => 'El material del área #:index es obligatorio.',
-                    'areas.*.material.in' => 'El material del área #:index no es válido.',
-                    'areas.*.estado.required' => 'El estado del área #:index es obligatorio.',
-                    'areas.*.estado.in' => 'El estado del área #:index no es válido.',
-                    'areas.*.anio_siembra.required' => 'El año de siembra del área #:index es obligatorio.',
-                    'areas.*.anio_siembra.date' => 'El año de siembra del área #:index debe ser una fecha válida.',
-                    'areas.*.area.required' => 'El área (m²) del área #:index es obligatoria.',
-                    'areas.*.area.numeric' => 'El área (m²) del área #:index debe ser un número.',
-                    'areas.*.area.min' => 'El área (m²) del área #:index debe ser al menos :min.',
-                    'areas.*.aplica_orden_plantis.required' => 'Debe indicar si aplica Orden Plantis para el área #:index.',
-                    'areas.*.aplica_orden_plantis.boolean' => 'El valor de "Aplica Orden Plantis" para el área #:index no es válido.',
-                    'areas.*.orden_plantis_numero.required' => 'El número de Orden Plantis del área #:index es obligatorio cuando aplica.',
-                    'areas.*.numero_plantas_orden_plantis.required' => 'El número de plantas de Orden Plantis del área #:index es obligatorio cuando aplica.',
-                    'areas.*.estado_oren_plantis.required' => 'El estado de Orden Plantis del área #:index es obligatorio cuando aplica.',
+                    'areas.*.material.required' => 'El material del área #' . ($index + 1) . ' es obligatorio.',
+                    'areas.*.estado.required' => 'El estado del área #' . ($index + 1) . ' es obligatorio.',
+                    'areas.*.anio_siembra.required' => 'El año de siembra del área #' . ($index + 1) . ' es obligatorio.',
+                    'areas.*.area_palmas_desarrollo_hectareas.required' => 'El área de desarrollo (Ha) del área #' . ($index + 1) . ' es obligatoria cuando el estado es Desarrollo.',
+                    'areas.*.numero_palmas_desarrollo.required' => 'El número de palmas en desarrollo del área #' . ($index + 1) . ' es obligatorio cuando el estado es Desarrollo.',
+                    'areas.*.area_palmas_produccion_hectareas.required' => 'El área de producción (Ha) del área #' . ($index + 1) . ' es obligatoria cuando el estado es Producción.',
+                    'areas.*.numero_palmas_produccion.required' => 'El número de palmas en producción del área #' . ($index + 1) . ' es obligatorio cuando el estado es Producción.',
                 ];
 
                 $validator = Validator::make($areaData, $rules, $messages);
@@ -110,38 +187,83 @@ class AreaController extends Controller
 
                 $validatedAreaData = $validator->validated();
 
-                if (!(bool)$validatedAreaData['aplica_orden_plantis']) {
-                    $validatedAreaData['orden_plantis_numero'] = null;
-                    $validatedAreaData['numero_plantas_orden_plantis'] = null;
-                    $validatedAreaData['estado_oren_plantis'] = null;
+                // 🔥 **AQUÍ ESTÁ LA SOLUCIÓN: COMBINAR DATOS DEL RESUMEN CON DATOS DEL ÁREA**
+                $areaToSave = array_merge($validatedAreaData, [
+                    'area_total_finca_hectareas' => $resumenData['area_total_finca_hectareas'],
+                    'numero_palmas_total_finca' => $resumenData['numero_palmas_total_finca'], // ⭐⭐ AHORA INCLUYE ORDEN PLANTIS ⭐⭐
+                    'ciclos_cosecha' => $resumenData['ciclos_cosecha_total'],
+                    'produccion_toneladas_por_mes' => $resumenData['produccion_total'],
+                ]);
+
+                // Limpiar campos según el estado
+                if ($areaToSave['estado'] === 'desarrollo') {
+                    $areaToSave['area_palmas_produccion_hectareas'] = null;
+                    $areaToSave['numero_palmas_produccion'] = null;
+                } else {
+                    $areaToSave['area_palmas_desarrollo_hectareas'] = null;
+                    $areaToSave['numero_palmas_desarrollo'] = null;
                 }
 
-                $validatedAreaData['visita_id'] = $visitaId;
+                // Limpiar campos de Orden Plantis si no aplica
+                if (!(bool)$areaToSave['aplica_orden_plantis']) {
+                    $areaToSave['orden_plantis_numero'] = null;
+                    $areaToSave['numero_plantas_orden_plantis'] = null;
+                    $areaToSave['estado_oren_plantis'] = null;
+                }
 
-                Area::create($validatedAreaData);
+                $areaToSave['visita_id'] = $visitaId;
+
+                // ⭐⭐ AÑADIR CAMPO ADICIONAL PARA REGISTRAR SI INCLUYE ORDEN PLANTIS ⭐⭐
+                $areaToSave['incluye_orden_plantis_en_total'] = (bool)($areaData['aplica_orden_plantis'] ?? false);
+
+                // DEBUG: Ver qué datos se están guardando
+                Log::info("Guardando área #" . ($index + 1) . ":", [
+                    'datos' => $areaToSave,
+                    'palmas_esta_area' => $palmasEstaArea ?? 0
+                ]);
+
+                Area::create($areaToSave);
             }
 
+            // ⭐⭐ ACTUALIZAR LA VISITA CON EL TOTAL RECALCULADO ⭐⭐
             $visita = Visita::find($visitaId);
-            if ($visita && $visita->estado === 'pendiente') {
-                $visita->estado = 'en_ejecucion';
-                $visita->save();
+            if ($visita) {
+                $updateData = [
+                    'area_total_finca_hectareas' => $resumenData['area_total_finca_hectareas'],
+                    'numero_palmas_total_finca' => $resumenData['numero_palmas_total_finca'], // ⭐⭐ INCLUYE ORDEN PLANTIS ⭐⭐
+                    'ciclos_cosecha_total' => $resumenData['ciclos_cosecha_total'],
+                    'produccion_total' => $resumenData['produccion_total'],
+                ];
+                
+                if ($visita->estado === 'pendiente') {
+                    $updateData['estado'] = 'en_ejecucion';
+                }
+                
+                $visita->update($updateData);
+                
+                Log::info("Visita actualizada con total de palmas (incluye Orden Plantis):", [
+                    'visita_id' => $visitaId,
+                    'numero_palmas_total_finca' => $resumenData['numero_palmas_total_finca'],
+                    'areas_count' => $areasCount
+                ]);
             }
 
             DB::commit();
 
             return redirect()->route('fertilizaciones.create', ['visita_id' => $visitaId])
-                ->with('success', '✅ Áreas registradas correctamente. Continúa con la fertilización.');
+                ->with('success', '✅ Áreas registradas correctamente. Total de palmas: ' . $resumenData['numero_palmas_total_finca'] . ' (incluye Orden Plantis). Continúa con la fertilización.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error al guardar áreas: " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'request' => $request->all()]);
-            // ✅ ESTA LÍNEA ES CLAVE PARA LA DEPURACIÓN INMEDIATA
-            dd($e->getMessage()); // Muestra el mensaje de error directamente en el navegador
-            // Después de depurar, comenta o elimina esta línea y deja la redirección:
-            // return redirect()->back()->with('error', 'Ocurrió un error inesperado al guardar las áreas: ' . $e->getMessage())->withInput();
+            Log::error("Error al guardar áreas: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(), 
+                'request_data' => $request->all(),
+                'resumen_data' => $resumenData,
+                'total_palmas_recalculado' => $totalPalmasRecalculado ?? 0
+            ]);
+            return redirect()->back()->with('error', 'Ocurrió un error inesperado al guardar las áreas: ' . $e->getMessage())->withInput();
         }
     }
-
     /**
      * Muestra el formulario para editar un área específica.
      *
@@ -171,8 +293,11 @@ class AreaController extends Controller
             'visita_id' => 'required|exists:visitas,id',
             'material' => 'required|in:guinense,hibrido',
             'estado' => 'required|in:desarrollo,produccion',
-            'anio_siembra' => 'required|date',
-            'area' => 'required|numeric|min:0',
+            'anio_siembra' => [
+                    'required',
+                    'regex:/^\d{4}$/'
+                ],
+            'area' => 'nullable|numeric|min:0',
 
             'area_total_finca_hectareas' => 'nullable|numeric|min:0',
             'numero_palmas_total_finca' => 'nullable|integer|min:0',
@@ -190,7 +315,6 @@ class AreaController extends Controller
         ];
 
         if ($request->input('aplica_orden_plantis')) {
-            $rules['orden_plantis_numero'] = 'required|integer|min:0';
             $rules['numero_plantas_orden_plantis'] = 'required|integer|min:0';
             $rules['estado_oren_plantis'] = 'required|in:desarrollo,produccion';
         }
@@ -218,225 +342,120 @@ class AreaController extends Controller
     }
 
      public function syncOfflineData(Request $request)
-    {
-        $submissions = $request->input('submissions');
-        $results = [];
+{
+    $submissions = $request->input('submissions', []);
+    $results = [];
 
-        // Asegurarse de que 'submissions' sea un array válido
-        if (!is_array($submissions)) {
-            Log::error('Invalid sync data: "submissions" is not an array.', ['request' => $request->all()]);
-            return response()->json(['message' => 'Invalid sync data.'], 400);
-        }
+    Log::info('📥 Sincronización Áreas OFFLINE', [
+        'total' => count($submissions)
+    ]);
 
-        foreach ($submissions as $submission) {
-            $formName = $submission['formName'] ?? null;
-            $formData = $submission['formData'] ?? [];
-            $local_id = $submission['local_id'] ?? null; // El ID único generado en el frontend
+    foreach ($submissions as $index => $data) {
 
-            // Log para depuración de cada envío
-            Log::info("Processing offline submission for form: {$formName}, local_id: {$local_id}", ['formData' => $formData]);
+        try {
 
-            try {
-                if ($formName === 'area') {
-                    $rules = [
-                        'visita_id' => 'required|exists:visitas,id',
-                        'local_id' => 'required|string|max:36', 
-                        'variedad' => 'required',
-                        'material' => 'required',
-                        'estado' => 'required|in:desarrollo,produccion',
-                        'anio_siembra' => 'required|date',
-                        'area' => 'required|numeric|min:0',
-                        'area_total_finca_hectareas' => 'nullable|numeric|min:0',
-                        'numero_palmas_total_finca' => 'nullable|integer|min:0',
-                        'area_palmas_desarrollo_hectareas' => 'nullable|numeric|min:0',
-                        'numero_palmas_desarrollo' => 'nullable|integer|min:0',
-                        'area_palmas_produccion_hectareas' => 'nullable|numeric|min:0',
-                        'numero_palmas_produccion' => 'nullable|integer|min:0',
-                        'ciclos_cosecha' => 'nullable|integer|min:0',
-                        'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
-                        'aplica_orden_plantis' => 'required|boolean',
-                        'orden_plantis_numero' => 'nullable|integer|min:0',
-                        'numero_plantas_orden_plantis' => 'nullable|integer|min:0',
-                        'estado_oren_plantis' => 'nullable|in:desarrollo,produccion',
-                    ];
+            // 🔒 Validación
+            $validator = Validator::make($data, [
+                'visita_id' => 'required|exists:visitas,id',
+                'local_id'  => 'required|string|max:36',
 
-                    // Reglas condicionales para 'aplica_orden_plantis'
-                    // Asegúrate de que 'aplica_orden_plantis' se interprete como booleano
-                    if (isset($formData['aplica_orden_plantis']) && (bool)$formData['aplica_orden_plantis']) {
-                        $rules['orden_plantis_numero'] = 'required|integer|min:0';
-                        $rules['numero_plantas_orden_plantis'] = 'required|integer|min:0';
-                        $rules['estado_oren_plantis'] = 'required|in:desarrollo,produccion';
-                    }
+                'variedad' => 'required|string',
+                'material' => 'required|string',
+                'estado'   => 'required|in:desarrollo,produccion',
 
-                    $validator = Validator::make($formData, $rules);
+                // STRING (varchar)
+                'anio_siembra' => ['required', 'regex:/^\d{4}$/'],
 
-                    if ($validator->fails()) {
-                        // Devuelve los errores de validación específicos para este envío
-                        $results[] = [
-                            'id' => $local_id, // Usar local_id para identificar el error en el frontend
-                            'formName' => $formName,
-                            'success' => false,
-                            'message' => 'Validation error.',
-                            'errors' => $validator->errors()->all() // Mensajes de error detallados
-                        ];
-                        continue; // Pasa al siguiente envío en el bucle
-                    }
+                'area' => 'nullable|numeric|min:0',
+                'area_total_finca_hectareas' => 'nullable|numeric|min:0',
+                'numero_palmas_total_finca' => 'nullable|integer|min:0',
 
-                    $validatedData = $validator->validated();
+                'area_palmas_desarrollo_hectareas' => 'nullable|numeric|min:0',
+                'numero_palmas_desarrollo' => 'nullable|integer|min:0',
 
-                    // Asegurar que los campos condicionales sean null si aplica_orden_plantis es false
-                    if (!(bool)$validatedData['aplica_orden_plantis']) {
-                        $validatedData['orden_plantis_numero'] = null;
-                        $validatedData['numero_plantas_orden_plantis'] = null;
-                        $validatedData['estado_oren_plantis'] = null;
-                    }
+                'area_palmas_produccion_hectareas' => 'nullable|numeric|min:0',
+                'numero_palmas_produccion' => 'nullable|integer|min:0',
 
-                    // ✅ Usar 'local_id' para buscar y actualizar o crear el registro
-                    Area::updateOrCreate(
-                        ['local_id' => $validatedData['local_id']], // Clave para buscar
-                        $validatedData // Datos a crear o actualizar
-                    );
+                'ciclos_cosecha' => 'nullable|integer|min:0',
+                'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
 
-                    // Opcional: Actualizar el estado de la visita a 'en_ejecucion'
-                    $visita = Visita::find($validatedData['visita_id']);
-                    if ($visita && $visita->estado === 'pendiente') {
-                        $visita->estado = 'en_ejecucion';
-                        $visita->save();
-                    }
+                'aplica_orden_plantis' => 'required|boolean',
+                'orden_plantis_numero' => 'nullable|integer|min:0',
+                'numero_plantas_orden_plantis' => 'nullable|integer|min:0',
+                'estado_orden_plantis' => 'nullable|in:desarrollo,produccion',
+            ]);
 
-                    $results[] = ['id' => $local_id, 'formName' => $formName, 'success' => true];
+            if ($validator->fails()) {
+                Log::warning('❌ Error validación Área', [
+                    'local_id' => $data['local_id'],
+                    'errors' => $validator->errors()->toArray()
+                ]);
 
-                } else {
-                    // Aquí puedes añadir lógica para otros formName (ej. 'fertilizacion', 'polinizacion')
-                    // Por ahora, si el formName no es 'area', lo marcamos como no soportado.
-                    $results[] = ['id' => $local_id, 'formName' => $formName, 'success' => false, 'message' => 'Form type not supported.'];
-                }
-
-            } catch (\Exception $e) {
-                // Captura cualquier otro error inesperado
-                Log::error("Unexpected error syncing offline data for form: {$formName}, local_id: {$local_id}. Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'data' => $formData]);
                 $results[] = [
-                    'id' => $local_id,
-                    'formName' => $formName,
+                    'id' => $data['local_id'],
                     'success' => false,
-                    'message' => 'Internal server error: ' . $e->getMessage()
+                    'errors' => $validator->errors()->all()
                 ];
+                continue;
             }
-        }
 
-        return response()->json(['results' => $results]);
+            $validated = $validator->validated();
+
+            // Limpieza si no aplica orden plantis
+            if (!$validated['aplica_orden_plantis']) {
+                $validated['orden_plantis_numero'] = null;
+                $validated['numero_plantas_orden_plantis'] = null;
+                $validated['estado_orden_plantis'] = null;
+            }
+
+            // 💾 GUARDADO REAL
+            $area = Area::updateOrCreate(
+                ['local_id' => $validated['local_id']],
+                $validated
+            );
+
+            Log::info('✅ Área guardada', [
+                'id' => $area->id,
+                'local_id' => $area->local_id
+            ]);
+
+            // Actualizar visita
+            $visita = Visita::find($validated['visita_id']);
+            if ($visita && $visita->estado === 'pendiente') {
+                $visita->update(['estado' => 'en_ejecucion']);
+            }
+
+            $results[] = [
+                'id' => $validated['local_id'],
+                'success' => true,
+                'area_id' => $area->id
+            ];
+
+        } catch (\Throwable $e) {
+
+            Log::error('🔥 Error guardando Área', [
+                'local_id' => $data['local_id'] ?? null,
+                'error' => $e->getMessage()
+            ]);
+
+            $results[] = [
+                'id' => $data['local_id'] ?? null,
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
     }
+
+    return response()->json([
+        'success' => true,
+        'results' => $results
+    ]);
+}
+
     // controllador offline
      
 
-     public function syncOffline(Request $request)
-    {
-        $payload = $request->json()->all();
-        
-        Log::info('Datos recibidos para sincronizar Area (offline):', [
-            'raw_data' => $request->getContent(),
-            'parsed_payload' => $payload
-        ]);
+    
 
-        // Validar que el payload tenga la estructura correcta
-        if (!isset($payload['submissions']) || !is_array($payload['submissions'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Formato inválido. Se espera un objeto con clave "submissions" conteniendo un array.'
-            ], 400);
-        }
-
-        $results = [];
-        
-        foreach ($payload['submissions'] as $submission) {
-            try {
-                $local_id = $submission['local_id'] ?? null;
-                $formData = $submission['formData'] ?? [];
-                $visita_id = $formData['visita_id'] ?? null;
-                if (isset($formData['anio_siembra']) && is_numeric($formData['anio_siembra'])) {
-                        $formData['anio_siembra'] = $formData['anio_siembra'] . '-01-01';
-                    }
-                if (!$local_id) {
-                    $results[] = [
-                        'local_id' => $local_id,
-                        'success' => false,
-                        'message' => 'local_id es requerido'
-                    ];
-                    continue;
-                }
-
-                // Validación de datos
-                $validator = Validator::make($formData, [
-                    'visita_id' => 'required|exists:visitas,id',
-                    'variedad'  => 'required',
-                    'material' => 'required',
-                    'estado' => 'required|in:desarrollo,produccion',
-                    'anio_siembra' => 'required|date',
-                    'area' => 'required|numeric|min:0',
-                    'area_total_finca_hectareas' => 'nullable|numeric|min:0',
-                    'numero_palmas_total_finca' => 'nullable|integer|min:0',
-                    'area_palmas_desarrollo_hectareas' => 'nullable|numeric|min:0',
-                    'numero_palmas_desarrollo' => 'nullable|integer|min:0',
-                    'area_palmas_produccion_hectareas' => 'nullable|numeric|min:0',
-                    'numero_palmas_produccion' => 'nullable|integer|min:0',
-                    'ciclos_cosecha' => 'nullable|integer|min:0',
-                    'produccion_toneladas_por_mes' => 'nullable|numeric|min:0',
-                    'aplica_orden_plantis' => 'required|boolean',
-                    'orden_plantis_numero' => 'nullable|required_if:aplica_orden_plantis,true|integer|min:0',
-                    'numero_plantas_orden_plantis' => 'nullable|required_if:aplica_orden_plantis,true|integer|min:0',
-                    'estado_oren_plantis' => 'nullable|required_if:aplica_orden_plantis,true|in:desarrollo,produccion',
-                ]);
-
-                if ($validator->fails()) {
-                    $results[] = [
-                        'local_id' => $local_id,
-                        'success' => false,
-                        'message' => 'Error de validación',
-                        'errors' => $validator->errors()->all()
-                    ];
-                    continue;
-                }
-
-                $validatedData = $validator->validated();
-
-                // Asegurar campos nulos cuando no aplica orden plantis
-                if (!$validatedData['aplica_orden_plantis']) {
-                    $validatedData['orden_plantis_numero'] = null;
-                    $validatedData['numero_plantas_orden_plantis'] = null;
-                    $validatedData['estado_oren_plantis'] = null;
-                }
-
-                // Crear o actualizar el área
-                Area::updateOrCreate(
-                    ['local_id' => $local_id],
-                    $validatedData
-                );
-
-                $results[] = [
-                    'local_id' => $local_id,
-                    'success' => true,
-                    'message' => 'Área sincronizada correctamente'
-                ];
-
-            } catch (\Exception $e) {
-                Log::error("Error sincronizando área: " . $e->getMessage(), [
-                    'trace' => $e->getTraceAsString(),
-                    'data' => $submission
-                ]);
-                
-                $results[] = [
-                    'local_id' => $local_id ?? 'desconocido',
-                    'success' => false,
-                    'message' => 'Error interno: ' . $e->getMessage()
-                ];
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Proceso de sincronización completado',
-            'results' => $results
-        ]);
-    }
 
 }

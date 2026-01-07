@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
@@ -50,6 +49,14 @@
                                 </label>
                                 <div class="p-3 bg-light rounded">
                                     <span class="fw-semibold">{{ $visita->plantacion->nombre ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-success">
+                                    <i class="fas fa-industry me-2"></i>Proveedor
+                                </label>
+                                <div class="p-3 bg-light rounded">
+                                    <span class="fw-semibold">{{ $visita->proveedor->proveedor_nombre ?? 'N/A' }}</span>
                                 </div>
                             </div>
 
@@ -121,7 +128,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
-
+                
             <!-- Card de Modo Offline -->
             @if(Auth::check() && in_array(Auth::user()->rol, [1,3]))
             <div class="card shadow mb-4">
@@ -136,15 +143,32 @@
                         <h5>Trabaja sin conexión a internet</h5>
                         <p class="text-muted">Complete los formularios ambientales sin necesidad de conexión</p>
                     </div>
-                    <a href="{{ url('/offline/componentes-ambientales') }}?visita_id={{ $visita->id }}" 
-                    class="btn btn-dark btn-lg" 
-                    target="_blank" 
-                    rel="noopener noreferrer">
-                        <i class="fas fa-download me-2"></i>Continuar sin conexión
+                    <a href="{{ url('/offline/agua-captacion-legal') }}?visita_id={{ $visita->id }}"
+                    class="btn btn-dark btn-lg"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onclick="guardarVisitaOffline({{ json_encode($visita) }})">
+                    <i class="fas fa-download me-2"></i>Continuar sin conexión
                     </a>
+                    <script>
+                    const proveedorNombre = @json($visita->proveedor->proveedor_nombre ?? 'N/A');
+                    function guardarVisitaOffline(visita) {
+                        visita.proveedor_nombre = proveedorNombre;
+                        // Guardar la visita en localStorage temporalmente
+                        localStorage.setItem('visita_offline_' + visita.id, JSON.stringify(visita));
+                        
+                        // También puedes guardar en IndexedDB si quieres
+                        if (window.saveFormData) {
+                            window.saveFormData('visita', visita);
+                        }
+                    }
+                    </script>
                 </div>
             </div>
-            
+             <a href="{{ route('visitas_ambiental.detalle', $visita->id) }}" class="btn btn-info btn-lg">
+                                        <i class="fas fa-search me-2"></i>Ver Detalle Completo
+                                    </a>
+                             
             <!-- Card de Navegación entre Componentes Ambientales -->
             @if ($visita->estado !== 'finalizada')
                 @if ($visita->estado === 'pendiente')
@@ -241,7 +265,7 @@
                                             {{ ucfirst($otraVisitaAmbiental->estado) }}
                                         </span>
                                     </div>
-                                    <a href="{{ route('ambiental.show', $otraVisitaAmbiental->id) }}" 
+                                    <a href="{{ route('visitasAmbientales.show', $otraVisitaAmbiental->id) }}" 
                                        class="btn btn-outline-success btn-sm">
                                         <i class="fas fa-eye me-1"></i>Ver
                                     </a>

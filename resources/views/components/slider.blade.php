@@ -34,12 +34,13 @@
         <!-- Menú Navigation -->
         <ul class="sidebar-menu list-unstyled p-3 mb-0">
             <!-- Dashboard -->
-            <li class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }} mb-2">
-                <a href="{{ route('dashboard') }}" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center">
+            <li class="sidebar-item {{ request()->routeIs('evaluaciones-ibt.create')  }} mb-2">
+                <a href="{{ route('evaluaciones-ibt.index') }}" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center">
                     <i class="fas fa-tachometer-alt me-3 fs-5"></i>
-                    <span class="fw-medium">Dashboard</span>
+                    <span class="fw-medium">Evaluación IBT</span>
                 </a>
             </li>
+           
             
             <!-- Zona Admon -->
             @if(Auth::check() && in_array(Auth::user()->rol, [1,2,3,4]))
@@ -144,7 +145,7 @@
 
             <!-- Visitas -->
             @if(Auth::check() && in_array(Auth::user()->rol, [1,2,3,4]))
-            <li class="sidebar-item has-submenu mb-2 {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'active' : '' }}">
+            <li class="sidebar-item has-submenu mb-2 {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') || request()->routeIs('visitas_ambiental.*') ? 'active' : '' }}">
                 <a href="#visitasSubmenu" data-bs-toggle="collapse" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-clipboard-list me-3 fs-5"></i>
@@ -152,7 +153,7 @@
                     </div>
                     <i class="fas fa-chevron-down ms-2 fs-6"></i>
                 </a>
-                <ul id="visitasSubmenu" class="sidebar-submenu collapse list-unstyled mt-2 ps-4 {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') ? 'show' : '' }}">
+                <ul id="visitasSubmenu" class="sidebar-submenu collapse list-unstyled mt-2 ps-4 {{ request()->routeIs('visitas.*') || request()->routeIs('visitas_social.*') || request()->routeIs('visitas_ambiental.*') ? 'show' : '' }}">
                     <!-- Visita Agronómica -->
                     <li class="sidebar-item has-submenu mb-2 {{ request()->routeIs('visitas.*') ? 'active' : '' }}">
                         <a href="#visitaAgroSubmenu" data-bs-toggle="collapse" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center justify-content-between">
@@ -213,6 +214,39 @@
                                 <a href="{{ route('visitas_social.full-import.form') }}" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center">
                                     <i class="fas fa-file-import me-3 fs-6"></i>
                                     <span>Importar <br> Componente <br> Social</span>
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </li>
+
+                    <!-- Visita Ambiental -->
+                    <li class="sidebar-item has-submenu mb-2 {{ request()->routeIs('visitas_ambiental.*') ? 'active' : '' }}">
+                        <a href="#visitaAmbientalSubmenu" data-bs-toggle="collapse" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-leaf me-3 fs-6"></i>
+                                <span>Ambiental</span>
+                            </div>
+                            <i class="fas fa-chevron-down ms-2 fs-6"></i>
+                        </a>
+                        <ul id="visitaAmbientalSubmenu" class="sidebar-submenu collapse list-unstyled mt-2 ps-4 {{ request()->routeIs('visitas_ambiental.*') ? 'show' : '' }}">
+                            <li class="sidebar-item mb-1">
+                                <a href="{{ route('visitasHomeAmbiental') }}" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center">
+                                    <i class="fas fa-home me-3 fs-6"></i>
+                                    <span>Home <br> Ambiental</span>
+                                </a>
+                            </li>
+                            @if(Auth::check() && in_array(Auth::user()->rol, [1,3])) <!-- Ajusta los roles según necesites -->
+                            <li class="sidebar-item mb-1">
+                                <a href="{{ route('visitas_ambiental.import.form') }}" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center">
+                                    <i class="fas fa-upload me-3 fs-6"></i>
+                                    <span>Importar <br> Individual</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item mb-1">
+                                <a href="{{ route('visitas_ambiental.full-import.form') }}" class="sidebar-link text-white text-decoration-none py-2 px-3 rounded d-flex align-items-center">
+                                    <i class="fas fa-file-import me-3 fs-6"></i>
+                                    <span>Importar <br> Componente <br> Ambiental</span>
                                 </a>
                             </li>
                             @endif

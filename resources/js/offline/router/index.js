@@ -17,6 +17,24 @@ import OrganizacionSocialForm from '../views/OrganizacionSocialForm.vue';
 import CierreVisitaForm from '../views/CierreVisitaForm.vue';
 
 
+import SueloConservacion from '../views/SueloConservacion.vue'
+import EnergiaUsoEficiente from '../views/EnergiaUsoEficiente.vue'
+import GobernanzaHidrica from '../views/GobernanzaHidrica.vue'
+import EmisionesGEI from '../views/EmisionesGEI.vue'
+import ResiduosManejo from '../views/ResiduosManejo.vue'
+import SustanciasManejo from '../views/SustanciasManejo.vue'
+import VertimientosManejo from '../views/VertimientosManejo.vue'
+import HmpManejo from '../views/HmpManejo.vue'
+import AvcControl from '../views/AvcControl.vue'
+import EcosistemaProteccion from '../views/EcosistemaProteccion.vue'
+import NoReemplazoNoDeforestacion from '../views/NoReemplazoNoDeforestacion.vue'
+import AguaCaptacionLegal from '../views/AguaCaptacionLegal.vue';
+import AguaUsoEficiente from '../views/AguaUsoEficiente.vue';
+import CierreVisitaAmbiental from '../views/CierreVisitaAmbiental.vue';
+import RevisionFinalAmbiental from '../views/RevisionFinalAmbiental.vue';
+import RevisionFinalSocial from   '../views/RevisionFinalSocial.vue';
+
+
 
 
 // Rutas para la funcionalidad offline 
@@ -25,17 +43,92 @@ import CierreVisitaForm from '../views/CierreVisitaForm.vue';
 const routes = [
 
 
+  //rutas visitas ambientales 
+
+
+  {
+    path: '/agua-captacion-legal',
+    component: AguaCaptacionLegal
+  },
+
+  {
+    path: '/agua-uso-eficiente',
+    component: AguaUsoEficiente
+  },
+
+  {
+    path: '/SueloConservacion',
+    component: SueloConservacion
+  },
+  {
+    path: '/energia-uso-eficiente',
+    component: EnergiaUsoEficiente
+  },
+  {
+    path: '/gobernanza-hidrica',
+    component: GobernanzaHidrica
+  },
+  {
+    path: '/emisiones-gei',
+    component: EmisionesGEI
+  },
+  {
+    path: '/residuos-manejo',
+    component: ResiduosManejo
+  },
+  {
+    path: '/sustancias-manejo',
+    component: SustanciasManejo
+  },
+  {
+    path: '/vertimientos-manejo',
+    component: VertimientosManejo
+  },
+  {
+    path: '/hmp-manejo',
+    component: HmpManejo
+  },
+  {
+    path: '/avc-control',
+    component: AvcControl
+  },
+  {
+    path: '/ecosistema-proteccion',
+    component: EcosistemaProteccion
+  },
+  {
+    path: '/noremplazo-nodeforestacion',
+    component: NoReemplazoNoDeforestacion
+  },
+  
+  {
+    path: '/cierre-visita',
+    component: CierreVisitaAmbiental
+  },
+
+  {
+    path: '/revision-final-ambiental',
+    component: RevisionFinalAmbiental
+  },
+
+
+
  //rutas visitas sociales  
  { 
-    path: '/', 
-    redirect: (to) => {
-      const visitaId = to.query.visita_id;
-      return { 
-        path: '/datos-personales', 
-        query: visitaId ? { visita_id: visitaId } : {}
-      }
+  path: '/', 
+  redirect: (to) => {
+    if (to.fullPath !== '/') {
+      return to.fullPath
     }
-  },
+
+    const visitaId = to.query.visita_id
+    return { 
+      path: '/datos-personales', 
+      query: visitaId ? { visita_id: visitaId } : {}
+    }
+  }
+},
+
 
  {
     path: '/datos-personales',
@@ -74,7 +167,7 @@ const routes = [
   {
     path: '/revision-final-social',
     name: 'RevisionFinalSocial',
-    component: () => import('../views/RevisionFinalSocial.vue')
+    component: RevisionFinalSocial
   },
 
   // Rutas Visitas agronómicas

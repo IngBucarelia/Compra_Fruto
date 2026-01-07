@@ -176,7 +176,7 @@ class VisitaController extends Controller
             );
 
 
-        return redirect()->route('planificaciones.create')
+        return redirect()->route('visitas.index')
             ->with('success', 'Planificación agronómica y visita creadas correctamente con ' . count($tiposVisita) . ' tipo(s) de visita.');
 
     } catch (\Illuminate\Validation\ValidationException $e) {

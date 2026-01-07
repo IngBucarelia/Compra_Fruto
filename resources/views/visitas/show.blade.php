@@ -231,7 +231,7 @@
                                 </div><br><br>
 
             <!-- Card de Otras Visitas -->
-            <div class="card shadow mb-4">
+            <div class="card shadow mb-4" style="width: 85%;margin-left:100px">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 text-success">
                         <i class="fas fa-history me-2"></i>Otras Visitas a esta Plantación
@@ -271,7 +271,7 @@
             <!-- Agrega esta sección del mapa en tu show de visita agronómica, después de la card de "Otras Visitas" -->
 
 <!-- Card del Mapa Interactivo -->
-<div class="card shadow mb-4">
+<div class="card shadow mb-4" style="width: 85%;margin-left:100px">
     <div class="card-header bg-white py-3">
         <h5 class="mb-0 text-success">
             <i class="fas fa-map-marked-alt me-2"></i>Ubicación en el Mapa

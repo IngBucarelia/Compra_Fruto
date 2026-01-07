@@ -32,7 +32,7 @@ class VisitaSocialController extends Controller
 
     $visitas = VisitaSocial::with(['proveedor', 'tecnico', 'plantacion'])
         // Filtra solo los estados válidos
-        ->whereIn('estado', ['pendiente', 'en_ejecucion', 'finalizada'])
+        ->whereIn('estado', ['pendiente', 'en_ejecucion', 'finalizada', 'finalizado                                                                                                                                     '])
         // Aplica búsqueda si hay texto
         ->when($buscar, function ($query) use ($buscar) {
             return $query->where(function ($q) use ($buscar) {

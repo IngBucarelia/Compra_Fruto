@@ -13,7 +13,8 @@ class SustanciasQuimicasBiologicas extends Model
         'cuenta_poes',
         'personal_capacitado',
         'almacenamiento_adecuado',
-        'observaciones'
+        'imagen_poes',
+        'observaciones',
     ];
 
     public function visitaAmbiental()

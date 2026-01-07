@@ -15,9 +15,9 @@ class Area extends Model
         'material',
         'estado',
         'anio_siembra',
-        'area',
+        'area', 
         'orden_plantis_numero', 
-        'estado_oren_plantis',  
+        'estado_oren_plantis', 
         'area_total_finca_hectareas',
         'numero_palmas_total_finca',
         'area_palmas_desarrollo_hectareas',
@@ -28,10 +28,11 @@ class Area extends Model
         'produccion_toneladas_por_mes',
         'aplica_orden_plantis', 
         'numero_plantas_orden_plantis', 
+        'local_id',
+        'estado_orden_plantis',
     ];
 
     protected $casts = [
-        'anio_siembra' => 'date',
         'area_total_finca_hectareas' => 'decimal:2',
         'area_palmas_desarrollo_hectareas' => 'decimal:2',
         'area_palmas_produccion_hectareas' => 'decimal:2',

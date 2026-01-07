@@ -7,6 +7,7 @@
     }
    
     .dashboard-container {
+        width: 90%;
         background-color: #909176be; /* Color de fondo del contenedor principal */
         border-radius: 20px;
         padding: 20px; /* Añadido padding para espacio interno */

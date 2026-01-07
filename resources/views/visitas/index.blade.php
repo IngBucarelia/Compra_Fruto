@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container" style="width: 90%">
     <!-- Header con Estadísticas -->
     <div class="row mb-4">
         <div class="col-12">

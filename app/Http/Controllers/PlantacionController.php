@@ -41,7 +41,7 @@ class PlantacionController extends Controller
             'vereda' => 'required|string',
             'municipio' => 'required|string',
             'departamento' => 'required|string',
-            'geolocalizacion' => 'required|string',
+            'geolocalizacion' => 'nullable|string',
             'dia_creado' => 'required|date',
         ]);
 
@@ -75,7 +75,7 @@ class PlantacionController extends Controller
             'nombre' => 'required|string',
             'municipio' => 'required|string',
             'departamento' => 'required|string',
-            'geolocalizacion' => 'required|string',
+            'geolocalizacion' => 'nullable|string',
             'dia_creado' => 'required|date',
         ]);
 

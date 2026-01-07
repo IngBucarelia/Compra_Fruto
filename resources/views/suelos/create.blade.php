@@ -155,47 +155,268 @@
     <div class="accordion mb-4" id="acordeonSuelo">
 
         {{-- Área --}}
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingArea">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArea" aria-expanded="true">
-                    📍 Área(s) registrada(s)
-                </button>
-            </h2>
-            <div id="collapseArea" class="accordion-collapse collapse show" data-bs-parent="#acordeonSuelo">
-                <div class="accordion-body">
-                    @if ($visita->areas->count() > 0) {{-- ✅ Cambiado a $visita->areas->count() --}}
-                        @foreach ($visita->areas as $area) {{-- ✅ Iterar sobre las áreas --}}
-                            <div class="area-info-card mb-3">
-                                <h5>Área #{{ $loop->index + 1 }} - Material: {{ $area->material }}- Variedad: {{ $area->variedad }}</h5>
-                                <ul>
-                                    <li><strong>Variedad:</strong> {{ $area->variedad }}</li>
-                                    <li><strong>Material:</strong> {{ $area->material }}</li>
-                                    <li><strong>Estado:</strong> {{ $area->estado }}</li>
-                                    <li><strong>Año siembra:</strong> {{ $area->anio_siembra }}</li>
-                                    <li><strong>Área (m²):</strong> {{ $area->area }}</li>
-                                    <li><strong>Área total en finca (Hectáreas):</strong> {{ $area->area_total_finca_hectareas ?? 'N/A' }}</li>
-                                    <li><strong>Número de palmas (Total Finca):</strong> {{ $area->numero_palmas_total_finca ?? 'N/A' }}</li>
-                                    <li><strong>Área de palmas en desarrollo (Hectáreas):</strong> {{ $area->area_palmas_desarrollo_hectareas ?? 'N/A' }}</li>
-                                    <li><strong>Número de palmas (Desarrollo):</strong> {{ $area->numero_palmas_desarrollo ?? 'N/A' }}</li>
-                                    <li><strong>Área de palmas en producción (Hectáreas):</strong> {{ $area->area_palmas_produccion_hectareas ?? 'N/A' }}</li>
-                                    <li><strong>Número de palmas (Producción):</strong> {{ $area->numero_palmas_produccion ?? 'N/A' }}</li>
-                                    <li><strong>Ciclos de Cosecha:</strong> {{ $area->ciclos_cosecha ?? 'N/A' }}</li>
-                                    <li><strong>Producción (Toneladas por Mes):</strong> {{ $area->produccion_toneladas_por_mes ?? 'N/A' }}</li>
-                                    <li><strong>Aplica Orden Plantis:</strong> {{ $area->aplica_orden_plantis ? 'Sí' : 'No' }}</li>
-                                    @if ($area->aplica_orden_plantis)
-                                        <li><strong>Orden Plantis N°:</strong> {{ $area->orden_plantis_numero ?? 'N/A' }}</li>
-                                        <li><strong>Número de Plantas (Orden Plantis):</strong> {{ $area->numero_plantas_orden_plantis ?? 'N/A' }}</li>
-                                        <li><strong>Estado Orden Plantis:</strong> {{ $area->estado_oren_plantis ?? 'N/A' }}</li>
-                                    @endif
-                                </ul>
-                                <div class="d-flex justify-content-end mt-2">
-                                    <a href="{{ route('areas.edit', $area->id) }}" class="btn btn-warning btn-sm">✏️ Editar esta área</a>
+         <div class="accordion mb-4" id="accordionArea">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingArea">
+                    <button style="background-color: darkseagreen !important; color: aliceblue" 
+                            class="accordion-button" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#collapseArea" 
+                            aria-controls="collapseArea">
+                        📍 Información del Área(s)
+                    </button>
+                </h2>
+                <div id="collapseArea" class="accordion-collapse collapse show" 
+                    aria-labelledby="headingArea" data-bs-parent="#accordionArea">
+                    <div class="accordion-body" style="background-color: rgb(209, 241, 209) !important; color: rgb(31, 32, 34)">
+                        
+                        @if ($visita->areas->count() > 0)
+                            @php
+                                $primerArea = $visita->areas->first();
+                                $areaTotal = $primerArea->area_total_finca_hectareas ?? 0;
+                                $palmasTotal = $primerArea->numero_palmas_total_finca ?? 0;
+                                $ciclosCosecha = $primerArea->ciclos_cosecha ?? 0;
+                                $produccionTotal = $primerArea->produccion_toneladas_por_mes ?? 0;
+                                
+                                // Calcular desglose de palmas
+                                $totalDesarrollo = $visita->areas->sum('numero_palmas_desarrollo');
+                                $totalProduccion = $visita->areas->sum('numero_palmas_produccion');
+                                $totalOrdenPlantis = $visita->areas->where('aplica_orden_plantis', true)->sum('numero_plantas_orden_plantis');
+                            @endphp
+                            
+                            <!-- ⭐⭐ INFORMACIÓN GENERAL DE LA FINCA ⭐⭐ -->
+                            <div class="mb-4">
+                                <div class="card shadow-sm border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-chart-bar me-2"></i>
+                                            Información General de la Finca
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-box-general mb-3">
+                                                    <label class="fw-bold">
+                                                        <i class="fas fa-ruler-combined me-2"></i>
+                                                        Área Total Finca:
+                                                    </label>
+                                                    <div class="info-value">
+                                                        {{ number_format($areaTotal, 2) }} Ha
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-box-general mb-3">
+                                                    <label class="fw-bold">
+                                                        <i class="fas fa-tree me-2"></i>
+                                                        Total de Palmas:
+                                                    </label>
+                                                    <div class="info-value">
+                                                        {{ number_format($palmasTotal, 0) }}
+                                                        <small class="text-muted ms-2">(incluye Orden Plantis)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="info-box-general mb-3">
+                                                    <label class="fw-bold">
+                                                        <i class="fas fa-sync-alt me-2"></i>
+                                                        Ciclos de Cosecha:
+                                                    </label>
+                                                    <div class="info-value">
+                                                        {{ $ciclosCosecha }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="info-box-general mb-3">
+                                                    <label class="fw-bold">
+                                                        <i class="fas fa-weight-hanging me-2"></i>
+                                                        Producción Total:
+                                                    </label>
+                                                    <div class="info-value">
+                                                        {{ number_format($produccionTotal, 2) }} Ton/Mes
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Desglose del total de palmas -->
+                                        <div class="row mt-3 bg-light p-3 rounded">
+                                            <div class="col-12">
+                                                <h6 class="mb-2">
+                                                    <i class="fas fa-list-ol me-2"></i>
+                                                    Desglose del Total de Palmas
+                                                </h6>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <small class="d-block">
+                                                            <span class="badge bg-info me-2">🌱</span>
+                                                            <strong>Desarrollo:</strong> {{ number_format($totalDesarrollo, 0) }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <small class="d-block">
+                                                            <span class="badge bg-success me-2">🌳</span>
+                                                            <strong>Producción:</strong> {{ number_format($totalProduccion, 0) }}
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <small class="d-block">
+                                                            <span class="badge bg-warning me-2">📋</span>
+                                                            <strong>Orden Plantis:</strong> {{ number_format($totalOrdenPlantis, 0) }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        @endforeach
-                    @else
-                        <p class="text-muted">No se ha registrado información de área.</p>
-                    @endif
+                            
+                            <!-- ⭐⭐ ÁREAS INDIVIDUALES ⭐⭐ -->
+                            <div>
+                                <h5 class="mb-3 mt-4">
+                                    <i class="fas fa-map-marked-alt me-2"></i>
+                                    Áreas Individuales ({{ $visita->areas->count() }})
+                                </h5>
+                                
+                                <div class="row">
+                                    @foreach ($visita->areas as $index => $area)
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card h-100 shadow-sm border-primary">
+                                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <h6 class="mb-0">
+                                                            <i class="fas fa-seedling me-2"></i>
+                                                            Área #{{ $index + 1 }}
+                                                        </h6>
+                                                        <small class="opacity-75">
+                                                            ID: {{ substr($area->id, 0, 8) }}
+                                                        </small>
+                                                    </div>
+                                                    <span class="badge {{ $area->estado === 'produccion' ? 'bg-success' : 'bg-info' }}">
+                                                        {{ $area->estado === 'produccion' ? 'Producción' : 'Desarrollo' }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="card-body">
+                                                    <!-- Información básica -->
+                                                    <div class="row mb-2">
+                                                        <div class="col-6">
+                                                            <small class="text-muted d-block">Variedad</small>
+                                                            <strong>{{ $area->variedad ?? 'N/A' }}</strong>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <small class="text-muted d-block">Material</small>
+                                                            <strong>{{ $area->material ?? 'N/A' }}</strong>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-3">
+                                                        <div class="col-12">
+                                                            <small class="text-muted d-block">Año de Siembra</small>
+                                                            <strong>{{ $area->anio_siembra ?? 'N/A' }}</strong>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Información específica según estado -->
+                                                    @if($area->estado === 'desarrollo')
+                                                        <div class="bg-info bg-opacity-10 p-2 rounded mb-2">
+                                                            <h6 class="text-info mb-2">
+                                                                <i class="fas fa-seedling me-2"></i>
+                                                                Información de Desarrollo
+                                                            </h6>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <small class="text-muted d-block">Área (Ha)</small>
+                                                                    <strong>{{ number_format($area->area_palmas_desarrollo_hectareas ?? 0, 2) }}</strong>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <small class="text-muted d-block">N° Palmas</small>
+                                                                    <strong>{{ number_format($area->numero_palmas_desarrollo ?? 0, 0) }}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @elseif($area->estado === 'produccion')
+                                                        <div class="bg-success bg-opacity-10 p-2 rounded mb-2">
+                                                            <h6 class="text-success mb-2">
+                                                                <i class="fas fa-tree me-2"></i>
+                                                                Información de Producción
+                                                            </h6>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <small class="text-muted d-block">Área (Ha)</small>
+                                                                    <strong>{{ number_format($area->area_palmas_produccion_hectareas ?? 0, 2) }}</strong>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <small class="text-muted d-block">N° Palmas</small>
+                                                                    <strong>{{ number_format($area->numero_palmas_produccion ?? 0, 0) }}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    <!-- Información de Orden Plantis -->
+                                                    @if($area->aplica_orden_plantis)
+                                                        <div class="bg-warning bg-opacity-10 p-2 rounded">
+                                                            <h6 class="text-warning mb-2">
+                                                                <i class="fas fa-clipboard-check me-2"></i>
+                                                                Orden Plantis
+                                                            </h6>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <small class="text-muted d-block">N° Orden</small>
+                                                                    <strong>{{ $area->orden_plantis_numero ?? 'N/A' }}</strong>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <small class="text-muted d-block">N° Plantas</small>
+                                                                    <strong>{{ number_format($area->numero_plantas_orden_plantis ?? 0, 0) }}</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mt-1">
+                                                                <div class="col-12">
+                                                                    <small class="text-muted d-block">Estado</small>
+                                                                    <span class="badge {{ $area->estado_oren_plantis === 'produccion' ? 'bg-success' : 'bg-info' }}">
+                                                                        {{ $area->estado_oren_plantis === 'produccion' ? 'Producción' : 'Desarrollo' }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="text-center mt-2">
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-times-circle me-1"></i>
+                                                                No aplica Orden Plantis
+                                                            </small>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                
+                                                <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar me-1"></i>
+                                                        {{ $area->created_at->format('d/m/Y H:i') }}
+                                                    </small>
+                                                    <a href="{{ route('areas.edit', $area->id) }}" 
+                                                    class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit me-1"></i> Editar
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                        @else
+                            <p class="text-muted">No se ha registrado área para esta visita.</p>
+                        @endif
+                        
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,6 +489,7 @@
                                                 <th>Pases</th>
                                                 <th>Ciclos</th>
                                                 <th>ANA</th>
+                                                <th>Cantidad ANA</th>
                                                 <th>Talco</th>
                                                 <th>Acciones</th>
                                             </tr>
@@ -277,6 +499,7 @@
                                                 <td>{{ \Carbon\Carbon::parse($poli->fecha)->format('d/m/Y') }}</td>
                                                 <td class="text-center">{{ $poli->n_pases }}</td>
                                                 <td class="text-center">{{ $poli->ciclos_ronda }}</td>
+                                                <td>{{ $poli->nombre_ana }}</td>
                                                 <td>{{ $poli->ana }} ({{ $poli->tipo_ana }})</td>
                                                 <td class="text-center">{{ $poli->talco }}</td>
                                                 <td class="text-center">
@@ -337,7 +560,7 @@
                                                 @foreach ($sanidad->plagas as $pla)
                                                     <li>
                                                         {{ $pla->nombre_plaga }} - 
-                                                        <strong>Estado:</strong> {{ $pla->estado ?? '-' }}
+                                                        <strong>Estado:</strong> {{ $pla->estado ?? '-' }}- <strong>Tipo Larva:</strong> {{ $pla->instar ?? '-' }}
                                                     </li>
                                                 @endforeach
                                             </ul>
@@ -460,7 +683,7 @@
 
                 <div class="mb-3">
                     <label>Tipo de suelo</label>
-                    <select name="tipo_suelo" class="form-control" required>
+                    <select id="tipo_suelo_select" class="form-control" required>
                         <option value="">Seleccione</option>
                         <option value="arenoso">Arenoso</option>
                         <option value="arcilloso">Arcilloso</option>
@@ -470,7 +693,20 @@
                         <option value="Franco-Arcilloso">Franco-Arcilloso</option>
                         <option value="otro">Otro</option>
                     </select>
+
+                    {{-- Campo que realmente se enviará al backend --}}
+                    <input type="hidden" name="tipo_suelo" id="tipo_suelo_real">
+
+                    {{-- Input visible cuando escogen "otro" --}}
+                    <input
+                        type="text"
+                        id="tipo_suelo_otro"
+                        class="form-control mt-2"
+                        placeholder="Especifique el tipo de suelo"
+                        style="display:none;"
+                    >
                 </div>
+
 
                 <button type="submit" class="btn btn-primary">💾 Guardar análisis de suelo</button>
             </form>
@@ -479,4 +715,29 @@
                 ➡️ Continuar con Labores de Cultivo
             </a> </button>         
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const select = document.getElementById('tipo_suelo_select');
+    const inputOtro = document.getElementById('tipo_suelo_otro');
+    const real = document.getElementById('tipo_suelo_real');
+
+    select.addEventListener('change', function () {
+
+        if (this.value === 'otro') {
+            inputOtro.style.display = 'block';
+            real.value = ''; // limpia campo real hasta que escriba
+        } else {
+            inputOtro.style.display = 'none';
+            real.value = this.value; // guarda valor normal
+        }
+    });
+
+    inputOtro.addEventListener('input', function () {
+        real.value = this.value; // lo que escriban se guarda en el mismo campo
+    });
+});
+</script>
+
 @endsection

@@ -11,6 +11,9 @@ class ResiduosManejo extends Model
     protected $fillable = [
         'visita_ambiental_id',
         'capacita_personal',
+        'personas_manipulan',
+        'personas_capacitadas',
+        'porcentaje_capacitadas',
         'conoce_diferencias',
         'certificado_final_respel',
         'manifiesto_transporte_respel',

@@ -10,7 +10,7 @@ class SanidadPlaga extends Model
     use HasFactory;
     protected $table = 'sanidad_plaga'; 
 
-    protected $fillable = ['sanidad_id', 'nombre_plaga', 'estado'];
+    protected $fillable = ['sanidad_id', 'nombre_plaga', 'estado','instar'];
 
     public function sanidad()
     {

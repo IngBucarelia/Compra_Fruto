@@ -803,7 +803,10 @@ export default {
             await this.cargarDatosCierre();
             
             this.mostrarAlerta('success', `✅ Cierre guardado. Tamaño optimizado: ${tamañoTotal} MB`);
-            
+            router.push({
+              path: '/revision-final-ambiental',
+              query: { visita_id: visitaId }
+            })
         } catch (error) {
             console.error('Error guardando cierre de visita:', error);
             this.mostrarAlerta('error', 'Error al guardar el cierre: ' + error.message);

@@ -7,6 +7,7 @@ use App\Models\DatosPersonalesSocial;
 use App\Models\Proveedor;
 use App\Models\User;
 use App\Models\VisitaAmbiental;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -254,7 +255,63 @@ public function store(Request $request)
         return redirect()->route('pno_reemplazo.create', $visitaId);
     }
 
+    if ($seccion === 'cierre_visita') {
+        return redirect()->route('cierre-visitas-ambiental.create', $visitaId);
+    }
+
 
     return back()->with('info', 'Seleccione una opción válida');
 }
+
+public function detalle($id)
+{
+    $visita = VisitaAmbiental::with([
+        'proveedor',
+        'plantacion',
+        'cierreVisitaAmbiental',
+        'aguaCaptacionLegal',
+        'aguaUsoEficiente',
+        'sueloConservacion',
+        'energiaManejo',
+        'gobernanzaHidrica',
+        'emisionesGei',
+        'residuosManejo',
+        'sustanciasQuimicasBiologicas',
+        'vertimientoManejo',
+        'plantacionHmp',
+        'plantacionAvc',
+        'plantacionEcosistema',
+        'pnoReemplazoNodeforestacion' // si ya lo agregaste
+    ])->findOrFail($id);
+
+    return view('ambiental.detalle', compact('visita'));
+}
+
+
+
+        public function exportarPDF($id)
+        {
+            $visita = VisitaAmbiental::with([
+                'proveedor',
+                'plantacion',
+                'cierreVisitaAmbiental',
+                'aguaCaptacionLegal',
+                'aguaUsoEficiente',
+                'sueloConservacion',
+                'energiaManejo',
+                'gobernanzaHidrica',
+                'emisionesGei',
+                'residuosManejo',
+                'sustanciasQuimicasBiologicas',
+                'vertimientoManejo',
+                'plantacionHmp',
+                'plantacionAvc',
+                'plantacionEcosistema',
+                'pnoReemplazoNodeforestacion' // si lo tienes
+            ])->findOrFail($id);
+
+            $pdf = Pdf::loadView('ambiental.exportar_pdf', compact('visita'));
+            
+            return $pdf->download("detalle_visita_ambiental_{$id}.pdf");
+        }
 }
